@@ -21,5 +21,9 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>This app need your authorization to access to your camera for take your profil picture</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>This app need your authorization to access to your photo library for take your profil picture</string>
 </dict>
 </plist>

@@ -6,17 +6,63 @@
 //
 
 import UIKit
+import FirebaseAuth
+
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     var window: UIWindow?
 
 
+   
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
-        guard let _ = (scene as? UIWindowScene) else { return }
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+
+        let window = UIWindow(windowScene: windowScene)
+        self.window = window
+        
+        configureInitialViewController()
+        
+        window.makeKeyAndVisible()
+    }
+
+    func configureInitialViewController() {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        
+        if Auth.auth().currentUser != nil {
+            // L'utilisateur est déjà connecté
+            if let mainViewController = storyboard.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
+                setRootViewController(mainViewController)
+            }
+        } else {
+            // L'utilisateur n'est pas connecté, on le dirige vers la page de login
+            if let loginViewController = storyboard.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
+                let navigationController = UINavigationController(rootViewController: loginViewController)
+                setRootViewController(navigationController)
+            }
+        }
+    }
+
+    func setRootViewController(_ vc: UIViewController, animated: Bool = true) {
+        guard let window = self.window else { return }
+        window.rootViewController = vc
+        
+        if animated {
+            UIView.transition(with: window,
+                              duration: 0.3,
+                              options: .transitionCrossDissolve,
+                              animations: nil,
+                              completion: nil)
+        }
+    }
+
+    func logout() {
+        do {
+            try Auth.auth().signOut()
+            configureInitialViewController()
+        } catch {
+            print("Erreur lors de la déconnexion : \(error.localizedDescription)")
+        }
     }
 
     func sceneDidDisconnect(_ scene: UIScene) {
