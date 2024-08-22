@@ -127,7 +127,7 @@ class FighterEditViewController: UIViewController {
             return
         }
         
-        let gender = genderSegmentedControl.selectedSegmentIndex == 0 ? "Male" : "Female"
+        let gender = genderSegmentedControl.selectedSegmentIndex == 0 ? "Men" : "Women"
         
         let updatedFighter = Fighter(
             id: fighter?.id,

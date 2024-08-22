@@ -47,7 +47,9 @@ class FirebaseService {
                 completion(.failure(error))
             } else {
                 let fighters = querySnapshot?.documents.compactMap { document -> Fighter? in
-                    try? document.data(as: Fighter.self)
+                    var fighter = try? document.data(as: Fighter.self)
+                    fighter?.id = document.documentID  // Assigner l'ID du document à l'objet Fighter
+                    return fighter
                 } ?? []
                 completion(.success(fighters))
             }
@@ -55,26 +57,23 @@ class FirebaseService {
     }
     
     func getFighter(id: String, completion: @escaping (Result<Fighter, Error>) -> Void) {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
-            return
-        }
-        
+        print("Getting fighter with ID: \(id)")
         db.collection("fighters").document(id).getDocument { (document, error) in
             if let error = error {
+                print("Error fetching fighter: \(error.localizedDescription)")
                 completion(.failure(error))
             } else if let document = document, document.exists {
                 do {
-                    let fighter = try document.data(as: Fighter.self)
-                    if fighter.creatorUserId == uid {
-                        completion(.success(fighter))
-                    } else {
-                        completion(.failure(NSError(domain: "FirebaseService", code: 1, userInfo: [NSLocalizedDescriptionKey: "You don't have permission to access this fighter"])))
-                    }
+                    var fighter = try document.data(as: Fighter.self)
+                    fighter.id = document.documentID
+                    print("Successfully fetched fighter: \(fighter.firstName) \(fighter.lastName)")
+                    completion(.success(fighter))
                 } catch {
+                    print("Error parsing fighter: \(error.localizedDescription)")
                     completion(.failure(error))
                 }
             } else {
+                print("Fighter document does not exist")
                 completion(.failure(NSError(domain: "FirebaseService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Fighter not found"])))
             }
         }
@@ -243,14 +242,18 @@ extension FirebaseService {
         }
     }
 
-    func saveEvent(_ event: Event, completion: @escaping (Result<Void, Error>) -> Void) {
+    func saveEvent(_ event: Event, completion: @escaping (Result<String, Error>) -> Void) {
         do {
             if let id = event.id {
                 try db.collection("events").document(id).setData(from: event)
+                completion(.success(id))
             } else {
-                _ = try db.collection("events").addDocument(from: event)
+                let newDocRef = db.collection("events").document()
+                var newEvent = event
+                newEvent.id = newDocRef.documentID
+                try newDocRef.setData(from: newEvent)
+                completion(.success(newDocRef.documentID))
             }
-            completion(.success(()))
         } catch {
             completion(.failure(error))
         }
@@ -269,9 +272,194 @@ extension FirebaseService {
                 completion(.failure(error))
             } else {
                 let events = querySnapshot?.documents.compactMap { document -> Event? in
-                    try? document.data(as: Event.self)
+                    var event = try? document.data(as: Event.self)
+                    event?.id = document.documentID  // Assigner l'ID du document à l'objet Event
+                    return event
                 } ?? []
                 completion(.success(events))
+            }
+        }
+    }
+    func getEvent(id: String, completion: @escaping (Result<Event, Error>) -> Void) {
+        print("Getting event with ID: \(id)")
+        db.collection("events").document(id).getDocument { (document, error) in
+            if let error = error {
+                print("Error fetching event: \(error.localizedDescription)")
+                completion(.failure(error))
+            } else if let document = document, document.exists {
+                do {
+                    var event = try document.data(as: Event.self)
+                    event.id = document.documentID
+                    print("Successfully fetched event: \(event.eventName)")
+                    completion(.success(event))
+                } catch {
+                    print("Error parsing event: \(error.localizedDescription)")
+                    completion(.failure(error))
+                }
+            } else {
+                print("Event document does not exist")
+                completion(.failure(NSError(domain: "FirebaseService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Event not found"])))
+            }
+        }
+    }
+}
+extension FirebaseService {
+    func saveFight(_ fight: Fight, completion: @escaping (Result<String, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
+            return
+        }
+
+        var fightToSave = fight
+        fightToSave.creatorUserId = uid
+
+        do {
+            if let id = fightToSave.id {
+                try db.collection("fights").document(id).setData(from: fightToSave)
+                completion(.success(id))
+            } else {
+                let newDocRef = db.collection("fights").document()
+                fightToSave.id = newDocRef.documentID
+                try newDocRef.setData(from: fightToSave)
+                completion(.success(newDocRef.documentID))
+            }
+        } catch {
+            completion(.failure(error))
+        }
+    }
+
+    func getFight(id: String, completion: @escaping (Result<Fight, Error>) -> Void) {
+        db.collection("fights").document(id).getDocument { (document, error) in
+            if let error = error {
+                completion(.failure(error))
+            } else if let document = document, document.exists {
+                do {
+                    let fight = try document.data(as: Fight.self)
+                    completion(.success(fight))
+                } catch {
+                    completion(.failure(error))
+                }
+            } else {
+                completion(.failure(NSError(domain: "FirebaseService", code: 2, userInfo: [NSLocalizedDescriptionKey: "Fight not found"])))
+            }
+        }
+    }
+
+    func getFightsForEvent(eventId: String, completion: @escaping (Result<[Fight], Error>) -> Void) {
+        db.collection("fights")
+            .whereField("eventId", isEqualTo: eventId)
+            .getDocuments { (querySnapshot, error) in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    let fights = querySnapshot?.documents.compactMap { document -> Fight? in
+                        try? document.data(as: Fight.self)
+                    } ?? []
+                    completion(.success(fights))
+                }
+            }
+    }
+
+    func updateFighterWithFight(fighterId: String, fightId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let fighterRef = db.collection("fighters").document(fighterId)
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            let fighterDocument: DocumentSnapshot
+            do {
+                try fighterDocument = transaction.getDocument(fighterRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+
+            guard var fighter = try? fighterDocument.data(as: Fighter.self) else {
+                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to fetch fighter"])
+                errorPointer?.pointee = error
+                return nil
+            }
+
+            fighter.fightIds = (fighter.fightIds ?? []) + [fightId]
+            
+            do {
+                try transaction.setData(from: fighter, forDocument: fighterRef)
+            } catch let error as NSError {
+                errorPointer?.pointee = error
+                return nil
+            }
+
+            return nil
+        }) { (object, error) in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+
+    func updateEventWithFight(eventId: String, fightId: String, completion: @escaping (Result<Void, Error>) -> Void) {
+        let eventRef = db.collection("events").document(eventId)
+        db.runTransaction({ (transaction, errorPointer) -> Any? in
+            let eventDocument: DocumentSnapshot
+            do {
+                try eventDocument = transaction.getDocument(eventRef)
+            } catch let fetchError as NSError {
+                errorPointer?.pointee = fetchError
+                return nil
+            }
+
+            guard var event = try? eventDocument.data(as: Event.self) else {
+                let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to fetch event"])
+                errorPointer?.pointee = error
+                return nil
+            }
+
+            event.fightIds = (event.fightIds ?? []) + [fightId]
+            
+            do {
+                try transaction.setData(from: event, forDocument: eventRef)
+            } catch let error as NSError {
+                errorPointer?.pointee = error
+                return nil
+            }
+
+            return nil
+        }) { (object, error) in
+            if let error = error {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
+    func getFights(completion: @escaping (Result<[Fight], Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
+            return
+        }
+
+        print("Starting getFights for user: \(uid)")
+        db.collection("fights")
+            .whereField("creatorUserId", isEqualTo: uid)
+            .getDocuments { (querySnapshot, error) in
+            if let error = error {
+                print("Error fetching fights: \(error.localizedDescription)")
+                completion(.failure(error))
+            } else {
+                print("Successfully fetched documents")
+                let fights = querySnapshot?.documents.compactMap { document -> Fight? in
+                    print("Processing document: \(document.documentID)")
+                    do {
+                        var fight = try document.data(as: Fight.self)
+                        fight.id = document.documentID
+                        print("Successfully parsed fight: \(fight)")
+                        return fight
+                    } catch {
+                        print("Error parsing fight: \(error.localizedDescription)")
+                        return nil
+                    }
+                } ?? []
+                print("Parsed \(fights.count) fights")
+                completion(.success(fights))
             }
         }
     }
