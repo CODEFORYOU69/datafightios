@@ -8,39 +8,36 @@
 import UIKit
 import FirebaseAuth
 
+
 class FightListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     @IBOutlet weak var tableView: UITableView!
     
     var fights: [Fight] = []
     var fighters: [String: Fighter] = [:]
     var events: [String: Event] = [:]
+    var rounds: [String: [Round]] = [:]
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
         setupNavigationBar()
         print("FightListViewController viewDidLoad")
-
         print("TableView frame: \(tableView.frame)")
-         print("TableView contentSize: \(tableView.contentSize)")
+        print("TableView contentSize: \(tableView.contentSize)")
         print("Current user ID: \(Auth.auth().currentUser?.uid ?? "No user")")
-
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         print("FightListViewController viewWillAppear")
-
-        loadFights()
+        loadFightsAndRelatedData()
     }
     
     func setupTableView() {
         tableView.dataSource = self
         tableView.delegate = self
-        
         tableView.register(UINib(nibName: "FightTableViewCell", bundle: nil), forCellReuseIdentifier: "FightCell")
         print("TableView setup complete")
-
     }
     
     func setupNavigationBar() {
@@ -56,7 +53,14 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
         }
     }
     
-    func loadFights() {
+    func loadFightsAndRelatedData() {
+        loadFights { [weak self] in
+            self?.loadFightersAndEvents()
+            self?.loadRounds()
+        }
+    }
+    
+    func loadFights(completion: @escaping () -> Void) {
         print("Starting loadFights")
         FirebaseService.shared.getFights { [weak self] result in
             print("getFights completed")
@@ -64,9 +68,10 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
             case .success(let fights):
                 print("Loaded \(fights.count) fights")
                 self?.fights = fights
-                self?.loadFightersAndEvents()
+                completion()
             case .failure(let error):
                 print("Error loading fights: \(error.localizedDescription)")
+                completion()
             }
         }
     }
@@ -115,37 +120,114 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
         }
     }
     
+    func loadRounds() {
+        for fight in fights {
+            guard let fightId = fight.id, let roundIds = fight.roundIds, !roundIds.isEmpty else {
+                print("No round IDs for fight: \(fight.id ?? "Unknown")")
+                continue
+            }
+            
+            print("Loading rounds for fight: \(fightId), Round IDs: \(roundIds)")
+            
+            let group = DispatchGroup()
+            var loadedRounds: [Round] = []
+            
+            for roundId in roundIds {
+                group.enter()
+                FirebaseService.shared.getRound(id: roundId, for: fight) { result in
+                    defer { group.leave() }
+                    switch result {
+                    case .success(let round):
+                        loadedRounds.append(round)
+                        print("Loaded round: \(roundId) for fight: \(fightId)")
+                    case .failure(let error):
+                        print("Failed to load round \(roundId) for fight \(fightId): \(error)")
+                    }
+                }
+            }
+            
+            group.notify(queue: .main) { [weak self] in
+                self?.rounds[fightId] = loadedRounds.sorted { $0.roundNumber < $1.roundNumber }
+                print("Finished loading rounds for fight: \(fightId), Loaded rounds: \(loadedRounds.count)")
+                self?.tableView.reloadData()
+            }
+        }
+    }
+    
+    @IBAction func addRoundButtonTapped(_ sender: UIButton) {
+        performSegue(withIdentifier: "ShowAddRound", sender: nil)
+    }
+
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "ShowAddRound" {
+            if let addRoundVC = segue.destination as? AddRoundViewController,
+               let selectedIndexPath = tableView.indexPathForSelectedRow {
+                let selectedFight = fights[selectedIndexPath.row]
+                addRoundVC.fight = selectedFight
+                addRoundVC.blueFighter = fighters[selectedFight.blueFighterId]
+                addRoundVC.redFighter = fighters[selectedFight.redFighterId]
+                addRoundVC.event = events[selectedFight.eventId]
+            }
+        }
+    }
+    
     // MARK: - UITableViewDataSource
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         print("numberOfRowsInSection called, returning \(fights.count)")
-
         return fights.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        print("cellForRowAt called for row \(indexPath.row)")
+        // Essayer de déballer la cellule en tant que FightTableViewCell
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "FightCell", for: indexPath) as? FightTableViewCell else {
-            print("Failed to dequeue FightTableViewCell")
+            // Retourner une cellule vide par défaut si le déballage échoue
             return UITableViewCell()
         }
-        
+
+        // Récupérer le combat correspondant à l'index actuel
         let fight = fights[indexPath.row]
+
+        // Vérifier si les combattants et l'événement existent
         if let blueFighter = fighters[fight.blueFighterId],
            let redFighter = fighters[fight.redFighterId],
            let event = events[fight.eventId] {
-            cell.configure(with: fight, blueFighter: blueFighter, redFighter: redFighter, event: event)
-        } 
-        
+
+            // Récupérer les rounds associés au combat
+            let fightRounds = rounds[fight.id ?? ""] ?? []
+
+            // Configurer la cellule avec les données récupérées
+            cell.configure(with: fight, blueFighter: blueFighter, redFighter: redFighter, event: event, rounds: fightRounds)
+
+            // Ajouter une action pour le bouton "Add Round"
+            cell.addRoundAction = { [weak self] in
+                self?.addRoundForFight(fight)
+            }
+        } else {
+            // Si les données ne sont pas disponibles, configurer la cellule avec des valeurs par défaut
+            cell.configure(with: fight, blueFighter: nil, redFighter: nil, event: nil, rounds: [])
+        }
+
         return cell
     }
-    
+    func addRoundForFight(_ fight: Fight) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let addRoundVC = storyboard.instantiateViewController(withIdentifier: "AddRoundViewController") as? AddRoundViewController {
+            addRoundVC.fight = fight
+            addRoundVC.blueFighter = fighters[fight.blueFighterId]
+            addRoundVC.redFighter = fighters[fight.redFighterId]
+            addRoundVC.event = events[fight.eventId]
+            navigationController?.pushViewController(addRoundVC, animated: true)
+        }
+    }
     
     // MARK: - UITableViewDelegate
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 120 // Ajustez cette valeur selon vos besoins
     }
+    
+    
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let fight = fights[indexPath.row]

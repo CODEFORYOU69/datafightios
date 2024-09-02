@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="22758" systemVersion="23G93" minimumToolsVersion="Automatic" sourceLanguage="Swift" usedWithSwiftData="YES" userDefinedModelVersionIdentifier="">
+    <entity name="ActionEntity" representedClassName="ActionEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="actionId" optional="YES" attributeType="String"/>
+        <attribute name="actionType" optional="YES" attributeType="String"/>
+        <attribute name="actionZone" optional="YES" attributeType="String"/>
+        <attribute name="color" optional="YES" attributeType="String"/>
+        <attribute name="fighterId" optional="YES" attributeType="String"/>
+        <attribute name="gamjeonType" optional="YES" attributeType="String"/>
+        <attribute name="guardPosition" optional="YES" attributeType="String"/>
+        <attribute name="isActive" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="limbUsed" optional="YES" attributeType="String"/>
+        <attribute name="points" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="situation" optional="YES" attributeType="String"/>
+        <attribute name="technique" optional="YES" attributeType="String"/>
+        <attribute name="timeStamp" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="videoTimestamp" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <relationship name="round" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="RoundEntity" inverseName="actions" inverseEntity="RoundEntity"/>
+    </entity>
+    <entity name="EventEntity" representedClassName="EventEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="country" optional="YES" attributeType="String"/>
+        <attribute name="creatorUserId" optional="YES" attributeType="String"/>
+        <attribute name="date" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="eventName" optional="YES" attributeType="String"/>
+        <attribute name="eventType" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="imageurl" optional="YES" attributeType="String"/>
+        <attribute name="location" optional="YES" attributeType="String"/>
+        <relationship name="fights" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="FightEntity" inverseName="event" inverseEntity="FightEntity"/>
+    </entity>
+    <entity name="FightEntity" representedClassName="FightEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="blueFighterId" optional="YES" attributeType="String"/>
+        <attribute name="blueVideoReplayUsed" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="category" optional="YES" attributeType="String"/>
+        <attribute name="creatorUserId" optional="YES" attributeType="String"/>
+        <attribute name="eventId" optional="YES" attributeType="String"/>
+        <attribute name="fightNumber" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="fightResult" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="isOlympic" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="redFighterId" optional="YES" attributeType="String"/>
+        <attribute name="redVideoReplayUsed" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="round" optional="YES" attributeType="String"/>
+        <attribute name="roundIds" optional="YES" attributeType="String"/>
+        <attribute name="videoId" optional="YES" attributeType="String"/>
+        <attribute name="videoURL" optional="YES" attributeType="String"/>
+        <attribute name="weightCategory" optional="YES" attributeType="String"/>
+        <relationship name="blueFighter" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="FighterEntity" inverseName="blueFights" inverseEntity="FighterEntity"/>
+        <relationship name="event" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="EventEntity" inverseName="fights" inverseEntity="EventEntity"/>
+        <relationship name="fightResults" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="FightResultEntity" inverseName="fight" inverseEntity="FightResultEntity"/>
+        <relationship name="redFighter" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="FighterEntity" inverseName="redFights" inverseEntity="FighterEntity"/>
+        <relationship name="rounds" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="RoundEntity" inverseName="fight" inverseEntity="RoundEntity"/>
+    </entity>
+    <entity name="FighterEntity" representedClassName="FighterEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="birthDate" optional="YES" attributeType="Date" usesScalarValueType="NO"/>
+        <attribute name="country" optional="YES" attributeType="String"/>
+        <attribute name="creatorUserId" optional="YES" attributeType="String"/>
+        <attribute name="firstName" optional="YES" attributeType="String"/>
+        <attribute name="gender" optional="YES" attributeType="String"/>
+        <attribute name="id" optional="YES" attributeType="String"/>
+        <attribute name="lastName" optional="YES" attributeType="String"/>
+        <attribute name="profileImageUrl" optional="YES" attributeType="String"/>
+        <relationship name="blueFights" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="FightEntity" inverseName="blueFighter" inverseEntity="FightEntity"/>
+        <relationship name="redFights" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="FightEntity" inverseName="redFighter" inverseEntity="FightEntity"/>
+    </entity>
+    <entity name="FightResultEntity" representedClassName="FightResultEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="blueScore" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="method" optional="YES" attributeType="String"/>
+        <attribute name="redScore" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="winner" optional="YES" attributeType="String"/>
+        <relationship name="fight" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="FightEntity" inverseName="fightResults" inverseEntity="FightEntity"/>
+    </entity>
+    <entity name="RoundEntity" representedClassName="RoundEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="blueFighterId" optional="YES" attributeType="String"/>
+        <attribute name="blueGamjeon" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="blueHits" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="blueScore" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="chronoDuration" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="duration" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="fightId" optional="YES" attributeType="String"/>
+        <attribute name="isSynced" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <attribute name="redFighterId" optional="YES" attributeType="String"/>
+        <attribute name="redGamjeon" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="redHits" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="redScore" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="roundId" optional="YES" attributeType="String"/>
+        <attribute name="roundNumber" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="roundTime" optional="YES" attributeType="Integer 16" defaultValueString="0" usesScalarValueType="YES"/>
+        <attribute name="roundWinner" optional="YES" attributeType="String"/>
+        <attribute name="victoryDecision" optional="YES" attributeType="String"/>
+        <relationship name="actions" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="ActionEntity" inverseName="round" inverseEntity="ActionEntity"/>
+        <relationship name="fight" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="FightEntity" inverseName="rounds" inverseEntity="FightEntity"/>
+        <relationship name="videoReplays" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="VideoReplayEntity" inverseName="round" inverseEntity="VideoReplayEntity"/>
+    </entity>
+    <entity name="VideoReplayEntity" representedClassName="VideoReplayEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="replayId" optional="YES" attributeType="String"/>
+        <attribute name="requestedByColor" optional="YES" attributeType="String"/>
+        <attribute name="requestedByFighterId" optional="YES" attributeType="String"/>
+        <attribute name="timeStamp" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
+        <attribute name="wasAccepted" optional="YES" attributeType="Boolean" usesScalarValueType="YES"/>
+        <relationship name="round" optional="YES" maxCount="1" deletionRule="Nullify" destinationEntity="RoundEntity" inverseName="videoReplays" inverseEntity="RoundEntity"/>
+    </entity>
+</model>

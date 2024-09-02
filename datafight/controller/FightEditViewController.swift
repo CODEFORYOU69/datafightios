@@ -15,15 +15,19 @@ class FightEditViewController: UIViewController, UIPickerViewDelegate, UIPickerV
     @IBOutlet weak var redFighterPicker: UIPickerView!
     @IBOutlet weak var isOlympicSegmentedControl: UISegmentedControl!
 
+    @IBOutlet weak var fightNumberInfo: UITextField!
     @IBOutlet weak var categoryPicker: UIPickerView!
     @IBOutlet weak var weightCategoryPicker: UIPickerView!
     @IBOutlet weak var roundPicker: UIPickerView!
+    
+    
 
     var events: [Event] = []
     var fighters: [Fighter] = []
     var selectedEvent: Event?
     var selectedBlueFighter: Fighter?
     var selectedRedFighter: Fighter?
+    
 
     let isOlympicOptions = ["Regular", "Olympic"]
     var categories: [String] = []
@@ -208,6 +212,8 @@ class FightEditViewController: UIViewController, UIPickerViewDelegate, UIPickerV
         guard let event = selectedEvent,
               let blueFighter = selectedBlueFighter,
               let redFighter = selectedRedFighter,
+              let fightNumberText = fightNumberInfo.text,
+              let fightNumber = Int(fightNumberText),  // Convertir le texte en Int
               let category = categories[safe: categoryPicker.selectedRow(inComponent: 0)],
               let weightCategory = weightCategories[safe: weightCategoryPicker.selectedRow(inComponent: 0)],
               let round = FightCategories.rounds[safe: roundPicker.selectedRow(inComponent: 0)] else {
@@ -224,10 +230,12 @@ class FightEditViewController: UIViewController, UIPickerViewDelegate, UIPickerV
         }
 
         let isOlympic = isOlympicSegmentedControl.selectedSegmentIndex == 1
+        
 
         let fight = Fight(
             creatorUserId: currentUserId,
             eventId: eventId,
+            fightNumber: fightNumber,
             blueFighterId: blueFighterId,
             redFighterId: redFighterId,
             category: category,

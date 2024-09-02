@@ -16,7 +16,7 @@
                 <rect key="frame" x="0.0" y="0.0" width="637" height="130"/>
                 <autoresizingMask key="autoresizingMask"/>
                 <subviews>
-                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="Ol6-5p-Cfp">
+                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="Ol6-5p-Cfp" userLabel="redfighter">
                         <rect key="frame" x="507" y="7" width="120" height="116"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Voo-3U-Ewc" userLabel="Red FighterFlag">
@@ -40,13 +40,49 @@
                             <constraint firstAttribute="width" constant="120" id="mzC-Os-odh"/>
                         </constraints>
                     </stackView>
-                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rMT-d7-DTH">
+                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" alignment="center" translatesAutoresizingMaskIntoConstraints="NO" id="6fX-UW-wyG" userLabel="infofight">
                         <rect key="frame" x="135" y="7" width="367" height="116"/>
-                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                        <nil key="textColor"/>
-                        <nil key="highlightedColor"/>
-                    </label>
-                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="6PM-Fd-Tph">
+                        <subviews>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="rMT-d7-DTH">
+                                <rect key="frame" x="163" y="0.0" width="41.333333333333343" height="58"/>
+                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                <nil key="textColor"/>
+                                <nil key="highlightedColor"/>
+                            </label>
+                            <stackView opaque="NO" contentMode="scaleToFill" spacing="20" translatesAutoresizingMaskIntoConstraints="NO" id="4IK-ty-ipo">
+                                <rect key="frame" x="5.6666666666666572" y="58" width="356" height="58"/>
+                                <subviews>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Round 1" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="V5H-Ye-Hcz">
+                                        <rect key="frame" x="0.0" y="0.0" width="61" height="58"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Round 2" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Hcq-cK-QAn">
+                                        <rect key="frame" x="81" y="0.0" width="63.333333333333343" height="58"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Round 3" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="seJ-Iq-HPU">
+                                        <rect key="frame" x="164.33333333333334" y="0.0" width="63.666666666666657" height="58"/>
+                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                        <nil key="textColor"/>
+                                        <nil key="highlightedColor"/>
+                                    </label>
+                                    <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hAV-4M-OlQ">
+                                        <rect key="frame" x="248" y="0.0" width="108" height="58"/>
+                                        <state key="normal" title="Button"/>
+                                        <buttonConfiguration key="configuration" style="plain" title="Add Round"/>
+                                        <connections>
+                                            <action selector="addRoundButtonTapped:" destination="KGk-i7-Jjw" eventType="touchUpInside" id="vtC-5B-Fp1"/>
+                                        </connections>
+                                    </button>
+                                </subviews>
+                            </stackView>
+                        </subviews>
+                    </stackView>
+                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" alignment="center" spacing="5" translatesAutoresizingMaskIntoConstraints="NO" id="6PM-Fd-Tph" userLabel="bluefighter">
                         <rect key="frame" x="10" y="7" width="120" height="116"/>
                         <subviews>
                             <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="oNR-Xc-uxP">
@@ -74,18 +110,19 @@
                 <constraints>
                     <constraint firstAttribute="trailing" secondItem="Ol6-5p-Cfp" secondAttribute="trailing" constant="10" id="2Bl-sk-rsq"/>
                     <constraint firstItem="6PM-Fd-Tph" firstAttribute="leading" secondItem="H2p-sc-9uM" secondAttribute="leading" constant="10" id="5pH-Mk-GWf"/>
-                    <constraint firstItem="rMT-d7-DTH" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="7" id="6rJ-JE-39I"/>
-                    <constraint firstItem="rMT-d7-DTH" firstAttribute="leading" secondItem="6PM-Fd-Tph" secondAttribute="trailing" constant="5" id="DZP-Ao-dTu"/>
                     <constraint firstItem="6PM-Fd-Tph" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="7" id="EF7-7f-q6h"/>
-                    <constraint firstItem="Ol6-5p-Cfp" firstAttribute="leading" secondItem="rMT-d7-DTH" secondAttribute="trailing" constant="5" id="Ldr-dg-0ro"/>
+                    <constraint firstAttribute="bottom" secondItem="6fX-UW-wyG" secondAttribute="bottom" constant="7" id="Xd5-2h-2VE"/>
                     <constraint firstAttribute="bottom" secondItem="6PM-Fd-Tph" secondAttribute="bottom" constant="7" id="an3-sY-cgH"/>
                     <constraint firstAttribute="bottom" secondItem="Ol6-5p-Cfp" secondAttribute="bottom" constant="7" id="cAi-H5-GgT"/>
+                    <constraint firstItem="6fX-UW-wyG" firstAttribute="leading" secondItem="6PM-Fd-Tph" secondAttribute="trailing" constant="5" id="g7X-M1-fv0"/>
+                    <constraint firstItem="6fX-UW-wyG" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="7" id="noe-38-jh6"/>
+                    <constraint firstItem="Ol6-5p-Cfp" firstAttribute="leading" secondItem="6fX-UW-wyG" secondAttribute="trailing" constant="5" id="oQb-ZV-kjw"/>
                     <constraint firstItem="Ol6-5p-Cfp" firstAttribute="top" secondItem="H2p-sc-9uM" secondAttribute="top" constant="7" id="qvA-ss-SCg"/>
-                    <constraint firstAttribute="bottom" secondItem="rMT-d7-DTH" secondAttribute="bottom" constant="7" id="yeL-Yj-Db1"/>
                 </constraints>
             </tableViewCellContentView>
             <viewLayoutGuide key="safeArea" id="njF-e1-oar"/>
             <connections>
+                <outlet property="addRoundButton" destination="hAV-4M-OlQ" id="BRc-HM-fXB"/>
                 <outlet property="blueFighterImageView" destination="38S-Ap-35L" id="JGm-R4-VTM"/>
                 <outlet property="blueFighterNameLabel" destination="JQ9-Wv-9va" id="LMV-Qy-i3Q"/>
                 <outlet property="blueFlagImageView" destination="oNR-Xc-uxP" id="HCk-7Z-jjZ"/>
@@ -93,6 +130,9 @@
                 <outlet property="redFighterImageView" destination="LVm-6o-St8" id="1hA-YL-OXZ"/>
                 <outlet property="redFighterNameLabel" destination="rfS-pl-QbW" id="yR1-xL-XiO"/>
                 <outlet property="redFlagImageView" destination="Voo-3U-Ewc" id="9qk-mP-FYA"/>
+                <outlet property="round1Label" destination="V5H-Ye-Hcz" id="3cf-wm-6ou"/>
+                <outlet property="round2Label" destination="Hcq-cK-QAn" id="m2q-M6-pAz"/>
+                <outlet property="round3Label" destination="seJ-Iq-HPU" id="qwP-9N-HCo"/>
             </connections>
             <point key="canvasLocation" x="380.91603053435114" y="-3.5211267605633805"/>
         </tableViewCell>
