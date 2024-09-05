@@ -975,5 +975,70 @@ extension FirebaseService {
             }
         }
     }
-
+    
+    func getLastRoundEndTime(for fight: Fight, completion: @escaping (Result<TimeInterval, Error>) -> Void) {
+        guard let fightId = fight.id else {
+            completion(.failure(NSError(domain: "FightError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Fight ID is missing"])))
+            return
+        }
+        
+        Firestore.firestore().collection("videos").whereField("fightId", isEqualTo: fightId).getDocuments { (querySnapshot, error) in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let document = querySnapshot?.documents.first else {
+                completion(.failure(NSError(domain: "VideoError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No video found for this fight"])))
+                return
+            }
+            
+            let videoData = document.data()
+            guard let video = Video(dictionary: videoData) else {
+                completion(.failure(NSError(domain: "VideoError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Failed to parse video data"])))
+                return
+            }
+            
+            if let lastRoundTimestamp = video.roundTimestamps.max(by: { $0.roundNumber < $1.roundNumber }) {
+                let endTime = lastRoundTimestamp.end ?? lastRoundTimestamp.start
+                completion(.success(endTime))
+            } else {
+                completion(.success(0)) // Pas de rounds enregistrés, commencer à 0
+            }
+        }
+    }
+    func updateVideoRoundTimestamps(for fight: Fight, roundNumber: Int, startTime: TimeInterval, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let fightId = fight.id else {
+            completion(.failure(NSError(domain: "FightError", code: 0, userInfo: [NSLocalizedDescriptionKey: "Fight ID is missing"])))
+            return
+        }
+        
+        Firestore.firestore().collection("videos").whereField("fightId", isEqualTo: fightId).getDocuments { (querySnapshot, error) in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let document = querySnapshot?.documents.first else {
+                completion(.failure(NSError(domain: "VideoError", code: 0, userInfo: [NSLocalizedDescriptionKey: "No video found for this fight"])))
+                return
+            }
+            
+            let newRoundTimestamp = [
+                "roundNumber": roundNumber,
+                "start": startTime,
+                "end": NSNull()
+            ] as [String : Any]
+            
+            document.reference.updateData([
+                "roundTimestamps": FieldValue.arrayUnion([newRoundTimestamp])
+            ]) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(()))
+                }
+            }
+        }
+    }
 }

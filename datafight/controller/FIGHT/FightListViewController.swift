@@ -16,6 +16,8 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
     var fighters: [String: Fighter] = [:]
     var events: [String: Event] = [:]
     var rounds: [String: [Round]] = [:]
+    var selectedFight: Fight?
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -155,9 +157,30 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
     }
     
     @IBAction func addRoundButtonTapped(_ sender: UIButton) {
-        performSegue(withIdentifier: "ShowAddRound", sender: nil)
-    }
+         guard let selectedIndexPath = tableView.indexPathForSelectedRow,
+               let fight = fights[safe: selectedIndexPath.row] else {
+             showAlert(title: "Error", message: "Please select a fight first")
+             return
+         }
 
+         if let fightResult = fight.fightResult {
+             // Le combat est déjà terminé
+             showAlert(title: "Fight Completed", message: "This fight has already ended with the following result:\nWinner: \(fightResult.winner)\nMethod: \(fightResult.method)")
+         } else if (fight.roundIds?.count ?? 0) >= 3 {
+             // Le combat a déjà 3 rounds, ce qui est généralement le maximum
+             showAlert(title: "Maximum Rounds Reached", message: "This fight already has the maximum number of rounds.")
+         } else {
+             // Le combat n'est pas terminé et n'a pas atteint le nombre maximum de rounds
+             selectedFight = fight
+             performSegue(withIdentifier: "ShowAddRound", sender: nil)
+         }
+     }
+    func showAlert(title: String, message: String) {
+        let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        let okAction = UIAlertAction(title: "OK", style: .default, handler: nil)
+        alertController.addAction(okAction)
+        present(alertController, animated: true, completion: nil)
+    }
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowAddRound" {
             if let addRoundVC = segue.destination as? AddRoundViewController,

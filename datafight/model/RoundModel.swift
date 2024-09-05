@@ -19,10 +19,13 @@ struct Round: Codable, Identifiable {
     var roundWinner: String?
     var blueHits: Int = 0  // Nouvelle propriété
         var redHits: Int = 0
+    var startTime: TimeInterval?  // Nouvelle propriété pour l'heure de début du round
+        var endTime: TimeInterval?    // Nouvelle propriété pour l'heure de fi
+    
 
     
     enum CodingKeys: String, CodingKey {
-        case id, fightId, roundNumber, chronoDuration, duration,roundTime, blueFighterId, redFighterId, actions, videoReplays, isSynced, victoryDecision, blueHits, redHits
+        case id, fightId, roundNumber, chronoDuration, duration,roundTime, blueFighterId, redFighterId, actions, videoReplays, isSynced, victoryDecision, blueHits, redHits, startTime, endTime
     }
 
     var blueScore: Int {
@@ -296,10 +299,14 @@ extension Round {
         roundEntity.redHits = Int16(self.redHits)
         roundEntity.roundTime = Int16(self.roundTime)
 
-        
+        if let startTime = self.startTime {
+            roundEntity.startTime = startTime
+        }
+        if let endTime = self.endTime {
+            roundEntity.endTime = endTime
+        }
 
-        
-        // Handle actions
+        // Gérer les actions
         let actionsSet = NSMutableSet()
         for action in self.actions {
             let actionEntity = action.toCoreDataObject(in: context)
@@ -307,7 +314,7 @@ extension Round {
         }
         roundEntity.actions = actionsSet
         
-        // Handle video replays
+        // Gérer les replays vidéo
         let videoReplaysSet = NSMutableSet()
         for videoReplay in self.videoReplays {
             let videoReplayEntity = videoReplay.toCoreDataObject(in: context)
@@ -416,30 +423,37 @@ extension Action {
 
 extension Round {
     var dictionary: [String: Any] {
-            var dict = [
-                "id": id as Any,
-                "fightId": fightId,
-                "roundNumber": roundNumber,
-                "chronoDuration": chronoDuration,
-                "duration": duration,
-                "roundTime": roundTime,
-                "blueFighterId": blueFighterId,
-                "redFighterId": redFighterId,
-                "actions": actions.map { $0.dictionary },
-                "videoReplays": videoReplays.map { $0.dictionary },
-                "isSynced": isSynced,
-                "blueHits": blueHits,
-                "redHits": redHits
-            ]
-            if let victoryDecision = victoryDecision {
-                dict["victoryDecision"] = victoryDecision.rawValue
-            }
-            if let roundWinner = roundWinner {
-                dict["roundWinner"] = roundWinner
-            }
-            return dict
+        var dict = [
+            "id": id as Any,
+            "fightId": fightId,
+            "roundNumber": roundNumber,
+            "chronoDuration": chronoDuration,
+            "duration": duration,
+            "roundTime": roundTime,
+            "blueFighterId": blueFighterId,
+            "redFighterId": redFighterId,
+            "actions": actions.map { $0.dictionary },
+            "videoReplays": videoReplays.map { $0.dictionary },
+            "isSynced": isSynced,
+            "blueHits": blueHits,
+            "redHits": redHits
+        ]
+        if let startTime = startTime {
+            dict["startTime"] = startTime
         }
+        if let endTime = endTime {
+            dict["endTime"] = endTime
+        }
+        if let victoryDecision = victoryDecision {
+            dict["victoryDecision"] = victoryDecision.rawValue
+        }
+        if let roundWinner = roundWinner {
+            dict["roundWinner"] = roundWinner
+        }
+        return dict
+    }
 }
+
 extension VideoReplay {
     var dictionary: [String: Any] {
         return [

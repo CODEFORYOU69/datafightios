@@ -10,37 +10,71 @@ import AVKit
 
 extension AddRoundViewController {
     
-    func setupVideoPlayer(with url: URL) {
-        guard videoPlayerView != nil else {
-            print("Error: setup videoPlayerView is nil")
-            return
-        }
-
-        print("Video found, setting up video player.")
-        videoPlayerView.loadVideo(url: url)
+    func uploadVideo(videoURL: URL) {
+        guard let fight = fight else { return }
         
-        let asset = AVAsset(url: url)
+        progressView.isHidden = false // Afficher la barre de progression
         
-        Task {
-            do {
-                // Charger la durée de la vidéo
-                let duration = try await asset.load(.duration)
-                let durationInSeconds = CMTimeGetSeconds(duration)
-                
-                // Mettre à jour l'interface utilisateur sur le thread principal
-                DispatchQueue.main.async { [weak self] in
-                    self?.setChronoDuration(durationInSeconds)
-                    self?.startTimerAndVideo() // Démarrer le chrono et la vidéo simultanément
+        FirebaseService.shared.uploadVideo(for: fight, videoURL: videoURL, progressHandler: { [weak self] progress in
+            DispatchQueue.main.async {
+                self?.progressView.setProgress(Float(progress), animated: true)
+            }
+        }) { [weak self] result in
+            DispatchQueue.main.async {
+                self?.progressView.isHidden = true // Masquer la barre de progression une fois l'upload terminé
+            }
+            
+            switch result {
+            case .success(let video):
+                print("Video uploaded successfully: \(video.url)")
+                if let videoURL = URL(string: video.url) {
+                    self?.setupVideoPlayer(with: videoURL)
+                    self?.setChronoDuration(video.duration)
                 }
-            } catch {
-                print("Failed to load video duration: \(error.localizedDescription)")
+            case .failure(let error):
+                print("Failed to upload video: \(error.localizedDescription)")
+                self?.showAlert(title: "Upload Error", message: "Failed to upload video.")
             }
         }
     }
+    
+    func resetTimer() {
+        remainingTime = chronoDuration
+        updateTimerLabel()
+    }
+    
+    func resetScores() {
+        blueScore = 0
+        redScore = 0
+        manageScores()
+    }
+    
+    func skipTime(by seconds: Double) {
+           guard let player = videoPlayerView.player else { return }
+           let currentTime = player.currentTime().seconds
+           let newTime = max(0, currentTime + seconds)
+           
+           seekVideo(to: CMTime(seconds: newTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
+           remainingTime = chronoDuration - newTime
+           updateTimerLabel()
+       }
+    
+    @objc func handleProgressTap(_ gesture: UITapGestureRecognizer) {
+        let location = gesture.location(in: videoProgressView)
+        let percentage = Float(location.x / videoProgressView.bounds.width)
+        let duration = videoPlayerView.player?.currentItem?.duration.seconds ?? 0
+        let newTime = duration * Double(percentage)
+
+        seekVideo(to: CMTime(seconds: newTime, preferredTimescale: CMTimeScale(NSEC_PER_SEC)))
+        updateChronoTime(fromVideoTime: newTime)
+    }
+
+    
+    
+   
 
     func startTimerAndVideo() {
         // Démarrer le timer
-        startTimer()
 
         // Démarrer la vidéo
         playVideo()
@@ -59,9 +93,18 @@ extension AddRoundViewController {
 
             if duration > 0 {
                 self.videoProgressView.progress = Float(currentTime / duration)
+                self.updateChronoTime(fromVideoTime: currentTime)
             }
         }
     }
+    
+    func updateChronoTime(fromVideoTime videoTime: TimeInterval) {
+        let elapsedTimeInRound = videoTime - currentRoundStartTime
+        remainingTime = max(0, chronoDuration - elapsedTimeInRound)
+        updateTimerLabel()
+    }
+
+
     func playVideo() {
         videoPlayerView.player?.play()
     }

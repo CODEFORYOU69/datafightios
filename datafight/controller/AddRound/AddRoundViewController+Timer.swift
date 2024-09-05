@@ -68,7 +68,14 @@ extension AddRoundViewController {
     func resumeTimer() {
         startTimer()
     }
-    
+    func updateRemainingTime(_ newTime: TimeInterval) {
+        remainingTime = newTime
+        updateTimerLabel()
+        
+        // Redémarrer le timer avec le nouveau temps
+        timer?.invalidate()
+        startTimer()
+    }
 
 
 }

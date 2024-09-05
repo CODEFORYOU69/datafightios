@@ -11,6 +11,59 @@ import AVFoundation
 
 extension AddRoundViewController {
     
+    func recordAction(color: FighterColor, zone: Zone, situation: CombatSituation? = nil, points: Int) {
+        pauseTimer()
+        
+        let currentTime = videoPlayerView.player?.currentTime() ?? CMTime.zero
+        let timestamp = CMTimeGetSeconds(currentTime)
+        
+        let newAction = Action(
+            id: UUID().uuidString,
+            fighterId: color == .blue ? fight?.blueFighterId ?? "" : fight?.redFighterId ?? "",
+            color: color,
+            actionType: .kick,  // À déterminer en fonction de l'interaction
+            technique: nil,  // À déterminer ultérieurement
+            limbUsed: nil,  // À déterminer ultérieurement
+            actionZone: zone,
+            timeStamp: chronoDuration - remainingTime,
+            situation: situation ?? .attack,
+            gamjeonType: nil,
+            guardPosition: nil,  // À déterminer ultérieurement
+            videoTimestamp: timestamp
+            
+        )
+        
+        showActionDetailsInterface(for: newAction, points: points, isIVRRequest: isIVRRequest)
+        
+    }
+    func addMarkerAtCurrentTime() {
+        guard let player = videoPlayerView.player else { return }
+        
+        // Calculer la position en pourcentage sur la barre de progression
+        let currentTime = player.currentTime().seconds
+        let duration = player.currentItem?.duration.seconds ?? 1
+        let percentage = CGFloat(currentTime / duration)
+        
+        // Créer une vue de marqueur
+        let markerView = UIView()
+        markerView.backgroundColor = .red // Couleur de la barre de marqueur
+        markerView.translatesAutoresizingMaskIntoConstraints = false
+        
+        videoProgressView.addSubview(markerView)
+        
+        // Définir les contraintes de taille et de position du marqueur
+        NSLayoutConstraint.activate([
+            markerView.widthAnchor.constraint(equalToConstant: 2), // Largeur de la barre
+            markerView.heightAnchor.constraint(equalTo: videoProgressView.heightAnchor, multiplier: 1.5), // 50% plus grande que la barre de progression
+            markerView.centerYAnchor.constraint(equalTo: videoProgressView.centerYAnchor),
+            
+            // Centrer la barre à la position calculée
+            markerView.centerXAnchor.constraint(equalTo: videoProgressView.leadingAnchor, constant: percentage * videoProgressView.bounds.width)
+        ])
+    }
+    
+    
+    
     func handleActionSelection(category: String, value: String) {
         guard var action = currentAction else { return }
         
@@ -106,7 +159,7 @@ extension AddRoundViewController {
         
         // Mettre à jour les scores et l'interface utilisateur
         updateScores(with: updatedAction)
-        updateUI()
+        manageScores()
         resumeTimer()
         
         // Vérifier si le round doit se terminer (par exemple, si un KO a été enregistré)
@@ -130,7 +183,7 @@ extension AddRoundViewController {
         
         // Forcer une mise à jour immédiate de l'interface utilisateur
         DispatchQueue.main.async { [weak self] in
-            self?.updateUI()
+            self?.manageScores()
             self?.removeLastActionIcon()
         }
         

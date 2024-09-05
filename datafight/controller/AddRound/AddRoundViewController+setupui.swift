@@ -91,16 +91,53 @@ extension AddRoundViewController {
 
 
 
-    func updateUI() {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.bluescore.text = "\(self.blueScore)"
-            self.redscore.text = "\(self.redScore)"
-            self.bluegamjeonlabel.text = "\(self.countGamjeons(for: .blue))"
-            self.redgamjeonlabel.text = "\(self.countGamjeons(for: .red))"
-        }
-    }
+    func manageScores() {
+           calculateScores()
+           updateScoreLabels()
+           updateGamjeonLabels()
+           updateHitsLabels()
+       }
     
+    private func calculateScores() {
+           guard let currentRound = currentRound else { return }
+           
+           blueScore = calculateScore(for: .blue, in: currentRound)
+           redScore = calculateScore(for: .red, in: currentRound)
+       }
+
+       private func calculateScore(for color: FighterColor, in round: Round) -> Int {
+           let directPoints = round.actions.filter { $0.color == color && $0.actionType != .gamJeon && $0.isActive }.reduce(0) { $0 + $1.points }
+           let opponentColor: FighterColor = color == .blue ? .red : .blue
+           let gamjeonPoints = round.actions.filter { $0.color == opponentColor && $0.actionType == .gamJeon && $0.isActive }.count
+           return directPoints + gamjeonPoints
+       }
+
+       private func updateScoreLabels() {
+           DispatchQueue.main.async { [weak self] in
+               guard let self = self else { return }
+               self.bluescore.text = "\(self.blueScore)"
+               self.redscore.text = "\(self.redScore)"
+           }
+       }
+
+       private func updateGamjeonLabels() {
+           DispatchQueue.main.async { [weak self] in
+               guard let self = self, let currentRound = self.currentRound else { return }
+               self.bluegamjeonlabel.text = "\(self.countGamjeons(for: .blue, in: currentRound))"
+               self.redgamjeonlabel.text = "\(self.countGamjeons(for: .red, in: currentRound))"
+           }
+       }
+
+       private func countGamjeons(for color: FighterColor, in round: Round) -> Int {
+           round.actions.filter { $0.color == color && $0.actionType == .gamJeon && $0.isActive }.count
+       }
+    private func updateHitsLabels() {
+           DispatchQueue.main.async { [weak self] in
+               guard let self = self, let currentRound = self.currentRound else { return }
+               self.bluehitslabel.text = "\(currentRound.blueHits)"
+               self.redhitslabel.text = "\(currentRound.redHits)"
+           }
+       }
     func printCurrentRoundActions() {
         guard let currentRound = currentRound else {
             print("No current round available")
