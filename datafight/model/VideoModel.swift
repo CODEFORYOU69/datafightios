@@ -6,6 +6,17 @@ struct Video: Codable {
     let url: String
     let duration: Double
     var roundTimestamps: [RoundTimestamp]
+    
+    mutating func updateOrAddRoundTimestamp(roundNumber: Int, start: TimeInterval, end: TimeInterval?) {
+            if let index = roundTimestamps.firstIndex(where: { $0.roundNumber == roundNumber }) {
+                roundTimestamps[index].start = start
+                roundTimestamps[index].end = end
+            } else {
+                let newTimestamp = RoundTimestamp(roundNumber: roundNumber, start: start, end: end)
+                roundTimestamps.append(newTimestamp)
+            }
+            roundTimestamps.sort { $0.roundNumber < $1.roundNumber }
+        }
 
     // Initialiseur par défaut
     init(id: String, fightId: String, url: String, duration: Double, roundTimestamps: [RoundTimestamp]) {
@@ -47,8 +58,14 @@ struct Video: Codable {
 
 struct RoundTimestamp: Codable {
     let roundNumber: Int
-    let start: TimeInterval
-    let end: TimeInterval?
+    var start: TimeInterval
+    var end: TimeInterval?
+    
+    init(roundNumber: Int, start: TimeInterval, end: TimeInterval? = nil) {
+            self.roundNumber = roundNumber
+            self.start = start
+            self.end = end
+        }
 
     // Conversion en dictionnaire pour Firestore
     var dictionary: [String: Any] {

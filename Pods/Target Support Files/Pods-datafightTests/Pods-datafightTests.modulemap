@@ -1,6 +1,0 @@
-framework module Pods_datafightTests {
-  umbrella header "Pods-datafightTests-umbrella.h"
-
-  export *
-  module * { export * }
-}

@@ -8,7 +8,7 @@
 import FirebaseFirestore
 import Foundation
 
-struct Fighter: Codable {
+struct Fighter: Codable, Identifiable {
     @DocumentID var id: String?
     var creatorUserId: String
     var firstName: String
@@ -73,3 +73,4 @@ struct Fighter: Codable {
 
     }
 }
+    

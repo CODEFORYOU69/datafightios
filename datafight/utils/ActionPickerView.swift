@@ -18,8 +18,48 @@ class ActionPickerView: UIView {
     private var isSpinningKick: Bool?
     private var currentCategory: ActionCategory
     private var isIVRRequest: Bool // Indique si c'est une IVR Request
-
     
+    private var chronoTextField: UITextField?
+
+
+    private func requestChronoTime() {
+        titleLabel.text = "Enter Remaining Time in Round"
+        
+        let textField = UITextField()
+        textField.placeholder = "mm:ss"
+        textField.keyboardType = .numberPad
+        textField.borderStyle = .roundedRect
+        textField.textAlignment = .center
+        
+        stackView.addArrangedSubview(textField)
+        
+        let confirmButton = UIButton(type: .system)
+        confirmButton.setTitle("Confirm", for: .normal)
+        confirmButton.addTarget(self, action: #selector(confirmChronoTime), for: .touchUpInside)
+        stackView.addArrangedSubview(confirmButton)
+        
+        self.chronoTextField = textField
+    }
+
+    @objc private func confirmChronoTime() {
+        guard let timeString = chronoTextField?.text, !timeString.isEmpty else {
+            print("Invalid time")
+            return
+        }
+        
+        // Conversion du temps en TimeInterval
+        let components = timeString.split(separator: ":")
+        if components.count == 2, let minutes = Double(components[0]), let seconds = Double(components[1]) {
+            let totalSeconds = (minutes * 60) + seconds
+            action.chronoTimestamp = totalSeconds
+            print("Chrono enregistré: \(totalSeconds) secondes")
+            onActionComplete?(action)  // Action complète avec chrono
+
+        } else {
+            print("Format de temps incorrect")
+        }
+    }
+
     private var previousSelections: [(category: ActionCategory, action: Action)] = []
     
     enum ActionCategory {
@@ -30,6 +70,7 @@ class ActionPickerView: UIView {
         case guardPosition
         case gamjeonType
         case situation
+        case chronoTimestamp
         case actionType // Nouveau cas pour déterminer le type d'action
         case impactArea // Nouveau cas pour déterminer la zone d'impact
         case zone
@@ -181,10 +222,11 @@ class ActionPickerView: UIView {
                 currentCategory = .guardPosition
 
             case .guardPosition:
-                currentCategory = .situation
-                
-            case .gamjeonType:
-                currentCategory = .situation
+                        currentCategory = .chronoTimestamp // Passe à chronoTimestamp après guardPosition
+                    case .chronoTimestamp: // Après chrono, passe à la situation ou termine
+                        currentCategory = .situation
+                    case .gamjeonType:
+                        currentCategory = .chronoTimestamp
                 
 
             case .situation:
@@ -218,15 +260,18 @@ class ActionPickerView: UIView {
                 currentCategory = .guardPosition
 
             case .guardPosition:
+                       currentCategory = .chronoTimestamp // Ajout de chronoTimestamp ici
+            case .chronoTimestamp:
                 if !(action.actionType == .kick && (points == 2 || points == 4)) {
                     currentCategory = .situation
                 } else {
                     onActionComplete?(action)
                     return
                 }
+                   case .gamjeonType:
+                       currentCategory = .chronoTimestamp
 
-            case .gamjeonType:
-                currentCategory = .situation
+            
 
             case .situation:
                 onActionComplete?(action)
@@ -317,12 +362,16 @@ class ActionPickerView: UIView {
                 self?.moveToNextCategory()
             }
             
-        case .situation:
-            titleLabel.text = "Select Situation"
-            addButtons(options: CombatSituation.allCases.map { $0.rawValue }) { [weak self] selectedIndex in
-                self?.action.situation = CombatSituation.allCases[selectedIndex]
-                self?.moveToNextCategory()
-            }
+        case .chronoTimestamp:
+               titleLabel.text = "Enter Remaining Time in Round"
+               requestChronoTime()
+
+           case .situation:
+               titleLabel.text = "Select Situation"
+               addButtons(options: CombatSituation.allCases.map { $0.rawValue }) { [weak self] selectedIndex in
+                   self?.action.situation = CombatSituation.allCases[selectedIndex]
+                   self?.moveToNextCategory()
+               }
         }
     }
 }

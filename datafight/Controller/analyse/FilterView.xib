@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="32700.99.1234" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" useSafeAreas="YES" colorMatched="YES">
+    <device id="ipad10_9rounded" orientation="portrait" layout="fullscreen" appearance="light"/>
+    <dependencies>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="22685"/>
+        <capability name="Safe area layout guides" minToolsVersion="9.0"/>
+        <capability name="System colors in document resources" minToolsVersion="11.0"/>
+        <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
+    </dependencies>
+    <objects>
+        <placeholder placeholderIdentifier="IBFilesOwner" id="-1" userLabel="File's Owner"/>
+        <placeholder placeholderIdentifier="IBFirstResponder" id="-2" customClass="UIResponder"/>
+        <view contentMode="scaleToFill" id="iN0-l3-epB" customClass="FilterView">
+            <rect key="frame" x="0.0" y="0.0" width="820" height="1180"/>
+            <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+            <subviews>
+                <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="6QI-vq-Aai" userLabel="attributePicker">
+                    <rect key="frame" x="50" y="124" width="328" height="227"/>
+                </pickerView>
+                <pickerView contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="n9U-Cy-OWd" userLabel="operationPicker">
+                    <rect key="frame" x="442" y="124" width="328" height="227"/>
+                </pickerView>
+                <textField opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="248" contentHorizontalAlignment="left" contentVerticalAlignment="center" borderStyle="roundedRect" textAlignment="natural" minimumFontSize="17" translatesAutoresizingMaskIntoConstraints="NO" id="hpk-k6-A6f" userLabel="valueTextField">
+                    <rect key="frame" x="50" y="391" width="328" height="114"/>
+                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                    <textInputTraits key="textInputTraits"/>
+                </textField>
+                <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="DCp-SN-nhN" userLabel="removeButton">
+                    <rect key="frame" x="442" y="391" width="328" height="114"/>
+                    <state key="normal" title="Button"/>
+                    <buttonConfiguration key="configuration" style="plain" title="Button"/>
+                </button>
+            </subviews>
+            <viewLayoutGuide key="safeArea" id="vUN-kp-3ea"/>
+            <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+            <constraints>
+                <constraint firstItem="6QI-vq-Aai" firstAttribute="width" secondItem="vUN-kp-3ea" secondAttribute="width" multiplier="0.4" id="8AR-Ol-0pl"/>
+                <constraint firstItem="n9U-Cy-OWd" firstAttribute="width" secondItem="vUN-kp-3ea" secondAttribute="width" multiplier="0.4" id="8bW-CA-UyB"/>
+                <constraint firstItem="6QI-vq-Aai" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" constant="100" id="90n-86-wYr"/>
+                <constraint firstItem="DCp-SN-nhN" firstAttribute="height" secondItem="vUN-kp-3ea" secondAttribute="height" multiplier="0.1" id="9Vm-ay-uXT"/>
+                <constraint firstItem="6QI-vq-Aai" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="50" id="9ZS-le-heP"/>
+                <constraint firstItem="n9U-Cy-OWd" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" constant="-50" id="C98-mg-OHu"/>
+                <constraint firstItem="hpk-k6-A6f" firstAttribute="width" secondItem="vUN-kp-3ea" secondAttribute="width" multiplier="0.4" id="EWt-gm-60z"/>
+                <constraint firstItem="DCp-SN-nhN" firstAttribute="width" secondItem="vUN-kp-3ea" secondAttribute="width" multiplier="0.4" id="KdW-lm-O48"/>
+                <constraint firstItem="hpk-k6-A6f" firstAttribute="leading" secondItem="vUN-kp-3ea" secondAttribute="leading" constant="50" id="afS-JE-bwc"/>
+                <constraint firstItem="DCp-SN-nhN" firstAttribute="trailing" secondItem="vUN-kp-3ea" secondAttribute="trailing" constant="-50" id="d37-WC-4Kf"/>
+                <constraint firstItem="DCp-SN-nhN" firstAttribute="top" secondItem="n9U-Cy-OWd" secondAttribute="bottom" constant="40" id="hey-0U-SQB"/>
+                <constraint firstItem="n9U-Cy-OWd" firstAttribute="top" secondItem="vUN-kp-3ea" secondAttribute="top" constant="100" id="pqh-N4-bKB"/>
+                <constraint firstItem="6QI-vq-Aai" firstAttribute="height" secondItem="vUN-kp-3ea" secondAttribute="height" multiplier="0.2" id="sxy-8M-8jb"/>
+                <constraint firstItem="hpk-k6-A6f" firstAttribute="height" secondItem="vUN-kp-3ea" secondAttribute="height" multiplier="0.1" id="uUa-Ad-gdb"/>
+                <constraint firstItem="n9U-Cy-OWd" firstAttribute="height" secondItem="vUN-kp-3ea" secondAttribute="height" multiplier="0.2" id="wc4-f7-eNR"/>
+                <constraint firstItem="hpk-k6-A6f" firstAttribute="top" secondItem="6QI-vq-Aai" secondAttribute="bottom" constant="40" id="xpz-H0-25J"/>
+            </constraints>
+            <connections>
+                <outlet property="attributePicker" destination="6QI-vq-Aai" id="bIW-Uj-ian"/>
+                <outlet property="operationPicker" destination="n9U-Cy-OWd" id="hhm-yZ-htg"/>
+                <outlet property="removeButton" destination="DCp-SN-nhN" id="z5V-Ba-6Qa"/>
+                <outlet property="valueTextField" destination="hpk-k6-A6f" id="7e0-g1-edQ"/>
+            </connections>
+            <point key="canvasLocation" x="137.5609756097561" y="19.830508474576273"/>
+        </view>
+    </objects>
+    <resources>
+        <systemColor name="systemBackgroundColor">
+            <color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+        </systemColor>
+    </resources>
+</document>

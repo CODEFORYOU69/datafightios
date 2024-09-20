@@ -2,7 +2,7 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSFileProviderDomainUsageDescription</key>
+	<key>Privacy - File Provider Domain Usage Description</key>
 	<string>We need access to your files to select videos.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

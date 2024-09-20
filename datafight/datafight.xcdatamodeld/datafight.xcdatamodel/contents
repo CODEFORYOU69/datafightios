@@ -4,6 +4,7 @@
         <attribute name="actionId" optional="YES" attributeType="String"/>
         <attribute name="actionType" optional="YES" attributeType="String"/>
         <attribute name="actionZone" optional="YES" attributeType="String"/>
+        <attribute name="chronoTimestamp" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="color" optional="YES" attributeType="String"/>
         <attribute name="fighterId" optional="YES" attributeType="String"/>
         <attribute name="gamjeonType" optional="YES" attributeType="String"/>
@@ -95,6 +96,7 @@
         <relationship name="videoReplays" optional="YES" toMany="YES" deletionRule="Nullify" destinationEntity="VideoReplayEntity" inverseName="round" inverseEntity="VideoReplayEntity"/>
     </entity>
     <entity name="VideoReplayEntity" representedClassName="VideoReplayEntity" syncable="YES" codeGenerationType="class">
+        <attribute name="chronoTimestamp" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="YES"/>
         <attribute name="replayId" optional="YES" attributeType="String"/>
         <attribute name="requestedByColor" optional="YES" attributeType="String"/>
         <attribute name="requestedByFighterId" optional="YES" attributeType="String"/>

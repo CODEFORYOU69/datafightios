@@ -1,7 +1,7 @@
 import FirebaseFirestore
 import Foundation
 
-struct Fight: Codable {
+struct Fight:Codable,  Identifiable{
     @DocumentID var id: String?
     var creatorUserId: String
     var eventId: String
@@ -58,15 +58,20 @@ struct Fight: Codable {
     }
 }
 
-struct FightResult: Codable {
+struct FightResult: Codable, CustomStringConvertible {
     var winner: String
     var method: String
     var totalScore: TotalScore
-    
+
     struct TotalScore: Codable {
         var blue: Int
         var red: Int
     }
+
+    var description: String {
+        return "Gagnant : \(winner), Méthode : \(method), Score - Bleu : \(totalScore.blue), Rouge : \(totalScore.red)"
+    }
+
     
     enum CodingKeys: String, CodingKey {
         case winner
@@ -172,3 +177,4 @@ extension FightResult {
         ]
     }
 }
+
