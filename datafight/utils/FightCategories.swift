@@ -43,4 +43,15 @@ struct FightCategories {
     ]
     
     static let rounds = ["128ème", "64ème", "32ème", "16ème", "Quarts de finale", "Demi-finale", "Finale", "1er tour de repêchage", "2ème tour de repêchage", "Match pour la 3ème place"]
+
+     static func getWeightCategories(for ageCategory: String, gender: String, isOlympic: Bool) -> [String] {
+        let categoryType = isOlympic ? "olympic" : "regular"
+        
+        if let genderCategories = weightCategories[categoryType]?[gender],
+           let ageCategories = genderCategories[ageCategory] {
+            return ageCategories
+        }
+        
+        return []
+    }
 }

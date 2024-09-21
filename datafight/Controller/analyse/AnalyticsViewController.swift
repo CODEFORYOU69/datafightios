@@ -195,10 +195,7 @@
             contentView.addSubview(nameLabel)
             contentView.addSubview(visualizationTypeLabel)
 
-            // Configurez les contraintes pour nameLabel et visualizationTypeLabel
-            // ...
-
-            // Style des labels
+           
             nameLabel.font = UIFont.boldSystemFont(ofSize: 16)
             visualizationTypeLabel.font = UIFont.systemFont(ofSize: 14)
             visualizationTypeLabel.textColor = .gray
