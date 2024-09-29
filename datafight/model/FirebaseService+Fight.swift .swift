@@ -10,39 +10,45 @@
 import Firebase
 import FirebaseFirestore
 import FirebaseAuth
+import FirebaseStorage
+
 
 extension FirebaseService {
     // MARK: - Fight Methods
     func updateFight(_ fight: Fight, completion: @escaping (Result<Void, Error>) -> Void) {
-            guard let uid = Auth.auth().currentUser?.uid, uid == fight.creatorUserId else {
-                completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authorized"])))
-                return
-            }
+        guard let uid = Auth.auth().currentUser?.uid, uid == fight.creatorUserId else {
+            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Utilisateur non autorisé"])))
+            return
+        }
 
-            guard let fightId = fight.id else {
-                completion(.failure(NSError(domain: "FirebaseService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Fight ID is missing"])))
-                return
-            }
+        guard let fightId = fight.id else {
+            completion(.failure(NSError(domain: "FirebaseService", code: 1, userInfo: [NSLocalizedDescriptionKey: "ID du combat manquant"])))
+            return
+        }
 
-            if isConnected {
-                do {
-                    try db.collection("fights").document(fightId).setData(from: fight) { error in
-                        if let error = error {
-                            completion(.failure(error))
-                        } else {
-                            CoreDataManager.shared.saveFight(fight)
-                            completion(.success(()))
-                        }
-                    }
-                } catch {
-                    CoreDataManager.shared.saveFight(fight)
-                    completion(.failure(error))
-                }
+        var updateData: [String: Any] = [:]
+        
+        do {
+            updateData = try fight.asDictionary()
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        // Si fightResult existe, ajoutez-le séparément au dictionnaire
+        if let fightResult = fight.fightResult {
+            updateData["fightResult"] = fightResult.dictionary
+        }
+        
+        db.collection("fights").document(fightId).updateData(updateData) { error in
+            if let error = error {
+                completion(.failure(error))
             } else {
-                CoreDataManager.shared.saveFight(fight)
                 completion(.success(()))
             }
         }
+    }
+
 
     func getFightsForEvent(eventId: String, completion: @escaping (Result<[Fight], Error>) -> Void) {
         db.collection("fights")
@@ -69,6 +75,7 @@ extension FirebaseService {
         fightToSave.creatorUserId = uid
 
         if let id = fightToSave.id {
+            // Updating an existing fight
             do {
                 try db.collection("fights").document(id).setData(from: fightToSave) { error in
                     if let error = error {
@@ -78,24 +85,27 @@ extension FirebaseService {
                     }
                 }
             } catch {
-                completion(.failure(error)) // Gérer l'erreur si `setData(from:)` échoue
+                completion(.failure(error))
             }
         } else {
+            // Creating a new fight
             let newDocRef = db.collection("fights").document()
             fightToSave.id = newDocRef.documentID
-            do {
-                try newDocRef.setData(from: fightToSave) { error in
-                    if let error = error {
-                        completion(.failure(error))
-                    } else {
-                        completion(.success(newDocRef.documentID))
-                    }
+
+            // Since @DocumentID ignores the id during encoding, we need to include it manually
+            var fightData = try? Firestore.Encoder().encode(fightToSave)
+            fightData?["id"] = fightToSave.id  // Include the id in the data
+
+            newDocRef.setData(fightData ?? [:]) { error in
+                if let error = error {
+                    completion(.failure(error))
+                } else {
+                    completion(.success(newDocRef.documentID))
                 }
-            } catch {
-                completion(.failure(error)) // Gérer l'erreur si `setData(from:)` échoue
             }
         }
     }
+
 
 
     func getFights(completion: @escaping (Result<[Fight], Error>) -> Void) {
@@ -136,30 +146,219 @@ extension FirebaseService {
             }
         }
     }
-
-    // Fonction pour le chatbot: Récupérer les valeurs distinctes des attributs des combats
-    func fetchDistinctFightValues(for field: String, completion: @escaping (Result<[String], Error>) -> Void) {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
+    func deleteFight(_ fight: Fight, completion: @escaping (Result<Void, Error>) -> Void) {
+        guard let fightId = fight.id else {
+            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Fight ID is missing"])))
             return
         }
+        
+        let group = DispatchGroup()
+        var deletionError: Error?
+        
+        // 1. Delete associated rounds
+        group.enter()
+        deleteRoundsForFight(fightId: fightId) { error in
+            if let error = error {
+                deletionError = error
+            }
+            group.leave()
+        }
+        
+        // 2. Delete associated video document and storage file
+        group.enter()
+        deleteVideoForFight(fightId: fightId) { error in
+            if let error = error {
+                deletionError = error
+            }
+            group.leave()
+        }
+        
+        // 3. Remove fight ID from events
+        group.enter()
+        removeReferenceFromEvents(fightId: fightId) { error in
+            if let error = error {
+                deletionError = error
+            }
+            group.leave()
+        }
+        
+        // 4. Remove fight ID from fighters
+        group.enter()
+        removeReferenceFromFighters(fightId: fightId) { error in
+            if let error = error {
+                deletionError = error
+            }
+            group.leave()
+        }
+        
+        // 5. Delete fight document
+        group.enter()
+        db.collection("fights").document(fightId).delete { error in
+            if let error = error {
+                deletionError = error
+            }
+            group.leave()
+        }
+        
+        group.notify(queue: .main) {
+            if let error = deletionError {
+                completion(.failure(error))
+            } else {
+                completion(.success(()))
+            }
+        }
+    }
 
-        db.collection("fights")
-            .whereField("creatorUserId", isEqualTo: uid)
-            .getDocuments { (snapshot, error) in
-                if let error = error {
-                    completion(.failure(error))
-                } else if let snapshot = snapshot {
-                    var valuesSet = Set<String>()
-                    for document in snapshot.documents {
-                        if let value = document.data()[field] as? String {
-                            valuesSet.insert(value)
-                        }
+    private func deleteRoundsForFight(fightId: String, completion: @escaping (Error?) -> Void) {
+        db.collection("rounds").whereField("fightId", isEqualTo: fightId).getDocuments { [weak self] (snapshot, error) in
+            if let error = error {
+                completion(error)
+                return
+            }
+            
+            let group = DispatchGroup()
+            var deletionError: Error?
+            
+            for document in snapshot?.documents ?? [] {
+                group.enter()
+                self?.db.collection("rounds").document(document.documentID).delete { error in
+                    if let error = error {
+                        deletionError = error
                     }
-                    completion(.success(Array(valuesSet)))
-                } else {
-                    completion(.success([]))
+                    group.leave()
                 }
             }
+            
+            group.notify(queue: .main) {
+                completion(deletionError)
+            }
+        }
+    }
+
+    private func deleteVideoForFight(fightId: String, completion: @escaping (Error?) -> Void) {
+        db.collection("videos").whereField("fightId", isEqualTo: fightId).getDocuments { [weak self] (snapshot, error) in
+            if let error = error {
+                completion(error)
+                return
+            }
+            
+            if let videoDocument = snapshot?.documents.first {
+                let videoId = videoDocument.documentID
+                
+                // Delete video document
+                self?.db.collection("videos").document(videoId).delete { error in
+                    if let error = error {
+                        completion(error)
+                        return
+                    }
+                    
+                    // Delete video file from storage
+                    let storageRef = Storage.storage().reference().child("videos/\(videoId).mp4")
+                    storageRef.delete { error in
+                        completion(error)
+                    }
+                }
+            } else {
+                completion(nil)
+            }
+        }
+    }
+
+    private func removeReferenceFromEvents(fightId: String, completion: @escaping (Error?) -> Void) {
+        db.collection("events").whereField("fightIds", arrayContains: fightId).getDocuments { [weak self] (snapshot, error) in
+            if let error = error {
+                completion(error)
+                return
+            }
+            
+            let group = DispatchGroup()
+            var updateError: Error?
+            
+            for document in snapshot?.documents ?? [] {
+                group.enter()
+                self?.db.collection("events").document(document.documentID).updateData([
+                    "fightIds": FieldValue.arrayRemove([fightId])
+                ]) { error in
+                    if let error = error {
+                        updateError = error
+                    }
+                    group.leave()
+                }
+            }
+            
+            group.notify(queue: .main) {
+                completion(updateError)
+            }
+        }
+    }
+
+    private func removeReferenceFromFighters(fightId: String, completion: @escaping (Error?) -> Void) {
+        let group = DispatchGroup()
+        var updateError: Error?
+        
+        // Remove from blue fighter
+        group.enter()
+        db.collection("fighters").whereField("blueFightIds", arrayContains: fightId).getDocuments { [weak self] (snapshot, error) in
+            if let error = error {
+                updateError = error
+                group.leave()
+                return
+            }
+            
+            if let fighterDocument = snapshot?.documents.first {
+                self?.db.collection("fighters").document(fighterDocument.documentID).updateData([
+                    "blueFightIds": FieldValue.arrayRemove([fightId])
+                ]) { error in
+                    if let error = error {
+                        updateError = error
+                    }
+                    group.leave()
+                }
+            } else {
+                group.leave()
+            }
+        }
+        
+        // Remove from red fighter
+        group.enter()
+        db.collection("fighters").whereField("redFightIds", arrayContains: fightId).getDocuments { [weak self] (snapshot, error) in
+            if let error = error {
+                updateError = error
+                group.leave()
+                return
+            }
+            
+            if let fighterDocument = snapshot?.documents.first {
+                self?.db.collection("fighters").document(fighterDocument.documentID).updateData([
+                    "redFightIds": FieldValue.arrayRemove([fightId])
+                ]) { error in
+                    if let error = error {
+                        updateError = error
+                    }
+                    group.leave()
+                }
+            } else {
+                group.leave()
+            }
+        }
+        
+        group.notify(queue: .main) {
+            completion(updateError)
+        }
+    }
+   
+}
+extension FirebaseService {
+    func saveFightAsync(_ fight: Fight) async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
+            saveFight(fight) { result in
+                switch result {
+                case .success(let fightId):
+                    continuation.resume(returning: fightId)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
     }
 }

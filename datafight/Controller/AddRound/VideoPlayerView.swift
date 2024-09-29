@@ -30,7 +30,13 @@ class VideoPlayerView: UIView {
         playerLayer?.videoGravity = .resizeAspect
         layer.addSublayer(playerLayer!)
     }
-    
+    func cleanup() {
+           player?.pause()
+           player?.replaceCurrentItem(with: nil)
+           player = nil
+           playerLayer?.removeFromSuperlayer()
+           playerLayer = nil
+       }
     func loadVideo(url: URL) {
         let playerItem = AVPlayerItem(url: url)
         player?.replaceCurrentItem(with: playerItem)

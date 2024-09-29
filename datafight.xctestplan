@@ -1,0 +1,59 @@
+{
+  "configurations" : [
+    {
+      "id" : "BDF085FE-D27B-4A0D-828C-959902DF32C5",
+      "name" : "Test Scheme Action",
+      "options" : {
+        "environmentVariableEntries" : [
+          {
+            "key" : "IS_TESTING",
+            "value" : "YES"
+          }
+        ],
+        "targetForVariableExpansion" : {
+          "containerPath" : "container:datafight.xcodeproj",
+          "identifier" : "3E87E3242C56B94700D843E2",
+          "name" : "datafight"
+        }
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "commandLineArgumentEntries" : [
+      {
+        "argument" : ""
+      }
+    ],
+    "environmentVariableEntries" : [
+      {
+        "key" : "unit_tests",
+        "value" : "true"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:datafight.xcodeproj",
+      "identifier" : "3E87E3242C56B94700D843E2",
+      "name" : "datafight"
+    }
+  },
+  "testTargets" : [
+    {
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:datafight.xcodeproj",
+        "identifier" : "3E87E33A2C56B94900D843E2",
+        "name" : "datafightTests"
+      }
+    },
+    {
+      "enabled" : false,
+      "parallelizable" : true,
+      "target" : {
+        "containerPath" : "container:datafight.xcodeproj",
+        "identifier" : "3E87E3442C56B94900D843E2",
+        "name" : "datafightUITests"
+      }
+    }
+  ],
+  "version" : 1
+}

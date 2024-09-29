@@ -26,6 +26,15 @@ class FighterListViewController: UIViewController, UITableViewDataSource, UITabl
         setupNavigationBar()
         setupActivityIndicator()
         tableView.tableFooterView = UIView()
+        
+        // Set table view background color
+            tableView.backgroundColor = UIColor.systemBackground
+            
+            // Remove separator lines
+            tableView.separatorStyle = .none
+            
+            // Add some padding to the table view
+            tableView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
 
     }
     
@@ -35,9 +44,22 @@ class FighterListViewController: UIViewController, UITableViewDataSource, UITabl
     }
     
     private func setupActivityIndicator() {
-        view.addSubview(activityIndicator)
-        activityIndicator.center = view.center
+        view.addSubview(loadingView)
+        loadingView.addSubview(activityIndicator)
+        
+        NSLayoutConstraint.activate([
+            loadingView.topAnchor.constraint(equalTo: view.topAnchor),
+            loadingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            loadingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            loadingView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            
+            activityIndicator.centerXAnchor.constraint(equalTo: loadingView.centerXAnchor),
+            activityIndicator.centerYAnchor.constraint(equalTo: loadingView.centerYAnchor)
+        ])
+        
         activityIndicator.hidesWhenStopped = true
+        activityIndicator.color = .white
+        loadingView.isHidden = true
     }
     
     func setupTableView() {
@@ -61,9 +83,11 @@ class FighterListViewController: UIViewController, UITableViewDataSource, UITabl
     }
 
     func loadFighters() {
+        loadingView.isHidden = false
         activityIndicator.startAnimating()
         FirebaseService.shared.getFighters { [weak self] result in
             DispatchQueue.main.async {
+                self?.loadingView.isHidden = true
                 self?.activityIndicator.stopAnimating()
                 switch result {
                 case .success(let fighters):
@@ -77,6 +101,12 @@ class FighterListViewController: UIViewController, UITableViewDataSource, UITabl
         }
     }
     
+    private let loadingView: UIView = {
+        let view = UIView()
+        view.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
     private func showAlert(title: String, message: String) {
         let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
         alert.addAction(UIAlertAction(title: "OK", style: .default))
@@ -101,7 +131,7 @@ class FighterListViewController: UIViewController, UITableViewDataSource, UITabl
     // MARK: - UITableViewDelegate
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return FighterTableViewCell.preferredHeight
+        return FighterTableViewCell.preferredHeight + 20 // Add 20 points for spacing
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
@@ -109,7 +139,11 @@ class FighterListViewController: UIViewController, UITableViewDataSource, UITabl
            showFighterDetails(fighter)
            tableView.deselectRow(at: indexPath, animated: true)
        }
-
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.contentView.layer.masksToBounds = true
+        let radius = cell.contentView.layer.cornerRadius
+        cell.layer.shadowPath = UIBezierPath(roundedRect: cell.bounds, cornerRadius: radius).cgPath
+    }
        func showFighterDetails(_ fighter: Fighter) {
            let storyboard = UIStoryboard(name: "Main", bundle: nil)
            if let detailVC = storyboard.instantiateViewController(withIdentifier: "FighterDetailViewController") as? FighterDetailViewController {

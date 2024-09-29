@@ -18,43 +18,64 @@ class ActionPickerView: UIView {
     private var isSpinningKick: Bool?
     private var currentCategory: ActionCategory
     private var isIVRRequest: Bool // Indique si c'est une IVR Request
+    private let round: Round
+    private var chronoLabel: UILabel?
+
     
-    private var chronoTextField: UITextField?
-
-
+    private func formatTime(_ time: TimeInterval) -> String {
+        let minutes = Int(time) / 60
+        let seconds = Int(time) % 60
+        return String(format: "%02d:%02d", minutes, seconds)
+    }
     private func requestChronoTime() {
-        titleLabel.text = "Enter Remaining Time in Round"
+        titleLabel.text = "Select Remaining Time in Round"
         
-        let textField = UITextField()
-        textField.placeholder = "mm:ss"
-        textField.keyboardType = .numberPad
-        textField.borderStyle = .roundedRect
-        textField.textAlignment = .center
+        // Créer un UISlider
+        let slider = UISlider()
+        slider.minimumValue = 0
+        slider.maximumValue = Float(round.roundTime)
+        slider.value = Float(round.roundTime) / 2
+        slider.translatesAutoresizingMaskIntoConstraints = false
         
-        stackView.addArrangedSubview(textField)
+        // Créer un label pour afficher le temps sélectionné
+        let timeLabel = UILabel()
+        timeLabel.textAlignment = .center
+        timeLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
+        timeLabel.text = formatTime(TimeInterval(slider.value))
+        timeLabel.translatesAutoresizingMaskIntoConstraints = false
+        
+        // Ajouter un gestionnaire d'événements pour le slider
+        slider.addTarget(self, action: #selector(sliderValueChanged(_:)), for: .valueChanged)
+        
+        // Ajouter les vues au stackView
+        stackView.addArrangedSubview(timeLabel)
+        stackView.addArrangedSubview(slider)
         
         let confirmButton = UIButton(type: .system)
         confirmButton.setTitle("Confirm", for: .normal)
         confirmButton.addTarget(self, action: #selector(confirmChronoTime), for: .touchUpInside)
         stackView.addArrangedSubview(confirmButton)
         
-        self.chronoTextField = textField
+        self.chronoLabel = timeLabel
+    }
+
+    @objc private func sliderValueChanged(_ sender: UISlider) {
+        let selectedTime = TimeInterval(sender.value)
+        chronoLabel?.text = formatTime(selectedTime)
     }
 
     @objc private func confirmChronoTime() {
-        guard let timeString = chronoTextField?.text, !timeString.isEmpty else {
+        guard let timeString = chronoLabel?.text, !timeString.isEmpty else {
             print("Invalid time")
             return
         }
         
-        // Conversion du temps en TimeInterval
         let components = timeString.split(separator: ":")
         if components.count == 2, let minutes = Double(components[0]), let seconds = Double(components[1]) {
             let totalSeconds = (minutes * 60) + seconds
             action.chronoTimestamp = totalSeconds
             print("Chrono enregistré: \(totalSeconds) secondes")
             onActionComplete?(action)  // Action complète avec chrono
-
         } else {
             print("Format de temps incorrect")
         }
@@ -76,15 +97,15 @@ class ActionPickerView: UIView {
         case zone
     }
     
-    init(frame: CGRect, initialAction: Action, points: Int, isIVRRequest: Bool, onComplete: @escaping (Action?) -> Void, onCancel: @escaping () -> Void, onUndo: @escaping () -> Void) {
+    init(frame: CGRect, initialAction: Action, points: Int, isIVRRequest: Bool, round: Round, onComplete: @escaping (Action?) -> Void, onCancel: @escaping () -> Void, onUndo: @escaping () -> Void) {
         self.action = initialAction
         self.points = points
-        self.isIVRRequest = isIVRRequest // Initialisation de la nouvelle propriété
+        self.isIVRRequest = isIVRRequest
+        self.round = round // Ajouter cette ligne
         self.onActionComplete = onComplete
         self.onCancel = onCancel
         self.onUndo = onUndo
         self.currentCategory = isIVRRequest ? .zone : .selectFighter
-
         
         super.init(frame: frame)
         setupView()
@@ -95,64 +116,105 @@ class ActionPickerView: UIView {
     }
     
     private func setupView() {
-        backgroundColor = .systemBackground
+        // Configuration du fond
+        backgroundColor = UIColor.systemBackground.withAlphaComponent(0.9)
+        layer.cornerRadius = 20
+        layer.masksToBounds = false
         
+        // Ajout d'ombre
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOffset = CGSize(width: 0, height: 5)
+        layer.shadowRadius = 10
+        layer.shadowOpacity = 0.3
+        
+        // Ajout d'une bordure
+        layer.borderWidth = 1
+        layer.borderColor = UIColor.systemGray4.cgColor
+
+        // Configuration du titre
         titleLabel = UILabel()
         titleLabel.textAlignment = .center
-        titleLabel.font = UIFont.boldSystemFont(ofSize: 20)
+        titleLabel.font = UIFont.boldSystemFont(ofSize: 24)
+        titleLabel.textColor = .label
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         addSubview(titleLabel)
-        
+
+        // Configuration du stackView
         stackView = UIStackView()
         stackView.axis = .vertical
-        stackView.spacing = 10
+        stackView.spacing = 15
         stackView.distribution = .fillEqually
         stackView.translatesAutoresizingMaskIntoConstraints = false
         addSubview(stackView)
-        
-        let cancelButton = UIButton(type: .system)
-        cancelButton.setTitle("Cancel", for: .normal)
-        cancelButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-        cancelButton.backgroundColor = .systemRed
-        cancelButton.layer.cornerRadius = 10
-        cancelButton.translatesAutoresizingMaskIntoConstraints = false
+
+        // Configuration des boutons
+        let cancelButton = createButton(title: "Cancel", color: .systemRed)
         cancelButton.addTarget(self, action: #selector(cancelButtonTapped), for: .touchUpInside)
-        addSubview(cancelButton)
-        
-        let undoButton = UIButton(type: .system)
-        undoButton.setTitle("Undo", for: .normal)
-        undoButton.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-        undoButton.backgroundColor = .systemYellow
-        undoButton.layer.cornerRadius = 10
-        undoButton.translatesAutoresizingMaskIntoConstraints = false
+
+        let undoButton = createButton(title: "Undo", color: .systemYellow)
         undoButton.addTarget(self, action: #selector(undoButtonTapped), for: .touchUpInside)
-        addSubview(undoButton)
-        
+
+        // Ajout des contraintes
         NSLayoutConstraint.activate([
-            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 20),
-            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor),
-            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor),
-            
-            stackView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 20),
+            titleLabel.topAnchor.constraint(equalTo: topAnchor, constant: 30),
+            titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
+            titleLabel.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
+
+            stackView.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 30),
             stackView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
             stackView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            
+
             cancelButton.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 20),
-            cancelButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20),
-            cancelButton.widthAnchor.constraint(equalToConstant: 100),
+            cancelButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -30),
+            cancelButton.widthAnchor.constraint(equalToConstant: 120),
             cancelButton.heightAnchor.constraint(equalToConstant: 50),
-            
+
             undoButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -20),
-            undoButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -20),
-            undoButton.widthAnchor.constraint(equalToConstant: 100),
+            undoButton.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -30),
+            undoButton.widthAnchor.constraint(equalToConstant: 120),
             undoButton.heightAnchor.constraint(equalToConstant: 50),
-            
-            stackView.bottomAnchor.constraint(lessThanOrEqualTo: cancelButton.topAnchor, constant: -20)
+
+            stackView.bottomAnchor.constraint(lessThanOrEqualTo: cancelButton.topAnchor, constant: -30)
         ])
-        
+
         updateForCurrentCategory()
     }
-    
+
+    private func createButton(title: String, color: UIColor) -> UIButton {
+        let button = UIButton(type: .system)
+        button.setTitle(title, for: .normal)
+        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        button.backgroundColor = color
+        button.setTitleColor(.white, for: .normal)
+        button.layer.cornerRadius = 15
+        button.translatesAutoresizingMaskIntoConstraints = false
+        addSubview(button)
+        return button
+    }
+
+    private func addButtons(options: [String], actionHandler: @escaping (Int) -> Void) {
+        for (index, option) in options.enumerated() {
+            let button = UIButton(type: .system)
+            button.setTitle(option, for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 18, weight: .medium)
+            button.layer.cornerRadius = 15
+            button.backgroundColor = .systemGray6
+            button.setTitleColor(.label, for: .normal)
+            button.heightAnchor.constraint(equalToConstant: 60).isActive = true
+            button.tag = index
+            button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
+            
+            // Ajout d'ombre au bouton
+            button.layer.shadowColor = UIColor.black.cgColor
+            button.layer.shadowOffset = CGSize(width: 0, height: 3)
+            button.layer.shadowRadius = 5
+            button.layer.shadowOpacity = 0.1
+            button.layer.masksToBounds = false
+            
+            stackView.addArrangedSubview(button)
+        }
+        self.buttonActionHandler = actionHandler
+    }
     @objc private func cancelButtonTapped() {
         onCancel?()
     }
@@ -167,20 +229,7 @@ class ActionPickerView: UIView {
         }
     }
     
-    private func addButtons(options: [String], actionHandler: @escaping (Int) -> Void) {
-        for (index, option) in options.enumerated() {
-            let button = UIButton(type: .system)
-            button.setTitle(option, for: .normal)
-            button.titleLabel?.font = UIFont.systemFont(ofSize: 18)
-            button.layer.cornerRadius = 10
-            button.backgroundColor = .systemGray6
-            button.heightAnchor.constraint(equalToConstant: 50).isActive = true
-            button.tag = index
-            button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
-            stackView.addArrangedSubview(button)
-        }
-        self.buttonActionHandler = actionHandler
-    }
+   
     
     private var buttonActionHandler: ((Int) -> Void)?
     

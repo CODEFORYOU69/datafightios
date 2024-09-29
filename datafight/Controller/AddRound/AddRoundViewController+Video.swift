@@ -11,10 +11,12 @@ import AVKit
 extension AddRoundViewController {
     
     func uploadVideo(videoURL: URL) {
-        guard let fight = fight else { return }
-        
-        progressView.isHidden = false
-        
+        guard let fight = fight else {
+            print("Error: No fight object available")
+            return
+        }
+
+        print("Starting video upload process")
         FirebaseService.shared.uploadVideo(for: fight, videoURL: videoURL, progressHandler: { [weak self] progress in
             DispatchQueue.main.async {
                 self?.progressView.setProgress(Float(progress), animated: true)
@@ -22,18 +24,18 @@ extension AddRoundViewController {
         }) { [weak self] result in
             DispatchQueue.main.async {
                 self?.progressView.isHidden = true
-            }
-            
-            switch result {
-            case .success(let video):
-                print("Video uploaded successfully: \(video.url)")
-                if let videoURL = URL(string: video.url) {
-                    self?.setupVideoPlayer(with: videoURL)
-                    self?.setChronoDuration(video.duration)
+                
+                switch result {
+                case .success(let video):
+                    print("Video uploaded successfully: \(video.url)")
+                    if let videoURL = URL(string: video.url) {
+                        self?.setupVideoPlayer(with: videoURL)
+                        self?.setChronoDuration(video.duration)
+                    }
+                case .failure(let error):
+                    print("Failed to upload video: \(error.localizedDescription)")
+                    self?.showAlert(title: "Upload Error", message: "Failed to upload video: \(error.localizedDescription)")
                 }
-            case .failure(let error):
-                print("Failed to upload video: \(error.localizedDescription)")
-                self?.showAlert(title: "Upload Error", message: "Failed to upload video.")
             }
         }
     }
@@ -74,12 +76,15 @@ extension AddRoundViewController {
    
 
     func startTimerAndVideo() {
-
-        // Démarrer la vidéo
-        playVideo()
-        updateVideoProgress()
-
-    }
+          // Start the video
+          playVideo()
+          
+          // Start the timer
+          startTimer()
+          
+          // Update video progress
+          updateVideoProgress()
+      }
     func updateVideoProgress() {
         guard let player = videoPlayerView.player else { return }
 

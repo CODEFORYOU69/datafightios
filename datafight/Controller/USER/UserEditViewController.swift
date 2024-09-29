@@ -12,10 +12,9 @@ import Firebase
 
 class UserEditViewController: UIViewController {
     
-    var isNewUser: Bool = false
-    var selectedCountryCode: String?
 
-    
+
+    @IBOutlet weak var contentView: UIView!
     @IBOutlet weak var profileImageView: UIImageView!
     @IBOutlet weak var firstNameTextField: UITextField!
     @IBOutlet weak var lastNameTextField: UITextField!
@@ -27,49 +26,79 @@ class UserEditViewController: UIViewController {
     var user: User?
     let countryPicker = CountryPickerView()
     let imagePicker = UIImagePickerController()
+    var isNewUser: Bool = false
+    var selectedCountryCode: String?
     
     override func viewDidLoad() {
             super.viewDidLoad()
             setupUI()
             setupCountryPicker()
             setupImagePicker()
-        setupNavigationBar()
+            setupNavigationBar()
 
             
             if isNewUser {
                 navigationItem.hidesBackButton = true
-                // Optionnel : Ajouter un message de bienvenue ou des instructions pour le nouvel utilisateur
+
             }
         }
     
 
     func setupNavigationBar() {
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .plain, target: self, action: #selector(saveTapped))
+        navigationItem.rightBarButtonItem?.tintColor = .systemBlue
+
     }
     func setupUI() {
-        guard let user = user else { return }
-        
-        firstNameTextField.text = user.firstName
-        lastNameTextField.text = user.lastName
-        teamNameTextField.text = user.teamName
-        roleTextField.text = user.role
-        countryButton.setTitle(user.country, for: .normal)
-        
-        // Gestion de la date de naissance
-        if let dateOfBirth = user.dateOfBirth {
-            dateOfBirthPicker.date = dateOfBirth
-        } else {
-            // Définir une date par défaut si dateOfBirth est nil
-            // Par exemple, la date actuelle ou une autre date appropriée
-            dateOfBirthPicker.date = Date()
+            view.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.97, alpha: 1.0)
+            
+            // Setup content view
+            contentView.backgroundColor = .white
+            contentView.layer.cornerRadius = 15
+            contentView.layer.shadowColor = UIColor.black.cgColor
+            contentView.layer.shadowOffset = CGSize(width: 0, height: 2)
+            contentView.layer.shadowOpacity = 0.1
+            contentView.layer.shadowRadius = 10
+            
+            // Setup profile image
+            profileImageView.layer.cornerRadius = profileImageView.frame.height / 2
+            profileImageView.clipsToBounds = true
+            profileImageView.layer.borderWidth = 3
+            profileImageView.layer.borderColor = UIColor.white.cgColor
+            
+            // Setup text fields
+            [firstNameTextField, lastNameTextField, roleTextField, teamNameTextField].forEach { textField in
+                textField?.borderStyle = .roundedRect
+                textField?.font = UIFont.systemFont(ofSize: 16)
+            }
+            
+            // Setup country button
+            countryButton.layer.cornerRadius = 5
+            countryButton.backgroundColor = .systemGray6
+            
+            // Setup date picker
+            dateOfBirthPicker.datePickerMode = .date
+            
+            // Populate fields if user exists
+            if let user = user {
+                firstNameTextField.text = user.firstName
+                lastNameTextField.text = user.lastName
+                teamNameTextField.text = user.teamName
+                roleTextField.text = user.role
+                countryButton.setTitle(user.country, for: .normal)
+                selectedCountryCode = user.country
+                
+                if let dateOfBirth = user.dateOfBirth {
+                    dateOfBirthPicker.date = dateOfBirth
+                }
+                
+                if let imageUrlString = user.profileImageURL, let imageUrl = URL(string: imageUrlString) {
+                    profileImageView.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder_profile"))
+                } else {
+                    profileImageView.image = UIImage(named: "placeholder_profile")
+                }
+            }
         }
-        
-        if let imageUrlString = user.profileImageURL, let imageUrl = URL(string: imageUrlString) {
-            profileImageView.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder_profile"))
-        } else {
-            profileImageView.image = UIImage(named: "placeholder_profile")
-        }
-    }
     
     func setupCountryPicker() {
         countryPicker.delegate = self
@@ -82,40 +111,37 @@ class UserEditViewController: UIViewController {
     }
     
     @IBAction func changeProfileImageTapped(_ sender: Any) {
-        let alertController = UIAlertController(title: "Changer la photo de profil", message: nil, preferredStyle: .actionSheet)
-        
-        if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            let cameraAction = UIAlertAction(title: "Prendre une photo", style: .default) { [weak self] _ in
-                self?.presentImagePicker(sourceType: .camera)
-            }
-            alertController.addAction(cameraAction)
-        }
-        
-        let galleryAction = UIAlertAction(title: "Choisir depuis la galerie", style: .default) { [weak self] _ in
-            self?.presentImagePicker(sourceType: .photoLibrary)
-        }
-        alertController.addAction(galleryAction)
-        
-        let cancelAction = UIAlertAction(title: "Annuler", style: .cancel, handler: nil)
-        alertController.addAction(cancelAction)
-        
-        // Configuration pour iPad
-        if let popoverController = alertController.popoverPresentationController {
-            // Si le bouton qui a déclenché cette action est accessible
-            if let button = sender as? UIView {
-                popoverController.sourceView = button
-                popoverController.sourceRect = button.bounds
-            } else {
-                // Sinon, utilisez le centre de la vue principale
-                popoverController.sourceView = self.view
-                popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
-            }
-            popoverController.permittedArrowDirections = [.up, .down, .left, .right]
-        }
-        
-        present(alertController, animated: true)
-    }
-
+           let alertController = UIAlertController(title: "Change Profile Picture", message: nil, preferredStyle: .actionSheet)
+           
+           if UIImagePickerController.isSourceTypeAvailable(.camera) {
+               let cameraAction = UIAlertAction(title: "Take a Photo", style: .default) { [weak self] _ in
+                   self?.presentImagePicker(sourceType: .camera)
+               }
+               alertController.addAction(cameraAction)
+           }
+           
+           let galleryAction = UIAlertAction(title: "Choose from Gallery", style: .default) { [weak self] _ in
+               self?.presentImagePicker(sourceType: .photoLibrary)
+           }
+           alertController.addAction(galleryAction)
+           
+           let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+           alertController.addAction(cancelAction)
+           
+           // iPad configuration
+           if let popoverController = alertController.popoverPresentationController {
+               if let button = sender as? UIView {
+                   popoverController.sourceView = button
+                   popoverController.sourceRect = button.bounds
+               } else {
+                   popoverController.sourceView = self.view
+                   popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
+               }
+               popoverController.permittedArrowDirections = [.up, .down, .left, .right]
+           }
+           
+           present(alertController, animated: true)
+       }
     private func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
         if sourceType == .photoLibrary {
             checkPhotoLibraryPermission { [weak self] granted in

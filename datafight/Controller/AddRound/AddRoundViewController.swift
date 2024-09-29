@@ -46,6 +46,58 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
     @IBOutlet weak var IconActionRegistered: UIView!
     @IBOutlet weak var videoPlayerContainerView: UIView!
     @IBOutlet weak var videoProgressView: UIProgressView!
+    
+    @IBOutlet weak var undoButton: UIButton!
+    
+    @IBOutlet weak var endRoundButton: UIButton!
+    @IBOutlet weak var setTime: UIButton!
+    
+    @IBOutlet weak var backwardButton: UIButton!
+    @IBOutlet weak var forwardButton: UIButton!
+    func styleButtons() {
+        let buttons: [UIButton] = [
+            blueIvr,
+            redIvr,
+            undoButton,
+            setTime,
+            forwardButton,
+            backwardButton,
+            endRoundButton
+            
+            // Ajoutez ici tous les autres boutons que vous voulez styliser
+        ]
+        
+        for button in buttons {
+            styleButton(button)
+        }
+    }
+    
+    func styleButton(_ button: UIButton) {
+        // Bords arrondis
+        button.layer.cornerRadius = 10 // Ajustez cette valeur pour plus ou moins d'arrondi
+        button.clipsToBounds = true
+        
+        // Ombrage
+        button.layer.shadowColor = UIColor.black.cgColor
+        button.layer.shadowOffset = CGSize(width: 0, height: 2)
+        button.layer.shadowRadius = 4
+        button.layer.shadowOpacity = 0.3
+        button.layer.masksToBounds = true
+        
+        // Optionnel : Ajout d'une bordure
+        button.layer.borderWidth = 1
+        button.layer.borderColor = button.titleColor(for: .normal)?.cgColor
+        
+        // Optionnel : Ajout d'un dégradé de couleur
+        let gradientLayer = CAGradientLayer()
+       
+        gradientLayer.cornerRadius = 10 // Même valeur que le cornerRadius du bouton
+        
+        button.layer.insertSublayer(gradientLayer, at: 0)
+        
+        // Ajuster la couleur du texte pour un meilleur contraste
+        button.setTitleColor(.white, for: .normal)
+    }
     @IBAction func endRoundButtonTapped(_ sender: UIButton) {
         endRound()
     }
@@ -114,44 +166,55 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
     var videoPlayerView: VideoPlayerView!
     var videoTimer: Timer?
     var rounds: [Round] = []
-
+    
     
     
     var isAlertPresented = false
-
+    
     func presentAlert(_ alertController: UIAlertController) {
-           guard !isAlertPresented else {
-               print("An alert is already presented, skipping this one.")
-               return
-           }
-           
-           isAlertPresented = true
-           present(alertController, animated: true) {
-               self.isAlertPresented = false
-           }
-       }
+        guard !isAlertPresented else {
+            print("An alert is already presented, skipping this one.")
+            return
+        }
+        
+        isAlertPresented = true
+        present(alertController, animated: true) {
+            self.isAlertPresented = false
+        }
+    }
     
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         setupVideoPlayer()
-
+        
         
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        pauseVideo()
+        stopVideo()
+        cleanupVideoResources()
         
     }
     
-    func updateRoundNumberLabel() {
+    func stopVideo() {
+        videoPlayerView.player?.pause()
+        videoPlayerView.player?.replaceCurrentItem(with: nil)
+    }
+    
+    func updateRoundWinIndicators() {
+        guard let fight = fight else { return }
+        
+        let blueWins = rounds.filter { $0.roundWinner == fight.blueFighterId }.count
+        let redWins = rounds.filter { $0.roundWinner == fight.redFighterId }.count
+        
         DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.roundNumberLabel.text = "\(self.currentRoundNumber)"
+            self?.bluewinningroundlabel.text = "\(blueWins)"
+            self?.redwinningroundlabel.text = "\(redWins)"
         }
     }
-
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -161,16 +224,22 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
         setupZoneGestures()
         setupProgressView()
         setCurrentRoundNumber()
-        updateRoundNumberLabel()
         manageScores()
-        print("Fight: \(String(describing: fight))")
-
+        styleButtons()
+        
     }
     
+   
     
+ 
+    
+    func cleanupVideoResources() {
+        videoPlayerView.cleanup()
+        videoPlayerView = nil
+    }
     func initializeRound(with roundTime: Int, completion: @escaping () -> Void) {
         print("Fight data: \(String(describing: fight))")
-
+        
         guard let fight = fight else {
             print("Error: No fight found")
             completion()
@@ -195,6 +264,7 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
                 self.currentRound = Round(
                     id: nil,
                     fightId: fight.id ?? "",
+                    creatorUserId: fight.creatorUserId,
                     roundNumber: nextRoundNumber,
                     chronoDuration: 0,
                     duration: 0,
@@ -215,7 +285,9 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
                     self.updateVideoRoundTimestamps(roundNumber: nextRoundNumber, startTime: newStartTime)
                 }
                 
-
+                // Mettre à jour les indicateurs de victoires de round ici
+                self.updateRoundWinIndicators()
+                
                 completion()
             }
         }
@@ -223,26 +295,26 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
     func requestNewRoundStartTime(lastEndTime: TimeInterval, completion: @escaping (TimeInterval) -> Void) {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-
+            
             let alertController = UIAlertController(
                 title: "New Round Start Time",
                 message: "Enter the start time for the new round (in seconds):\nLast round ended at: \(lastEndTime) seconds",
                 preferredStyle: .alert
             )
-
+            
             alertController.addTextField { textField in
                 textField.placeholder = "Start Time (seconds)"
                 textField.keyboardType = .decimalPad
                 textField.text = String(lastEndTime)
             }
-
+            
             let confirmAction = UIAlertAction(title: "OK", style: .default) { _ in
                 let newStartTime = TimeInterval(alertController.textFields?.first?.text ?? "") ?? lastEndTime
                 completion(newStartTime)
             }
-
+            
             alertController.addAction(confirmAction)
-
+            
             // Présenter le UIAlertController uniquement si la vue est visible
             if self.isViewLoaded && self.view.window != nil {
                 self.present(alertController, animated: true, completion: nil)
@@ -251,8 +323,8 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
             }
         }
     }
-
-
+    
+    
     func checkForVideo() {
         guard let fight = fight else {
             print("Error: No fight found")
@@ -269,13 +341,13 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
             }
         }
     }
-
+    
     func setupVideoPlayer(with url: URL) {
         guard videoPlayerView != nil else {
             print("Error: setup videoPlayerView is nil")
             return
         }
-
+        
         print("Video found, setting up video player.")
         videoPlayerView.loadVideo(url: url)
         
@@ -302,14 +374,14 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
             }
         }
     }
-
+    
     func updateVideoRoundTimestamps(roundNumber: Int, startTime: TimeInterval) {
         print("Updating round video timestamps for round \(roundNumber) with start time \(startTime)")
-
+        
         guard let fight = fight else {
-               print("Error: Missing fight or video ID")
-               return
-           }
+            print("Error: Missing fight or video ID")
+            return
+        }
         FirebaseService.shared.updateVideoRoundTimestamps(for: fight, roundNumber: roundNumber, startTime: startTime) { result in
             switch result {
             case .success:
@@ -352,31 +424,49 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
     func requestRoundTime() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
-
-            let alertController = UIAlertController(title: "Round Duration", message: "Enter the duration of the round (in minutes):", preferredStyle: .alert)
-
-            alertController.addTextField { textField in
-                textField.placeholder = "Minutes"
-                textField.keyboardType = .numberPad
-            }
-
-            let confirmAction = UIAlertAction(title: "OK", style: .default) { _ in
-                if let minutesString = alertController.textFields?.first?.text,
-                   let minutes = Int(minutesString) {
-                    // Convertir les minutes en secondes pour roundTime
-                    let roundTimeInSeconds = minutes * 60
-                    self.initializeRound(with: roundTimeInSeconds) {
-                       
-                    }
-                } else {
-                    // Si aucune valeur n'est entrée, répéter la demande
-                    self.requestRoundTime()
+            
+            let alertController = UIAlertController(title: "Round Duration", message: "Select the duration of the round:", preferredStyle: .alert)
+            
+            let segmentedControl = UISegmentedControl(items: ["1:00", "1:30", "2:00"])
+            segmentedControl.selectedSegmentIndex = 2  // Set 2:00 as default
+            segmentedControl.translatesAutoresizingMaskIntoConstraints = false
+            
+            alertController.view.addSubview(segmentedControl)
+            
+            NSLayoutConstraint.activate([
+                segmentedControl.topAnchor.constraint(equalTo: alertController.view.topAnchor, constant: 50),
+                segmentedControl.leadingAnchor.constraint(equalTo: alertController.view.leadingAnchor, constant: 20),
+                segmentedControl.trailingAnchor.constraint(equalTo: alertController.view.trailingAnchor, constant: -20),
+                segmentedControl.heightAnchor.constraint(equalToConstant: 30)
+            ])
+            
+            let confirmAction = UIAlertAction(title: "OK", style: .default) { [weak self] _ in
+                guard let self = self else { return }
+                
+                var roundTimeInSeconds: Int
+                switch segmentedControl.selectedSegmentIndex {
+                case 0:
+                    roundTimeInSeconds = 60  // 1 minute
+                case 1:
+                    roundTimeInSeconds = 90  // 1 minute 30 seconds
+                case 2:
+                    roundTimeInSeconds = 120 // 2 minutes
+                default:
+                    roundTimeInSeconds = 120 // Default to 2 minutes
+                }
+                
+                self.initializeRound(with: roundTimeInSeconds) {
+                    // Completion handler if needed
                 }
             }
-
+            
             alertController.addAction(confirmAction)
-
-            // Vérifier que la vue est visible avant de présenter l'alerte
+            
+            // Add a cancel action
+            let cancelAction = UIAlertAction(title: "Cancel", style: .cancel, handler: nil)
+            alertController.addAction(cancelAction)
+            
+            // Check if the view is visible before presenting the alert
             if self.isViewLoaded && self.view.window != nil {
                 self.present(alertController, animated: true, completion: nil)
             } else {
@@ -384,7 +474,6 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
             }
         }
     }
-
     func setupVideoPlayer() {
         // Créez le VideoPlayerView avec la même taille que la vue conteneur
         videoPlayerView = VideoPlayerView(frame: videoPlayerContainerView.bounds)
@@ -484,7 +573,6 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
             remainingTime = duration
             currentRoundNumber = 1
             currentRoundStartTime = 0
-            updateRoundNumberLabel()
             return
         }
         
@@ -519,7 +607,6 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
                 }
                 
                 DispatchQueue.main.async {
-                    self.updateRoundNumberLabel()
                     self.seekVideo(to: CMTime(seconds: self.currentRoundStartTime, preferredTimescale: 600))
                     self.updateChronoTime(fromVideoTime: self.currentRoundStartTime)
                 }
@@ -534,7 +621,6 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
                 print("Current round number set y to: \(self.currentRoundNumber)")
                 
                 DispatchQueue.main.async {
-                    self.updateRoundNumberLabel()
                     self.updateChronoTime(fromVideoTime: 0)
                 }
             }
@@ -556,7 +642,9 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
             frame: pickerFrame,
             initialAction: actionWithFighterIds,
             points: points,
-            isIVRRequest : isIVRRequest, // Définit IVR request à true pour une requête IVR
+            isIVRRequest : isIVRRequest,
+            round: currentRound!, // Utilisez l'opérateur de déballage forcé ici
+            // Définit IVR request à true pour une requête IVR
             
             onComplete: { [weak self] completedAction in
                 if let completedAction = completedAction {
@@ -570,8 +658,8 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
             onCancel: { [weak self] in
                 // Action à effectuer en cas d'annulation (par exemple, reprendre le timer)
                 self?.resumeTimer()
-                self?.actionPicker?.removeFromSuperview()
-                self?.actionPicker = nil
+                self?.hideActionPicker()
+                
             },
             onUndo: {
                 // Ajoutez ici une action à effectuer en cas d'annulation, même si c'est juste un log
@@ -580,21 +668,34 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
             
         )
         
-        actionPicker.center = view.center
-        actionPicker.layer.cornerRadius = 20
-        actionPicker.layer.masksToBounds = true
-        actionPicker.alpha = 0
-        
+        actionPicker.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(actionPicker)
         self.actionPicker = actionPicker
+        
+        NSLayoutConstraint.activate([
+            actionPicker.leadingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.leadingAnchor, constant: 20),
+            actionPicker.trailingAnchor.constraint(equalTo: view.safeAreaLayoutGuide.trailingAnchor, constant: -20),
+            actionPicker.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            actionPicker.heightAnchor.constraint(equalToConstant: view.bounds.height * 0.6)
+        ])
+        
+        actionPicker.alpha = 0
         
         UIView.animate(withDuration: 0.3) {
             actionPicker.alpha = 1
         }
+        
         addMarkerAtCurrentTime()
         printCurrentRoundActions()
-        
-        
+    }
+    
+    private func hideActionPicker() {
+        UIView.animate(withDuration: 0.3, animations: {
+            self.actionPicker?.alpha = 0
+        }) { _ in
+            self.actionPicker?.removeFromSuperview()
+            self.actionPicker = nil
+        }
     }
     
     func handleRoundEnd() {
@@ -611,14 +712,15 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
         
         let newRound = Round(
             fightId: fight.id ?? "",
+            creatorUserId: fight.creatorUserId ,
             roundNumber: (fight.roundIds?.count ?? 0) + 1,
             chronoDuration: chronoDuration,
             duration: chronoDuration - remainingTime,
             roundTime: roundTime,
             blueFighterId: fight.blueFighterId,
             redFighterId: fight.redFighterId,
-            actions: [], // Vous devrez implémenter la logique pour collecter les actions
-            videoReplays: [], // Idem pour les replays vidéo
+            actions: [],
+            videoReplays: [],
             isSynced: false
         )
         
@@ -640,9 +742,7 @@ extension AddRoundViewController: UIImagePickerControllerDelegate, UINavigationC
             return
         }
         
-        // Récupérer l'URL de la vidéo sélectionnée
         if let videoURL = info[.mediaURL] as? URL {
-            // Upload la vidéo sur Firebase
             uploadVideo(videoURL: videoURL)
         }
         

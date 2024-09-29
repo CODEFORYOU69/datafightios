@@ -239,6 +239,7 @@ extension AddRoundViewController {
             
             let newRound = Round(
                 fightId: fight.id ?? "",
+                creatorUserId: fight.creatorUserId,
                 roundNumber: nextRoundNumber,
                 chronoDuration: self.videoPlayerView.player?.currentItem?.duration.seconds ?? 0,
                 duration: 0,
@@ -261,18 +262,15 @@ extension AddRoundViewController {
             
             self.seekVideo(to: CMTime(seconds: newStartTime, preferredTimescale: 600))
             
-            // Mettez à jour les labels pour le nombre de rounds gagnés
-                   DispatchQueue.main.async {
-                       self.bluewinningroundlabel.text = "\(self.blueRoundWon)"
-                       self.redwinningroundlabel.text = "\(self.redRoundWon)"
-                   }
+            updateRoundWinIndicators()
+
             
             // Notify the user that the next round is ready
             let alertController = UIAlertController(title: "New Round", message: "Round \(nextRoundNumber) is ready to start.", preferredStyle: .alert)
             let startAction = UIAlertAction(title: "Start", style: .default) { _ in
                 print("Starting next round")
-                self.startTimer()
-                self.playVideo()
+                self.startTimerAndVideo()
+               
             }
             alertController.addAction(startAction)
             self.present(alertController, animated: true, completion: nil)

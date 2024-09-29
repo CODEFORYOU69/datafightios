@@ -1,12 +1,4 @@
-//
-    //  AddRoundViewController+fcalculate+round+fight.swift
-//  datafight
-//
-//  Created by younes ouasmi on 03/09/2024.
-//
-
-//
-//  AddRoundViewController+fcalculate+round+fight.swift
+//AddRoundViewController+fcalculate+round+fight.swift
 //  datafight
 //
 //  Created by younes ouasmi on 03/09/2024.
@@ -52,13 +44,14 @@ extension AddRoundViewController {
     }
     
     func updateFightWithResult(_ result: FightResult) {
-        print("Updating fight with result")
+        print("Updating fight with result: \(result)")
         guard var updatedFight = fight else {
             print("Error: No fight found")
             return
         }
         
         updatedFight.fightResult = result
+        print("Updated fight: \(updatedFight)")
         
         FirebaseService.shared.updateFight(updatedFight) { [weak self] updateResult in
             switch updateResult {
@@ -67,6 +60,7 @@ extension AddRoundViewController {
                 self?.showFightCompletion(result: result)
             case .failure(let error):
                 print("Failed to update fight: \(error.localizedDescription)")
+                print("Error details: \(error)")
                 self?.showAlert(title: "Error", message: "Failed to update fight: \(error.localizedDescription)")
             }
         }

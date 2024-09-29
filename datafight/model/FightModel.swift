@@ -37,7 +37,24 @@ struct Fight:Codable,  Identifiable{
         case videoId
         case videoURL
     }
-
+    func encode(to encoder: Encoder) throws {
+         var container = encoder.container(keyedBy: CodingKeys.self)
+         try container.encode(creatorUserId, forKey: .creatorUserId)
+         try container.encode(eventId, forKey: .eventId)
+         try container.encode(fightNumber, forKey: .fightNumber)
+         try container.encode(blueFighterId, forKey: .blueFighterId)
+         try container.encode(redFighterId, forKey: .redFighterId)
+         try container.encode(category, forKey: .category)
+         try container.encode(weightCategory, forKey: .weightCategory)
+         try container.encodeIfPresent(round, forKey: .round)
+         try container.encode(isOlympic, forKey: .isOlympic)
+         try container.encodeIfPresent(roundIds, forKey: .roundIds)
+         try container.encodeIfPresent(fightResult, forKey: .fightResult)
+         try container.encode(blueVideoReplayUsed, forKey: .blueVideoReplayUsed)
+         try container.encode(redVideoReplayUsed, forKey: .redVideoReplayUsed)
+         try container.encodeIfPresent(videoId, forKey: .videoId)
+         try container.encodeIfPresent(videoURL, forKey: .videoURL)
+     }
     init(id: String? = nil, creatorUserId: String, eventId: String, fightNumber: Int, blueFighterId: String, redFighterId: String, category: String, weightCategory: String, round: String, isOlympic: Bool, roundIds: [String]? = nil, fightResult: FightResult? = nil, blueVideoReplayUsed: Bool = false, redVideoReplayUsed: Bool = false, videoId: String? = nil, videoURL: String? = nil) {
         self.id = id
         self.creatorUserId = creatorUserId
@@ -72,7 +89,6 @@ struct FightResult: Codable, CustomStringConvertible {
         return "Gagnant : \(winner), Méthode : \(method), Score - Bleu : \(totalScore.blue), Rouge : \(totalScore.red)"
     }
 
-    
     enum CodingKeys: String, CodingKey {
         case winner
         case method
@@ -85,72 +101,21 @@ struct FightResult: Codable, CustomStringConvertible {
         self.totalScore = TotalScore(blue: totalScore.blue, red: totalScore.red)
     }
     
-    init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        winner = try container.decode(String.self, forKey: .winner)
-        method = try container.decode(String.self, forKey: .method)
-        totalScore = try container.decode(TotalScore.self, forKey: .totalScore)
-    }
+    // Pas besoin de redéfinir init(from:) et encode(to:) car Codable les génère automatiquement
     
-    func encode(to encoder: Encoder) throws {
-        var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(winner, forKey: .winner)
-        try container.encode(method, forKey: .method)
-        try container.encode(totalScore, forKey: .totalScore)
+    // Ajout d'une méthode pour convertir en dictionnaire
+    var dictionary: [String: Any] {
+        return [
+            "winner": winner,
+            "method": method,
+            "totalScore": [
+                "blue": totalScore.blue,
+                "red": totalScore.red
+            ]
+        ]
     }
 }
 
-extension Fight {
-    init(from entity: FightEntity) {
-        self.id = entity.id
-        self.creatorUserId = entity.creatorUserId ?? ""
-        self.eventId = entity.eventId ?? ""
-        self.fightNumber = Int(entity.fightNumber)
-        self.blueFighterId = entity.blueFighterId ?? ""
-        self.redFighterId = entity.redFighterId ?? ""
-        self.category = entity.category ?? ""
-        self.weightCategory = entity.weightCategory ?? ""
-        self.round = entity.round ?? ""
-        self.isOlympic = entity.isOlympic
-        self.roundIds = (entity.roundIds )?.components(separatedBy: ",")  // Convertir une chaîne en tableau
-        self.blueVideoReplayUsed = entity.blueVideoReplayUsed
-        self.redVideoReplayUsed = entity.redVideoReplayUsed
-        self.videoId = entity.videoId
-        self.videoURL = entity.videoURL
-
-        if let rounds = entity.rounds?.allObjects as? [RoundEntity] {
-            var blueRoundsWon = 0
-            var redRoundsWon = 0
-            var totalBlueScore = 0
-            var totalRedScore = 0
-            
-            for round in rounds {
-                if round.roundWinner == self.blueFighterId {
-                    blueRoundsWon += 1
-                } else if round.roundWinner == self.redFighterId {
-                    redRoundsWon += 1
-                }
-                totalBlueScore += Int(round.blueScore)
-                totalRedScore += Int(round.redScore)
-            }
-            
-            if blueRoundsWon >= 2 || redRoundsWon >= 2 {
-                let winner = blueRoundsWon > redRoundsWon ? self.blueFighterId : self.redFighterId
-                let method = "Points"
-                
-                self.fightResult = FightResult(
-                    winner: winner,
-                    method: method,
-                    totalScore: (blue: totalBlueScore, red: totalRedScore)
-                )
-            } else {
-                self.fightResult = nil
-            }
-        } else {
-            self.fightResult = nil
-        }
-    }
-}
 
 extension Fight {
     mutating func markVideoReplayAsUsed(for color: FighterColor) {
@@ -165,16 +130,3 @@ extension Fight {
         return color == .blue ? blueVideoReplayUsed : redVideoReplayUsed
     }
 }
-extension FightResult {
-    var dictionary: [String: Any] {
-        return [
-            "winner": winner,
-            "method": method,
-            "totalScore": [
-                "blue": totalScore.blue,
-                "red": totalScore.red
-            ]
-        ]
-    }
-}
-

@@ -30,6 +30,15 @@ class EventListViewController: UIViewController, UITableViewDataSource, UITableV
         setupTableView()
         setupNavigationBar()
         setupActivityIndicator()
+        
+        // Set table view background color
+           tableView.backgroundColor = UIColor.systemBackground
+           
+           // Remove separator lines
+           tableView.separatorStyle = .none
+           
+           // Add some padding to the table view
+           tableView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -103,9 +112,13 @@ class EventListViewController: UIViewController, UITableViewDataSource, UITableV
     // MARK: - UITableViewDelegate
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 120 // Ajustez cette valeur selon vos besoins
+        return 140
     }
-    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.contentView.layer.masksToBounds = true
+        let radius = cell.contentView.layer.cornerRadius
+        cell.layer.shadowPath = UIBezierPath(roundedRect: cell.bounds, cornerRadius: radius).cgPath
+    }
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let event = events[indexPath.row]
         let storyboard = UIStoryboard(name: "Main", bundle: nil)

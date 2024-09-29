@@ -175,6 +175,7 @@ extension AddRoundViewController {
                 initialAction: initialGamjeonAction,
                 points: 1,
                 isIVRRequest: true,
+                round: currentRound!, // Utilisez l'opérateur de déballage forcé ici
                 onComplete: { [weak self] completedAction in
                     guard let self = self else { return }
                     if let completedAction = completedAction {

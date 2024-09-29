@@ -3,6 +3,8 @@ import SDWebImage
 import FlagKit
 
 class FightTableViewCell: UITableViewCell {
+    @IBOutlet weak var containerView: UIView!
+
     @IBOutlet weak var blueFlagImageView: UIImageView!
     @IBOutlet weak var blueFighterImageView: UIImageView!
     @IBOutlet weak var blueFighterNameLabel: UILabel!
@@ -22,12 +24,9 @@ class FightTableViewCell: UITableViewCell {
         setupCellStyle()
         styleLabelsAndButtons()
         
-        blueFighterImageView.layer.zPosition = 1
-          redFighterImageView.layer.zPosition = 1
-          addRoundButton.layer.zPosition = 1
-          round1Label.layer.zPosition = 1
-          round2Label.layer.zPosition = 1
-          round3Label.layer.zPosition = 1
+        containerView.layer.cornerRadius = 10
+                containerView.layer.masksToBounds = true
+                containerView.backgroundColor = UIColor.systemGray6
     }
     
 
@@ -43,19 +42,17 @@ class FightTableViewCell: UITableViewCell {
         
         // Ajout de l'ombre
         backgroundView.layer.shadowColor = UIColor.black.cgColor
-        backgroundView.layer.shadowOffset = CGSize(width: 0, height: 2)
-        backgroundView.layer.shadowOpacity = 0.2
-        backgroundView.layer.shadowRadius = 4
+        backgroundView.layer.shadowOffset = CGSize(width: 0, height: 4)
+        backgroundView.layer.shadowOpacity = 0.1
+        backgroundView.layer.shadowRadius = 8
         
         // Ajout de la bordure et des coins arrondis
-        backgroundView.layer.cornerRadius = 10
+        backgroundView.layer.cornerRadius = 15
         backgroundView.layer.borderWidth = 1
-        backgroundView.layer.borderColor = UIColor.lightGray.cgColor
+        backgroundView.layer.borderColor = UIColor.lightGray.withAlphaComponent(0.3).cgColor
         
         // Assurez-vous que l'ombre est visible en dehors des limites de la vue
         backgroundView.layer.masksToBounds = false
-        
-
         
         // Ajout de la vue de fond à la cellule
         self.backgroundView = backgroundView
@@ -64,14 +61,21 @@ class FightTableViewCell: UITableViewCell {
         self.contentView.layer.zPosition = 1
         
         // Ajustez les marges du contenu pour qu'il s'aligne avec la vue de fond
-        self.contentView.layoutMargins = UIEdgeInsets(top: verticalPadding/2, left: 10, bottom: verticalPadding/2, right: 10)
+        self.contentView.layoutMargins = UIEdgeInsets(top: verticalPadding/2, left: 20, bottom: verticalPadding/2, right: 20)
         
-        // Rendre les images des combattants circulaires
-        blueFighterImageView.layer.cornerRadius = blueFighterImageView.frame.height / 2
-        blueFighterImageView.clipsToBounds = true
-
-        redFighterImageView.layer.cornerRadius = redFighterImageView.frame.height / 2
-        redFighterImageView.clipsToBounds = true
+        // Rendre les images des combattants circulaires avec une bordure
+        [blueFighterImageView, redFighterImageView].forEach { imageView in
+            imageView?.layer.cornerRadius = imageView!.frame.height / 2
+            imageView?.clipsToBounds = true
+            imageView?.layer.borderWidth = 2
+            imageView?.layer.borderColor = UIColor.white.cgColor
+        }
+        
+        // Ajouter un effet de profondeur au bouton "Add Round"
+        addRoundButton.layer.shadowColor = UIColor.black.cgColor
+        addRoundButton.layer.shadowOffset = CGSize(width: 0, height: 2)
+        addRoundButton.layer.shadowOpacity = 0.1
+        addRoundButton.layer.shadowRadius = 4
     }
     private func styleLabelsAndButtons() {
         // Style des labels
@@ -121,7 +125,7 @@ class FightTableViewCell: UITableViewCell {
         configureAddRoundButton(roundCount: fight.roundIds?.count ?? 0, fightResult: fight.fightResult)
     }
     
-     func configureRoundLabels(for rounds: [Round], roundIds: [String]) {
+    func configureRoundLabels(for rounds: [Round], roundIds: [String]) {
         let roundLabels = [round1Label, round2Label, round3Label]
 
         for (index, label) in roundLabels.enumerated() {
@@ -132,16 +136,27 @@ class FightTableViewCell: UITableViewCell {
                 if let round = rounds.first(where: { $0.id == roundIds[index] }) {
                     if let winnerId = round.roundWinner {
                         label?.textColor = (winnerId == round.blueFighterId) ? .blue : .red
+                        label?.font = UIFont.boldSystemFont(ofSize: 16) // Mettre en gras le label du round gagné
                     } else {
                         label?.textColor = .black
+                        label?.font = UIFont.systemFont(ofSize: 16)
                     }
                 } else {
                     label?.textColor = .black
+                    label?.font = UIFont.systemFont(ofSize: 16)
                 }
             } else {
                 label?.text = "R\(index + 1)"
                 label?.textColor = .lightGray
+                label?.font = UIFont.systemFont(ofSize: 16)
             }
+            
+            // Ajouter une ombre au texte pour le faire ressortir
+            label?.layer.shadowColor = UIColor.black.cgColor
+            label?.layer.shadowRadius = 1.0
+            label?.layer.shadowOpacity = 0.2
+            label?.layer.shadowOffset = CGSize(width: 1, height: 1)
+            label?.layer.masksToBounds = false
         }
     }
 

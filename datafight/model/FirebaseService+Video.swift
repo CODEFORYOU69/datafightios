@@ -19,10 +19,21 @@ extension FirebaseService {
 
     func uploadVideo(for fight: Fight, videoURL: URL, progressHandler: @escaping (Double) -> Void, completion: @escaping (Result<Video, Error>) -> Void) {
         let videoId = UUID().uuidString
-        let storageRef = storage.child("videos/\(videoId).mp4")
-
-        do {
-            let videoData = try Data(contentsOf: videoURL)
+           let storageRef = storage.child("videos/\(videoId).mp4")
+           
+           let fileManager = FileManager.default
+           let tempDirectoryURL = fileManager.temporaryDirectory
+           let tempFileURL = tempDirectoryURL.appendingPathComponent(videoId).appendingPathExtension("mp4")
+           
+           do {
+               try fileManager.copyItem(at: videoURL, to: tempFileURL)
+               
+               guard fileManager.fileExists(atPath: tempFileURL.path) else {
+                   completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Temp video file does not exist"])))
+                   return
+               }
+               
+               let videoData = try Data(contentsOf: tempFileURL)
 
             // Début de l'upload
             let uploadTask = storageRef.putData(videoData, metadata: nil)
@@ -77,11 +88,13 @@ extension FirebaseService {
             }
 
             // Gestion de l'échec de l'upload
-            uploadTask.observe(.failure) { snapshot in
-                if let error = snapshot.error {
-                    completion(.failure(error))
-                }
-            }
+               uploadTask.observe(.failure) { snapshot in
+                   if let error = snapshot.error as NSError? {
+                       print("Upload failed with error: \(error.localizedDescription)")
+                       print("Error code: \(error.code)")
+                       completion(.failure(error))
+                   }
+               }
         } catch {
             completion(.failure(error))
         }
@@ -117,27 +130,41 @@ extension FirebaseService {
     func updateVideoTimestamps(videoId: String, roundNumber: Int, startTimestamp: TimeInterval, endTimestamp: TimeInterval?, completion: @escaping (Result<Void, Error>) -> Void) {
         let videoRef = db.collection("videos").document(videoId)
         
-        var timestampData: [String: Any] = [
-            "roundNumber": roundNumber,
-            "start": startTimestamp
-        ]
-        
-        if let endTimestamp = endTimestamp {
-            timestampData["end"] = endTimestamp
-        }
-        
-        videoRef.updateData([
-            "roundTimestamps": FieldValue.arrayUnion([timestampData])
-        ]) { error in
+        videoRef.getDocument { (document, error) in
             if let error = error {
                 completion(.failure(error))
-            } else {
-                completion(.success(()))
+                return
+            }
+            
+            guard let document = document, document.exists, let data = document.data() else {
+                completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "Video not found"])))
+                return
+            }
+            
+            do {
+                var video = try Firestore.Decoder().decode(Video.self, from: data)
+                
+                // Update or add the round timestamp
+                video.updateOrAddRoundTimestamp(roundNumber: roundNumber, start: startTimestamp, end: endTimestamp)
+                
+                // Encode the updated video object
+                let updatedData = try Firestore.Encoder().encode(video)
+                
+                // Update the video document
+                videoRef.setData(updatedData, merge: true) { error in
+                    if let error = error {
+                        completion(.failure(error))
+                    } else {
+                        completion(.success(()))
+                    }
+                }
+            } catch {
+                completion(.failure(error))
             }
         }
     }
     func updateVideo(_ video: Video, completion: @escaping (Result<Void, Error>) -> Void) {
-        let videoId = video.id // Pas besoin de guard let si video.id est non-optionnel
+        let videoId = video.id
 
 
         do {

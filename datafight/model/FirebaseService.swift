@@ -1,73 +1,51 @@
-// FirebaseService.swift
-
 import Firebase
 import FirebaseFirestore
-
 import FirebaseStorage
 import UIKit
 import FirebaseAuth
 import Network
-import FirebaseFirestoreCombineSwift
 
 class FirebaseService {
     static let shared = FirebaseService()
-    let db = Firestore.firestore()
-    let storage = Storage.storage().reference()
+    let db: Firestore
+    let storage: StorageReference
     let monitor = NWPathMonitor()
     var isConnected = true
 
-    private init() {
-        startNetworkMonitoring()
+    static func configure() {
+        if ProcessInfo.processInfo.environment["IS_TESTING"] == "YES" {
+            print("Configuring Firebase for testing environment")
+            let settings = FirestoreSettings()
+            settings.host = "localhost:8080"
+            settings.cacheSettings = MemoryCacheSettings()
+            settings.isSSLEnabled = false
+            
+            Firestore.firestore().settings = settings
+            
+            Auth.auth().useEmulator(withHost: "localhost", port: 9099)
+            Storage.storage().useEmulator(withHost: "localhost", port: 9199)
+        } else {
+            print("Configuring Firebase for production environment")
+        }
+        
+        FirebaseApp.configure()
     }
 
-    private func startNetworkMonitoring() {
-        monitor.pathUpdateHandler = { [weak self] path in
-            self?.isConnected = path.status == .satisfied
-            if self?.isConnected == true {
-                self?.syncUnsyncedData()
-            }
+    private init() {
+        self.db = Firestore.firestore()
+        self.storage = Storage.storage().reference()
+        setupNetworkMonitoring()
+    }
+
+    private func setupNetworkMonitoring() {
+        monitor.pathUpdateHandler = { path in
+            self.isConnected = path.status == .satisfied
+            print("Network connection status: \(self.isConnected ? "Connected" : "Disconnected")")
         }
         let queue = DispatchQueue(label: "NetworkMonitor")
         monitor.start(queue: queue)
     }
 
-   
-    private func syncUnsyncedData() {
-        syncCachedRounds { result in
-            switch result {
-            case .success:
-                print("Successfully synced cached rounds")
-            case .failure(let error):
-                print("Failed to sync cached rounds: \(error.localizedDescription)")
-            }
-        }
-    }
-    func syncCachedRounds(completion: @escaping (Result<Void, Error>) -> Void) {
-        let unsyncedRounds = CoreDataManager.shared.getUnsyncedRounds()
-        let group = DispatchGroup()
-
-        for round in unsyncedRounds {
-            group.enter()
-            if let fight = CoreDataManager.shared.getFightForRound(round) {
-                saveRound(round, for: fight) { result in
-                    switch result {
-                    case .success:
-                        CoreDataManager.shared.markRoundAsSynced(id: round.id!, for: fight)
-                    case .failure(let error):
-                        print("Failed to sync round: \(error.localizedDescription)")
-                    }
-                    group.leave()
-                }
-            } else {
-                print("Failed to find fight for round: \(round.id ?? "unknown")")
-                group.leave()
-            }
-        }
-
-        group.notify(queue: .main) {
-            completion(.success(()))
-        }
-    }
     func getCurrentUserID() -> Result<String, Error> {
         if let uid = Auth.auth().currentUser?.uid {
             return .success(uid)
@@ -75,54 +53,6 @@ class FirebaseService {
             return .failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"]))
         }
     }
-
-    func fetchEntities<T: Codable>(ofType type: T.Type, from collection: String, filters: [Filter], completion: @escaping (Result<[T], Error>) -> Void) {
-            guard let userId = Auth.auth().currentUser?.uid else {
-                completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
-                return
-            }
-
-            var query: Query = db.collection(collection).whereField("creatorUserId", isEqualTo: userId)
-
-            for filter in filters {
-                query = applyFilter(query: query, filter: filter)
-            }
-
-            query.getDocuments { snapshot, error in
-                if let error = error {
-                    completion(.failure(error))
-                } else {
-                    let entities = snapshot?.documents.compactMap { document -> T? in
-                        do {
-                            let entity = try document.data(as: T.self)
-                            return entity
-                        } catch {
-                            print("Erreur lors du décodage de \(T.self): \(error)")
-                            return nil
-                        }
-                    } ?? []
-                    completion(.success(entities))
-                }
-            }
-        }
-
-        // Assurez-vous que la fonction `applyFilter` est correctement définie
-        private func applyFilter(query: Query, filter: Filter) -> Query {
-            switch filter.operation {
-            case .equalTo:
-                return query.whereField(filter.field, isEqualTo: filter.value)
-            case .notEqualTo:
-                return query.whereField(filter.field, isNotEqualTo: filter.value)
-            case .greaterThan:
-                return query.whereField(filter.field, isGreaterThan: filter.value)
-            case .lessThan:
-                return query.whereField(filter.field, isLessThan: filter.value)
-            case .contains:
-                return query.whereField(filter.field, arrayContains: filter.value)
-            }
-        }
-
-    
 }
 
 // Extensions pour l'encodage/décodage des objets
@@ -135,5 +65,3 @@ extension Encodable {
         return dictionary
     }
 }
-
-

@@ -69,11 +69,14 @@ extension FirebaseService {
 
             db.collection("users").document(uid).setData(userData, merge: true) { error in
                 if let error = error {
+                    print("Failed to update Firestore: \(error.localizedDescription)")
                     completion(.failure(error))
                 } else {
+                    print("User profile successfully updated in Firestore")
                     completion(.success(()))
                 }
             }
+
         case .failure(let error):
             completion(.failure(error))
         }

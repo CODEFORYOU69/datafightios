@@ -16,54 +16,37 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
    
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
-        guard let windowScene = (scene as? UIWindowScene) else { return }
+           guard let windowScene = (scene as? UIWindowScene) else { return }
+           window = UIWindow(windowScene: windowScene)
+           configureInitialViewController()
+           window?.makeKeyAndVisible()
+       }
 
-        let window = UIWindow(windowScene: windowScene)
-        self.window = window
-        
-        configureInitialViewController()
-        
-        window.makeKeyAndVisible()
-    }
+       func configureInitialViewController() {
+           let storyboard = UIStoryboard(name: "Main", bundle: nil)
+           
+           if Auth.auth().currentUser != nil {
+               // L'utilisateur est déjà connecté
+               if let mainTabBarController = storyboard.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
+                   window?.rootViewController = mainTabBarController
+               }
+           } else {
+               // L'utilisateur n'est pas connecté, on le dirige vers la page de login
+               if let loginViewController = storyboard.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
+                   let navigationController = UINavigationController(rootViewController: loginViewController)
+                   window?.rootViewController = navigationController
+               }
+           }
+       }
 
-    func configureInitialViewController() {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        
-        if Auth.auth().currentUser != nil {
-            // L'utilisateur est déjà connecté
-            if let mainViewController = storyboard.instantiateViewController(withIdentifier: "MainTabBarController") as? UITabBarController {
-                setRootViewController(mainViewController)
-            }
-        } else {
-            // L'utilisateur n'est pas connecté, on le dirige vers la page de login
-            if let loginViewController = storyboard.instantiateViewController(withIdentifier: "LoginViewController") as? LoginViewController {
-                let navigationController = UINavigationController(rootViewController: loginViewController)
-                setRootViewController(navigationController)
-            }
-        }
-    }
-
-    func setRootViewController(_ vc: UIViewController, animated: Bool = true) {
-        guard let window = self.window else { return }
-        window.rootViewController = vc
-        
-        if animated {
-            UIView.transition(with: window,
-                              duration: 0.3,
-                              options: .transitionCrossDissolve,
-                              animations: nil,
-                              completion: nil)
-        }
-    }
-
-    func logout() {
-        do {
-            try Auth.auth().signOut()
-            configureInitialViewController()
-        } catch {
-            print("Erreur lors de la déconnexion : \(error.localizedDescription)")
-        }
-    }
+       func logout() {
+           do {
+               try Auth.auth().signOut()
+               configureInitialViewController()
+           } catch {
+               print("Error during logout: \(error.localizedDescription)")
+           }
+       }
 
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.

@@ -19,6 +19,7 @@ enum EventType: String, Codable, CaseIterable {
     case g2 = "G2"
     case grandSlam = "Grand Slam"
     case grandPrix = "Grand Prix"
+    case olympicGame = "Olympic Game"
 }
         struct Event: Codable, Identifiable {
             @DocumentID var id: String?

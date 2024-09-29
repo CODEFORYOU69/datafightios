@@ -7,7 +7,7 @@
 import UIKit
 import FirebaseAuth
 
-class LoginViewController: UIViewController {
+class LoginViewController: UIViewController, UITextFieldDelegate {
 
     @IBOutlet weak var emailTextField: UITextField!
     @IBOutlet weak var passwordTextField: UITextField!
@@ -16,14 +16,31 @@ class LoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupTextFields()
+
 
         // Ajouter un geste de tap pour fermer le clavier
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(hideKeyboard))
         view.addGestureRecognizer(tapGesture)
     }
-
+    func setupTextFields() {
+         emailTextField.delegate = self
+         passwordTextField.delegate = self
+     }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == emailTextField {
+            passwordTextField.becomeFirstResponder()
+        } else if textField == passwordTextField {
+            textField.resignFirstResponder()
+            loginButtonTapped(textField)
+        }
+        return true
+    }
     @objc func hideKeyboard() {
-        view.endEditing(true)
+        DispatchQueue.main.async {
+            self.view.endEditing(true)
+        }
     }
 
     func setupUI() {
@@ -34,19 +51,27 @@ class LoginViewController: UIViewController {
     @IBAction func loginButtonTapped(_ sender: Any) {
         guard let email = emailTextField.text, !email.isEmpty,
               let password = passwordTextField.text, !password.isEmpty else {
-            showAlert(message: "Veuillez remplir tous les champs")
+            showAlert(message: "Please fill in all fields")
             return
         }
 
         Auth.auth().signIn(withEmail: email, password: password) { [weak self] authResult, error in
-            if let error = error {
-                self?.showAlert(message: "Erreur de connexion: \(error.localizedDescription)")
-            } else {
-                // Connexion réussie
-                self?.performSegue(withIdentifier: "showMainApp", sender: nil)
+            DispatchQueue.main.async {
+                if let error = error {
+                    self?.showAlert(message: "Login error: \(error.localizedDescription)")
+                } else {
+                    // Connexion réussie
+                    self?.handleSuccessfulLogin()
+                }
             }
         }
     }
+    private func handleSuccessfulLogin() {
+          // Utilisez SceneDelegate pour réinitialiser la racine de la navigation
+          if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
+              sceneDelegate.configureInitialViewController()
+          }
+      }
 
     func showAlert(message: String) {
         let alert = UIAlertController(title: nil, message: message, preferredStyle: .alert)

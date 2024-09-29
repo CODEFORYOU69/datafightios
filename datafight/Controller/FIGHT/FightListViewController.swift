@@ -18,25 +18,28 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
     var rounds: [String: [Round]] = [:]
     var selectedFight: Fight?
 
-    
+    private let activityIndicator = UIActivityIndicatorView(style: .large)
+
     override func viewDidLoad() {
         super.viewDidLoad()
         setupTableView()
         setupNavigationBar()
-        tableView.clipsToBounds = false  // Empêche la coupure des ombres
-        tableView.separatorStyle = .none
-    
-
-        print("FightListViewController viewDidLoad")
-        print("TableView frame: \(tableView.frame)")
-        print("TableView contentSize: \(tableView.contentSize)")
-        print("Current user ID: \(Auth.auth().currentUser?.uid ?? "No user")")
+        setupActivityIndicator()
+        
+        // Set table view background color
+        tableView.backgroundColor = UIColor.systemBackground
+        
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        print("FightListViewController viewWillAppear")
         loadFightsAndRelatedData()
+    }
+    
+    private func setupActivityIndicator() {
+        view.addSubview(activityIndicator)
+        activityIndicator.center = view.center
+        activityIndicator.hidesWhenStopped = true
     }
     
     func setupTableView() {
@@ -44,8 +47,7 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
         tableView.delegate = self
         tableView.register(UINib(nibName: "FightTableViewCell", bundle: nil), forCellReuseIdentifier: "FightCell")
         tableView.separatorStyle = .none
-        tableView.backgroundColor = .clear // ou la couleur de fond que vous préférez
-        print("TableView setup complete")
+            tableView.contentInset = UIEdgeInsets(top: 10, left: 0, bottom: 10, right: 0)
     }
     
     func setupNavigationBar() {
@@ -62,13 +64,17 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
     }
     
     func loadFightsAndRelatedData() {
+        activityIndicator.startAnimating()
+
         loadFights { [weak self] in
             self?.loadFightersAndEvents()
             self?.loadRounds()
         }
     }
     func loadRounds() {
-        for (index, fight) in fights.enumerated() {
+        let globalGroup = DispatchGroup()
+        
+        for (_, fight) in fights.enumerated() {
             guard let fightId = fight.id, let roundIds = fight.roundIds, !roundIds.isEmpty else {
                 print("No round IDs for fight: \(fight.id ?? "Unknown")")
                 continue
@@ -76,6 +82,7 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
 
             print("Loading rounds for fight: \(fightId), Round IDs: \(roundIds)")
 
+            globalGroup.enter()
             let group = DispatchGroup()
             var loadedRounds: [Round] = []
 
@@ -96,29 +103,26 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
             group.notify(queue: .main) { [weak self] in
                 self?.rounds[fightId] = loadedRounds.sorted { $0.roundNumber < $1.roundNumber }
                 print("Finished loading rounds for fight: \(fightId), Loaded rounds: \(loadedRounds.count)")
-
-                // Vérifiez si l'index de ce combat est encore visible dans la tableView
-                if let cell = self?.tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? FightTableViewCell {
-                    cell.configureRoundLabels(for: loadedRounds, roundIds: roundIds)
-                }
-
-                // Rechargez toute la tableView pour s'assurer que tout est à jour.
-                self?.tableView.reloadData()
+                globalGroup.leave()
             }
+        }
+        
+        globalGroup.notify(queue: .main) { [weak self] in
+            self?.tableView.reloadData()
+            print("All rounds loaded, reloading table view")
         }
     }
 
     func loadFights(completion: @escaping () -> Void) {
-        print("Starting loadFights")
         FirebaseService.shared.getFights { [weak self] result in
-            print("getFights completed")
             switch result {
             case .success(let fights):
-                print("Loaded \(fights.count) fights")
                 self?.fights = fights
                 completion()
             case .failure(let error):
                 print("Error loading fights: \(error.localizedDescription)")
+                self?.showAlert(title: "Error", message: "Unable to load fights: \(error.localizedDescription)")
+
                 completion()
             }
         }
@@ -128,8 +132,7 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
         let fighterIds = Set(fights.flatMap { [$0.blueFighterId, $0.redFighterId] })
         let eventIds = Set(fights.map { $0.eventId })
         
-        print("Loading \(fighterIds.count) fighters and \(eventIds.count) events")
-        
+
         let group = DispatchGroup()
         
         for fighterId in fighterIds {
@@ -165,6 +168,8 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
             print("Fighters loaded: \(self?.fighters.count ?? 0)")
             print("Events loaded: \(self?.events.count ?? 0)")
             self?.tableView.reloadData()
+            self?.activityIndicator.stopAnimating()
+
         }
     }
     
@@ -208,7 +213,31 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
             }
         }
     }
-    
+    func deleteFight(_ fight: Fight, at indexPath: IndexPath) {
+        let alert = UIAlertController(title: "Delete Fight", message: "Are you sure you want to delete this fight? This action cannot be undone.", preferredStyle: .alert)
+        
+        alert.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        alert.addAction(UIAlertAction(title: "Delete", style: .destructive, handler: { [weak self] _ in
+            self?.performDeletion(of: fight, at: indexPath)
+        }))
+        
+        present(alert, animated: true)
+    }
+
+    func performDeletion(of fight: Fight, at indexPath: IndexPath) {
+        FirebaseService.shared.deleteFight(fight) { [weak self] result in
+            switch result {
+            case .success:
+                DispatchQueue.main.async {
+                    self?.fights.remove(at: indexPath.row)
+                    self?.tableView.deleteRows(at: [indexPath], with: .fade)
+                }
+            case .failure(let error):
+                print("Failed to delete fight: \(error.localizedDescription)")
+                self?.showAlert(title: "Error", message: "Failed to delete fight: \(error.localizedDescription)")
+            }
+        }
+    }
     // MARK: - UITableViewDataSource
     
     func numberOfSections(in tableView: UITableView) -> Int {
@@ -219,9 +248,10 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
         return fights.count // Nombre total de combats
     }
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 10 // Espace en haut de la première cellule
+        return 20 // Espace en haut de la première cellule
     }
-
+    
+    
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let headerView = UIView()
         headerView.backgroundColor = .clear
@@ -229,7 +259,7 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
     }
 
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        return 10 // Espace en bas de la dernière cellule
+        return 20 // Espace en bas de la dernière cellule
     }
 
     func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
@@ -294,17 +324,32 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
     }
     
     // MARK: - UITableViewDelegate
-    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            let fight = fights[indexPath.row]
+            deleteFight(fight, at: indexPath)
+        }
+    }
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 180 // Ajustez cette valeur selon vos besoins
+        return 140 // Ajustez cette valeur selon vos besoins
     }
     
     
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        _ = fights[indexPath.row]
-        // Implémentez la logique pour afficher les détails du combat
-        // Par exemple :
-        // performSegue(withIdentifier: "showFightDetail", sender: fight)
+        let fight = fights[indexPath.row]
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let detailVC = storyboard.instantiateViewController(withIdentifier: "FightDetailViewController") as? FightDetailViewController {
+            detailVC.fight = fight
+            detailVC.rounds = rounds[fight.id ?? ""] ?? []
+            detailVC.fightResult = fight.fightResult
+            detailVC.blueFighter = fighters[fight.blueFighterId]
+            detailVC.redFighter = fighters[fight.redFighterId]
+            
+            // Présenter le contrôleur de vue modalement
+            detailVC.modalPresentationStyle = .fullScreen
+            present(detailVC, animated: true, completion: nil)
+        }
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }

@@ -18,6 +18,7 @@ import CountryPickerView
 
 class EventEditViewController: UIViewController {
 
+    @IBOutlet weak var contentView: UIView!
     @IBOutlet weak var eventImageView: UIImageView!
     @IBOutlet weak var chooseImageButton: UIButton!
     @IBOutlet weak var eventNameTextField: UITextField!
@@ -29,8 +30,6 @@ class EventEditViewController: UIViewController {
     var event: Event?
     let imagePicker = UIImagePickerController()
     let countryPicker = CountryPickerView()
-    
-    
     var selectedCountry: String?
 
     override func viewDidLoad() {
@@ -47,37 +46,66 @@ class EventEditViewController: UIViewController {
     }
 
     func setupUI() {
-        if let event = event {
-            eventNameTextField.text = event.eventName
-            if let index = EventType.allCases.firstIndex(of: event.eventType) {
-                eventTypePicker.selectRow(index, inComponent: 0, animated: false)
-            }
-
-            locationTextField.text = event.location
-            datePicker.date = event.date
-            selectedCountry = event.country
-            countryButton.setTitle(event.country, for: .normal)
-            
-            if let imageUrlString = event.imageURL, let imageUrl = URL(string: imageUrlString) {
-                eventImageView.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder_event"))
-            } else {
-                eventImageView.image = UIImage(named: "placeholder_event")
-            }
-        } else {
-            datePicker.date = Date()
-        }
-        
-        StyleGuide.applyTextFieldStyle(to: eventNameTextField)
-        StyleGuide.applyTextFieldStyle(to: locationTextField)
-        StyleGuide.applyButtonStyle(to: countryButton)
-        StyleGuide.applyButtonStyle(to: chooseImageButton)
-        
-        eventImageView.layer.cornerRadius = 10
-        eventImageView.clipsToBounds = true
-        eventImageView.layer.borderWidth = 1
-        eventImageView.layer.borderColor = UIColor.lightGray.cgColor
-    }
-    
+           view.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.97, alpha: 1.0)
+           
+           // Setup content view
+           contentView.backgroundColor = .white
+           contentView.layer.cornerRadius = 15
+           contentView.layer.shadowColor = UIColor.black.cgColor
+           contentView.layer.shadowOffset = CGSize(width: 0, height: 2)
+           contentView.layer.shadowOpacity = 0.1
+           contentView.layer.shadowRadius = 10
+           
+           // Setup image view
+           eventImageView.layer.cornerRadius = 10
+           eventImageView.clipsToBounds = true
+           eventImageView.layer.borderWidth = 2
+           eventImageView.layer.borderColor = UIColor.systemBlue.cgColor
+           
+           // Setup choose image button
+           chooseImageButton.layer.cornerRadius = 5
+           chooseImageButton.backgroundColor = .systemBlue
+           chooseImageButton.setTitleColor(.white, for: .normal)
+           
+           // Setup text fields
+           [eventNameTextField, locationTextField].forEach { textField in
+               textField?.borderStyle = .none
+               textField?.backgroundColor = .systemGray6
+               textField?.layer.cornerRadius = 8
+               textField?.layer.masksToBounds = true
+               textField?.font = UIFont.systemFont(ofSize: 16)
+               textField?.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField?.frame.height ?? 0))
+               textField?.leftViewMode = .always
+           }
+           
+           // Setup country button
+           countryButton.layer.cornerRadius = 8
+           countryButton.backgroundColor = .systemGray6
+           countryButton.setTitleColor(.darkGray, for: .normal)
+           
+           // Setup date picker
+           datePicker.backgroundColor = .systemGray6
+           datePicker.layer.cornerRadius = 8
+           
+           if let event = event {
+               eventNameTextField.text = event.eventName
+               if let index = EventType.allCases.firstIndex(of: event.eventType) {
+                   eventTypePicker.selectRow(index, inComponent: 0, animated: false)
+               }
+               locationTextField.text = event.location
+               datePicker.date = event.date
+               selectedCountry = event.country
+               countryButton.setTitle(event.country, for: .normal)
+               
+               if let imageUrlString = event.imageURL, let imageUrl = URL(string: imageUrlString) {
+                   eventImageView.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder_event"))
+               } else {
+                   eventImageView.image = UIImage(named: "placeholder_event")
+               }
+           } else {
+               datePicker.date = Date()
+           }
+       }
     func setupImagePicker() {
         imagePicker.delegate = self
         imagePicker.allowsEditing = true

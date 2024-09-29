@@ -1,11 +1,11 @@
     import Foundation
     import FirebaseFirestore
-    import CoreData
 
 
     struct Round: Codable, Identifiable {
         @DocumentID var id: String?  // Changé de UUID à String
         var fightId: String
+        var creatorUserId: String
         var roundNumber: Int
         var chronoDuration: TimeInterval  // Durée paramétrée du chrono
         var duration: TimeInterval  // Durée réelle du round
@@ -26,6 +26,7 @@
         
         init(id: String? = nil,
                 fightId: String,
+                creatorUserId: String,
                 roundNumber: Int,
                 chronoDuration: TimeInterval,
                 duration: TimeInterval,
@@ -43,6 +44,7 @@
              endTime: TimeInterval? = nil) {
             self.id = id
             self.fightId = fightId
+            self.creatorUserId = creatorUserId
             self.roundNumber = roundNumber
             self.chronoDuration = chronoDuration
             self.duration = duration
@@ -61,12 +63,13 @@
         }
         
         enum CodingKeys: String, CodingKey {
-            case id, fightId, roundNumber, chronoDuration, duration,roundTime, blueFighterId, redFighterId, actions, videoReplays, isSynced, victoryDecision,roundWinner, blueHits, redHits, startTime, endTime
+            case id, fightId, creatorUserId, roundNumber, chronoDuration, duration,roundTime, blueFighterId, redFighterId, actions, videoReplays, isSynced, victoryDecision,roundWinner, blueHits, redHits, startTime, endTime
         }
         init(from decoder: Decoder) throws {
                let container = try decoder.container(keyedBy: CodingKeys.self)
                id = try container.decodeIfPresent(String.self, forKey: .id)
                fightId = try container.decode(String.self, forKey: .fightId)
+               creatorUserId = try container.decode(String.self, forKey: .creatorUserId)
                roundNumber = try container.decode(Int.self, forKey: .roundNumber)
                chronoDuration = try container.decode(TimeInterval.self, forKey: .chronoDuration)
                duration = try container.decode(TimeInterval.self, forKey: .duration)
@@ -394,132 +397,7 @@
     // MARK: - Core Data Helper
     // MARK: - Core Data Helper
 
-    extension Round {
-        func toCoreDataObject(in context: NSManagedObjectContext) -> RoundEntity {
-            let roundEntity = RoundEntity(context: context)
-            roundEntity.roundId = self.id
-            roundEntity.fightId = self.fightId
-            roundEntity.roundNumber = Int16(self.roundNumber)
-            roundEntity.chronoDuration = self.chronoDuration
-            roundEntity.duration = self.duration
-            roundEntity.blueFighterId = self.blueFighterId
-            roundEntity.redFighterId = self.redFighterId
-            roundEntity.victoryDecision = self.victoryDecision?.rawValue
-            roundEntity.isSynced = self.isSynced
-            roundEntity.roundWinner = self.roundWinner
-            roundEntity.blueScore = Int16(self.blueScore)
-            roundEntity.redScore = Int16(self.redScore)
-            roundEntity.blueHits = Int16(self.blueHits)
-            roundEntity.redHits = Int16(self.redHits)
-            roundEntity.roundTime = Int16(self.roundTime)
-            
-            if let startTime = self.startTime {
-                roundEntity.startTime = startTime
-            }
-            if let endTime = self.endTime {
-                roundEntity.endTime = endTime
-            }
-            
-            // Gérer les actions
-            let actionsSet = NSMutableSet()
-            for action in self.actions {
-                let actionEntity = action.toCoreDataObject(in: context)
-                actionsSet.add(actionEntity)
-            }
-            roundEntity.actions = actionsSet
-            
-            // Gérer les replays vidéo
-            let videoReplaysSet = NSMutableSet()
-            for videoReplay in self.videoReplays {
-                let videoReplayEntity = videoReplay.toCoreDataObject(in: context)
-                videoReplaysSet.add(videoReplayEntity)
-            }
-            roundEntity.videoReplays = videoReplaysSet
-            
-            return roundEntity
-        }
-        
-        init(from entity: RoundEntity) {
-            self.id = entity.roundId ?? String()
-            self.fightId = entity.fightId ?? ""
-            self.roundNumber = Int(entity.roundNumber)
-            self.roundTime = Int(entity.roundTime)
-            self.chronoDuration = entity.chronoDuration
-            self.duration = entity.duration
-            self.blueFighterId = entity.blueFighterId ?? ""
-            self.redFighterId = entity.redFighterId ?? ""
-            self.victoryDecision = VictoryDecision(rawValue: entity.victoryDecision ?? "")
-            self.isSynced = entity.isSynced
-            self.roundWinner = entity.roundWinner
-            self.blueHits = Int(entity.blueHits)
-            self.redHits = Int(entity.redHits)
-            
-            
-            
-            self.actions = (entity.actions?.allObjects as? [ActionEntity])?.compactMap { Action(from: $0) } ?? []
-            self.videoReplays = (entity.videoReplays?.allObjects as? [VideoReplayEntity])?.compactMap { VideoReplay(from: $0) } ?? []
-        }
-    }
-
-    extension Action {
-        func toCoreDataObject(in context: NSManagedObjectContext) -> ActionEntity {
-            let actionEntity = ActionEntity(context: context)
-            actionEntity.actionId = self.id
-            actionEntity.fighterId = self.fighterId
-            actionEntity.color = self.color.rawValue
-            actionEntity.actionType = self.actionType.rawValue
-            actionEntity.technique = self.technique?.rawValue
-            actionEntity.limbUsed = self.limbUsed?.rawValue
-            actionEntity.actionZone = self.actionZone?.rawValue
-            actionEntity.timeStamp = self.timeStamp
-            actionEntity.situation = self.situation?.rawValue
-            actionEntity.gamjeonType = self.gamjeonType?.rawValue
-            actionEntity.guardPosition = self.guardPosition?.rawValue
-            actionEntity.videoTimestamp = self.videoTimestamp
-            actionEntity.isActive = ((self.isActive) != nil)
-            actionEntity.chronoTimestamp = self.chronoTimestamp ?? 0
-            return actionEntity
-        }
-        
-        init(from entity: ActionEntity) {
-            self.id = entity.actionId ?? UUID().uuidString
-            self.fighterId = entity.fighterId ?? ""
-            self.color = FighterColor(rawValue: entity.color ?? "") ?? .blue
-            self.actionType = ActionType(rawValue: entity.actionType ?? "") ?? .kick
-            self.technique = Technique(rawValue: entity.technique ?? "")
-            self.limbUsed = Limb(rawValue: entity.limbUsed ?? "")
-            self.actionZone = Zone(rawValue: entity.actionZone ?? "")
-            self.timeStamp = entity.timeStamp
-            self.situation = CombatSituation(rawValue: entity.situation ?? "") ?? .attack
-            self.gamjeonType = GamjeonType(rawValue: entity.gamjeonType ?? "")
-            self.guardPosition = GuardPosition(rawValue: entity.guardPosition ?? "")
-            self.videoTimestamp = entity.videoTimestamp
-            self.isActive = entity.isActive
-            self.chronoTimestamp = entity.chronoTimestamp
-        }
-    }
-
-    extension VideoReplay {
-        func toCoreDataObject(in context: NSManagedObjectContext) -> VideoReplayEntity {
-            let videoReplayEntity = VideoReplayEntity(context: context)
-            videoReplayEntity.replayId = self.id
-            videoReplayEntity.requestedByFighterId = self.requestedByFighterId
-            videoReplayEntity.requestedByColor = self.requestedByColor.rawValue
-            videoReplayEntity.timeStamp = self.timeStamp
-            videoReplayEntity.wasAccepted = self.wasAccepted
-            videoReplayEntity.chronoTimestamp = self.chronoTimestamp
-            return videoReplayEntity
-        }
-        
-        init(from entity: VideoReplayEntity) {
-            self.id = entity.replayId ?? String()
-            self.requestedByFighterId = entity.requestedByFighterId ?? ""
-            self.requestedByColor = FighterColor(rawValue: entity.requestedByColor ?? "") ?? .blue
-            self.timeStamp = entity.timeStamp
-            self.wasAccepted = entity.wasAccepted
-            self.chronoTimestamp = entity.chronoTimestamp
-        }
-    }
+   
     extension Action {
         var dictionary: [String: Any] {
             var dict: [String: Any] = [

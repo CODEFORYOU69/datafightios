@@ -15,29 +15,31 @@
     extension FirebaseService {
         // MARK: - Fighter Methods
 
-        func saveFighter(_ fighter: Fighter, completion: @escaping (Result<Void, Error>) -> Void) {
+        func saveFighter(_ fighter: Fighter, completion: @escaping (Result<String, Error>) -> Void) {
             guard let uid = Auth.auth().currentUser?.uid else {
                 completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
                 return
             }
 
             var fighterData = fighter
-            fighterData.creatorUserId = uid  // Assurez-vous que l'ID de l'utilisateur est défini
+            fighterData.creatorUserId = uid  // Ensure that the user ID is set
+
+            let newDocRef = db.collection("fighters").document()  // Create a new document reference
+            fighterData.id = newDocRef.documentID  // Set the fighter's ID
 
             do {
-                // Utilisation de `try` car `addDocument(from:)` peut lancer une erreur
-                try db.collection("fighters").addDocument(from: fighterData) { error in
+                try newDocRef.setData(from: fighterData) { error in
                     if let error = error {
-                        completion(.failure(error))  // En cas d'erreur, renvoyez-la dans le completion handler
+                        completion(.failure(error))  // Return the error in the completion handler
                     } else {
-                        completion(.success(()))  // Si succès, renvoyez un succès
+                        completion(.success(newDocRef.documentID))  // Return the fighter ID upon success
                     }
                 }
             } catch {
-                // Gérer l'erreur si l'appel `addDocument(from:)` échoue
-                completion(.failure(error))
+                completion(.failure(error))  
             }
         }
+
 
 
         func getFighters(completion: @escaping (Result<[Fighter], Error>) -> Void) {
@@ -107,32 +109,9 @@
         }
         func updateFighterWithFight(fighterId: String, fightId: String, completion: @escaping (Result<Void, Error>) -> Void) {
             let fighterRef = db.collection("fighters").document(fighterId)
-            db.runTransaction({ (transaction, errorPointer) -> Any? in
-                let fighterDocument: DocumentSnapshot
-                do {
-                    try fighterDocument = transaction.getDocument(fighterRef)
-                } catch let fetchError as NSError {
-                    errorPointer?.pointee = fetchError
-                    return nil
-                }
-
-                guard var fighter = try? fighterDocument.data(as: Fighter.self) else {
-                    let error = NSError(domain: "AppErrorDomain", code: -1, userInfo: [NSLocalizedDescriptionKey: "Unable to fetch fighter"])
-                    errorPointer?.pointee = error
-                    return nil
-                }
-
-                fighter.fightIds = (fighter.fightIds ?? []) + [fightId]
-                
-                do {
-                    try transaction.setData(from: fighter, forDocument: fighterRef)
-                } catch let error as NSError {
-                    errorPointer?.pointee = error
-                    return nil
-                }
-
-                return nil
-            }) { (object, error) in
+            fighterRef.updateData([
+                "fightIds": FieldValue.arrayUnion([fightId])
+            ]) { error in
                 if let error = error {
                     completion(.failure(error))
                 } else {
@@ -140,29 +119,24 @@
                 }
             }
         }
-        // Fonction pour le chatbot: Récupérer les valeurs distinctes des attributs des combattants
-        func fetchDistinctFighterValues(for field: String, completion: @escaping (Result<[String], Error>) -> Void) {
-            guard let uid = Auth.auth().currentUser?.uid else {
-                completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
-                return
-            }
 
-            db.collection("fighters")
-                .whereField("creatorUserId", isEqualTo: uid)
-                .getDocuments { (snapshot, error) in
-                    if let error = error {
-                        completion(.failure(error))
-                    } else if let snapshot = snapshot {
-                        var valuesSet = Set<String>()
-                        for document in snapshot.documents {
-                            if let value = document.data()[field] as? String {
-                                valuesSet.insert(value)
-                            }
-                        }
-                        completion(.success(Array(valuesSet)))
-                    } else {
-                        completion(.success([]))
+     
+    }
+extension FirebaseService {
+
+
+        func saveFighterAsync(_ fighter: Fighter) async throws -> String {
+            try await withCheckedThrowingContinuation { continuation in
+                saveFighter(fighter) { result in
+                    switch result {
+                    case .success(let fighterId):
+                        continuation.resume(returning: fighterId)
+                    case .failure(let error):
+                        continuation.resume(throwing: error)
                     }
                 }
+            }
         }
-    }
+    
+
+}

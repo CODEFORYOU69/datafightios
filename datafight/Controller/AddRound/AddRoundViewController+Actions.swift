@@ -137,6 +137,7 @@ extension AddRoundViewController {
             
             currentRound = Round(
                 fightId: fight.id ?? "",
+                creatorUserId: fight.creatorUserId,
                 roundNumber: (fight.roundIds?.count ?? 0) + 1,
                 chronoDuration: chronoDuration,
                 duration: 0, // Sera mis à jour à la fin du round

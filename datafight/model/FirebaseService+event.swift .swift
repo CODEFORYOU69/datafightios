@@ -13,6 +13,8 @@ import FirebaseStorage
 import UIKit
 import FirebaseAuth
 
+
+
 extension FirebaseService {
     // MARK: - Event Methods
     func updateEventWithFight(eventId: String, fightId: String, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -51,6 +53,11 @@ extension FirebaseService {
         }
     }
     func saveEvent(_ event: Event, completion: @escaping (Result<String, Error>) -> Void) {
+        
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
+            return
+        }
         if let id = event.id {
             do {
                 try db.collection("events").document(id).setData(from: event) { error in
@@ -66,6 +73,8 @@ extension FirebaseService {
         } else {
             let newDocRef = db.collection("events").document()
             var newEvent = event
+            newEvent.creatorUserId = uid  // Ensure creatorUserId is set to current authenticated user
+            
             newEvent.id = newDocRef.documentID
             do {
                 try newDocRef.setData(from: newEvent) { error in
@@ -105,14 +114,23 @@ extension FirebaseService {
     }
 
     func getEvent(id: String, completion: @escaping (Result<Event, Error>) -> Void) {
+        guard let uid = Auth.auth().currentUser?.uid else {
+            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
+            return
+        }
+
         db.collection("events").document(id).getDocument { (document, error) in
             if let error = error {
                 completion(.failure(error))
             } else if let document = document, document.exists {
                 do {
                     var event = try document.data(as: Event.self)
-                    event.id = document.documentID
-                    completion(.success(event))
+                    if event.creatorUserId == uid {
+                        event.id = document.documentID
+                        completion(.success(event))
+                    } else {
+                        completion(.failure(NSError(domain: "FirebaseService", code: 1, userInfo: [NSLocalizedDescriptionKey: "Unauthorized access"])))
+                    }
                 } catch {
                     completion(.failure(error))
                 }
@@ -121,6 +139,7 @@ extension FirebaseService {
             }
         }
     }
+
 
     func uploadEventImage(_ image: UIImage, completion: @escaping (Result<URL, Error>) -> Void) {
         guard let imageData = image.jpegData(compressionQuality: 0.8) else {
@@ -148,30 +167,32 @@ extension FirebaseService {
         }
     }
 
-    // Fonction pour le chatbot: Récupérer les valeurs distinctes des attributs des événements
-    func fetchDistinctEventValues(for field: String, completion: @escaping (Result<[String], Error>) -> Void) {
-        guard let uid = Auth.auth().currentUser?.uid else {
-            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
-            return
-        }
-
-        db.collection("events")
-            .whereField("creatorUserId", isEqualTo: uid)
-            .getDocuments { (snapshot, error) in
-                if let error = error {
-                    completion(.failure(error))
-                } else if let snapshot = snapshot {
-                    var valuesSet = Set<String>()
-                    for document in snapshot.documents {
-                        if let value = document.data()[field] as? String {
-                            valuesSet.insert(value)
-                        }
-                    }
-                    completion(.success(Array(valuesSet)))
-                } else {
-                    completion(.success([]))
-                }
-            }
-    }
+   
 }
 
+extension FirebaseService {
+    func saveEventAsync(_ event: Event) async throws -> String {
+        try await withCheckedThrowingContinuation { continuation in
+            saveEvent(event) { result in
+                switch result {
+                case .success(let eventId):
+                    continuation.resume(returning: eventId)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    func fetchEventsAsync(withIds ids: [String]) async throws -> [Event] {
+            try await withCheckedThrowingContinuation { continuation in
+                fetchEvents(withIds: ids) { result in
+                    switch result {
+                    case .success(let events):
+                        continuation.resume(returning: events)
+                    case .failure(let error):
+                        continuation.resume(throwing: error)
+                    }
+                }
+            }
+        }
+}

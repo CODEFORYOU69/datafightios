@@ -35,7 +35,8 @@ class FightEditViewController: UIViewController, UIPickerViewDelegate, UIPickerV
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        setupStyle()
+
         setupPickers()
         setupIsOlympicSegmentedControl()
         initializeCategoriesAndWeights()
@@ -45,7 +46,75 @@ class FightEditViewController: UIViewController, UIPickerViewDelegate, UIPickerV
         navigationItem.leftBarButtonItem = UIBarButtonItem(title: "Cancel", style: .plain, target: self, action: #selector(cancelTapped))
 
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(saveFightTapped))
+        addLabelForPicker(eventPicker, withText: "Event")
+        addLabelForPicker(blueFighterPicker, withText: "Blue Fighter")
+        addLabelForPicker(redFighterPicker, withText: "Red Fighter")
+        addLabelForPicker(categoryPicker, withText: "Category")
+        addLabelForPicker(weightCategoryPicker, withText: "Weight")
+        addLabelForPicker(roundPicker, withText: "Round")
 
+    }
+    
+    func setupStyle() {
+        view.backgroundColor = .customBackground
+        
+        // Style pour les UIPickerView
+        [eventPicker, blueFighterPicker, redFighterPicker, categoryPicker, weightCategoryPicker, roundPicker].forEach {
+            stylePicker($0)
+        }
+        
+        // Style pour le UISegmentedControl
+        styleSegmentedControl(isOlympicSegmentedControl)
+        
+        // Style pour le UITextField
+        styleTextField(fightNumberInfo)
+        
+        // Style pour les boutons de navigation
+        navigationItem.leftBarButtonItem?.tintColor = .customAccent
+        navigationItem.rightBarButtonItem?.tintColor = .customAccent
+    }
+    func stylePicker(_ picker: UIPickerView) {
+        picker.backgroundColor = .white
+        picker.layer.cornerRadius = 10
+        picker.layer.borderWidth = 1
+        picker.layer.borderColor = UIColor.customAccent.cgColor
+        picker.layer.shadowColor = UIColor.black.cgColor
+        picker.layer.shadowOffset = CGSize(width: 0, height: 2)
+        picker.layer.shadowRadius = 4
+        picker.layer.shadowOpacity = 0.1
+    }
+    func styleSegmentedControl(_ segmentedControl: UISegmentedControl) {
+        segmentedControl.backgroundColor = .white
+        segmentedControl.selectedSegmentTintColor = .customAccent
+        segmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.customText], for: .normal)
+        segmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
+        segmentedControl.layer.cornerRadius = 10
+        segmentedControl.layer.masksToBounds = true
+    }
+
+    func styleTextField(_ textField: UITextField) {
+        textField.backgroundColor = .white
+        textField.textColor = .customText
+        textField.layer.cornerRadius = 10
+        textField.layer.borderWidth = 1
+        textField.layer.borderColor = UIColor.customAccent.cgColor
+        textField.layer.shadowColor = UIColor.black.cgColor
+        textField.layer.shadowOffset = CGSize(width: 0, height: 2)
+        textField.layer.shadowRadius = 4
+        textField.layer.shadowOpacity = 0.1
+    }
+    func addLabelForPicker(_ picker: UIPickerView, withText text: String) {
+        let label = UILabel()
+        label.text = text
+        label.textColor = .customText
+        label.font = UIFont.boldSystemFont(ofSize: 16)
+        label.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(label)
+        
+        NSLayoutConstraint.activate([
+            label.bottomAnchor.constraint(equalTo: picker.topAnchor, constant: -8),
+            label.leadingAnchor.constraint(equalTo: picker.leadingAnchor)
+        ])
     }
     
     func initializeCategoriesAndWeights() {
@@ -165,7 +234,30 @@ class FightEditViewController: UIViewController, UIPickerViewDelegate, UIPickerV
             break
         }
     }
-
+    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
+        let label = (view as? UILabel) ?? UILabel()
+        label.textColor = .customText
+        label.textAlignment = .center
+        label.font = UIFont.systemFont(ofSize: 18)
+        
+        switch pickerView {
+        case eventPicker:
+            label.text = events[row].eventName
+        case blueFighterPicker, redFighterPicker:
+            let fighter = fighters[row]
+            label.text = "\(fighter.firstName) \(fighter.lastName)"
+        case categoryPicker:
+            label.text = categories[row]
+        case weightCategoryPicker:
+            label.text = weightCategories[row]
+        case roundPicker:
+            label.text = FightCategories.rounds[row]
+        default:
+            break
+        }
+        
+        return label
+    }
     func updateCategoriesAndWeights() {
         guard selectedBlueFighter != nil else { return }
 
@@ -267,7 +359,25 @@ class FightEditViewController: UIViewController, UIPickerViewDelegate, UIPickerV
             }
         }
     }
-
+    func setupSaveButton() {
+        let saveButton = UIButton(type: .system)
+        saveButton.setTitle("Save Fight", for: .normal)
+        saveButton.setTitleColor(.white, for: .normal)
+        saveButton.backgroundColor = .customAccent
+        saveButton.layer.cornerRadius = 10
+        saveButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+        saveButton.addTarget(self, action: #selector(saveFightTapped(_:)), for: .touchUpInside)
+        
+        saveButton.translatesAutoresizingMaskIntoConstraints = false
+        view.addSubview(saveButton)
+        
+        NSLayoutConstraint.activate([
+            saveButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            saveButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            saveButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            saveButton.heightAnchor.constraint(equalToConstant: 50)
+        ])
+    }
     // Méthode helper pour afficher des alertes
     func showAlert(title: String, message: String, completion: (() -> Void)? = nil) {
         let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
@@ -304,4 +414,9 @@ extension Collection {
     subscript(safe index: Index) -> Element? {
         return indices.contains(index) ? self[index] : nil
     }
+}
+extension UIColor {
+    static let customBackground = UIColor(red: 0.95, green: 0.95, blue: 0.97, alpha: 1.0)
+    static let customAccent = UIColor(red: 0.2, green: 0.6, blue: 0.86, alpha: 1.0)
+    static let customText = UIColor(red: 0.2, green: 0.2, blue: 0.2, alpha: 1.0)
 }

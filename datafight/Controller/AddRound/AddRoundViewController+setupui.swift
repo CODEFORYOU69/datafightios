@@ -96,6 +96,7 @@ extension AddRoundViewController {
            updateScoreLabels()
            updateGamjeonLabels()
            updateHitsLabels()
+        loadExistingRounds()
        }
     
     private func calculateScores() {
@@ -104,7 +105,19 @@ extension AddRoundViewController {
            blueScore = calculateScore(for: .blue, in: currentRound)
            redScore = calculateScore(for: .red, in: currentRound)
        }
-
+    func loadExistingRounds() {
+        guard let fight = fight else { return }
+        
+        FirebaseService.shared.getAllRoundsForFight(fight) { [weak self] result in
+            switch result {
+            case .success(let fetchedRounds):
+                self?.rounds = fetchedRounds
+                self?.updateRoundWinIndicators()
+            case .failure(let error):
+                print("Failed to fetch rounds: \(error.localizedDescription)")
+            }
+        }
+    }
        private func calculateScore(for color: FighterColor, in round: Round) -> Int {
            let directPoints = round.actions.filter { $0.color == color && $0.actionType != .gamJeon && ($0.isActive != nil) }.reduce(0) { $0 + $1.points }
            let opponentColor: FighterColor = color == .blue ? .red : .blue

@@ -13,7 +13,27 @@ class FighterTableViewCell: UITableViewCell {
     
     static let preferredHeight: CGFloat = 80 // Ajustez cette valeur selon vos besoins
     
-
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        // Add spacing
+        contentView.frame = contentView.frame.inset(by: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10))
+        
+        // Add rounded corners
+        contentView.layer.cornerRadius = 10
+        contentView.layer.masksToBounds = true
+        
+        // Add shadow
+        layer.shadowColor = UIColor.black.cgColor
+        layer.shadowOffset = CGSize(width: 0, height: 2)
+        layer.shadowRadius = 4
+        layer.shadowOpacity = 0.1
+        layer.masksToBounds = false
+        layer.shadowPath = UIBezierPath(roundedRect: bounds, cornerRadius: contentView.layer.cornerRadius).cgPath
+        
+        // Make sure the cell's background is clear so the shadow is visible
+        backgroundColor = .clear
+    }
 
     override func awakeFromNib() {
         super.awakeFromNib()
@@ -74,5 +94,8 @@ class FighterTableViewCell: UITableViewCell {
 
             // Ajuster la taille du drapeau
             flagImageView.contentMode = .scaleAspectFit
+        contentView.backgroundColor = .white
+
     }
+    
 }

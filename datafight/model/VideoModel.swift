@@ -8,17 +8,17 @@ struct Video: Codable {
     var roundTimestamps: [RoundTimestamp]
     
     mutating func updateOrAddRoundTimestamp(roundNumber: Int, start: TimeInterval, end: TimeInterval?) {
-            if let index = roundTimestamps.firstIndex(where: { $0.roundNumber == roundNumber }) {
-                roundTimestamps[index].start = start
-                roundTimestamps[index].end = end
-            } else {
-                let newTimestamp = RoundTimestamp(roundNumber: roundNumber, start: start, end: end)
-                roundTimestamps.append(newTimestamp)
-            }
-            roundTimestamps.sort { $0.roundNumber < $1.roundNumber }
+        if let index = roundTimestamps.firstIndex(where: { $0.roundNumber == roundNumber }) {
+            roundTimestamps[index].start = start
+            roundTimestamps[index].end = end
+        } else {
+            let newTimestamp = RoundTimestamp(roundNumber: roundNumber, start: start, end: end)
+            roundTimestamps.append(newTimestamp)
         }
+        roundTimestamps.sort { $0.roundNumber < $1.roundNumber }
+    }
 
-    // Initialiseur par défaut
+    // Default initializer
     init(id: String, fightId: String, url: String, duration: Double, roundTimestamps: [RoundTimestamp]) {
         self.id = id
         self.fightId = fightId
@@ -27,7 +27,7 @@ struct Video: Codable {
         self.roundTimestamps = roundTimestamps
     }
 
-    // Conversion en dictionnaire pour Firestore
+    // Conversion to dictionary for Firestore
     var dictionary: [String: Any] {
         return [
             "id": id,
@@ -38,7 +38,7 @@ struct Video: Codable {
         ]
     }
 
-    // Initialisation à partir d'un dictionnaire (utile pour récupérer des données depuis Firestore)
+    // Initialization from a dictionary (useful for retrieving data from Firestore)
     init?(dictionary: [String: Any]) {
         guard let id = dictionary["id"] as? String,
               let fightId = dictionary["fightId"] as? String,
@@ -56,18 +56,19 @@ struct Video: Codable {
     }
 }
 
+
 struct RoundTimestamp: Codable {
     let roundNumber: Int
     var start: TimeInterval
     var end: TimeInterval?
     
     init(roundNumber: Int, start: TimeInterval, end: TimeInterval? = nil) {
-            self.roundNumber = roundNumber
-            self.start = start
-            self.end = end
-        }
+        self.roundNumber = roundNumber
+        self.start = start
+        self.end = end
+    }
 
-    // Conversion en dictionnaire pour Firestore
+    // Conversion to dictionary for Firestore
     var dictionary: [String: Any] {
         var dict: [String: Any] = [
             "roundNumber": roundNumber,
@@ -79,7 +80,7 @@ struct RoundTimestamp: Codable {
         return dict
     }
 
-    // Initialisation à partir d'un dictionnaire
+    // Initialization from a dictionary
     init?(dictionary: [String: Any]) {
         guard let roundNumber = dictionary["roundNumber"] as? Int,
               let start = dictionary["start"] as? TimeInterval else {
@@ -91,3 +92,4 @@ struct RoundTimestamp: Codable {
         self.end = dictionary["end"] as? TimeInterval
     }
 }
+
