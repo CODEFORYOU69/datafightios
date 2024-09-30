@@ -56,7 +56,7 @@ jobs:
       # Start Firebase Emulator Suite (Auth, Firestore, Storage)
       - name: Start Firebase Emulator Suite
         run: |
-          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data &
+          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data --token ${{ secrets.FIREBASE_TOKEN }} &
         
       # Wait for Firebase Emulator to start
       - name: Wait for Firebase Emulator to Start
@@ -80,7 +80,7 @@ jobs:
             -scheme datafight \
             -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
             CODE_SIGNING_ALLOWED=NO \
-            -skipPackagePluginValidation
+            -skipPackagePluginValidation \
             -retry-tests-on-failure \
             -test-timeouts-enabled NO \
             -timeout=300
