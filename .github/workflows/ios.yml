@@ -11,44 +11,71 @@ jobs:
     runs-on: macos-latest
 
     steps:
-    - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Set up Xcode
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: latest-stable
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20'  # Mise à jour vers Node.js 20
 
-    - name: Build and Test
-      run: |
-        xcodebuild build-for-testing \
-          -project datafight.xcodeproj \
-          -scheme datafight \
-          -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
-          -testPlan datafight
-          
-    - name: Debug Directory Structure
-      run: |
-        ls -R ${{ github.workspace }}
-        ls -R ${{ github.workspace }}/build
+      - name: Install xcpretty
+        run: |
+          gem install xcpretty
 
-    - name: Package App and Tests
-      run: |
-        # Package the app
-        mkdir -p Payload
-        cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
-        zip -r app.ipa Payload
+      - name: Install Firebase CLI
+        run: |
+          npm install -g firebase-tools
 
-        # Package the tests
-        cd ${{ github.workspace }}/build/Debug-iphonesimulator
-        zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
+      - name: Set up Xcode
+        uses: maxim-lobanov/setup-xcode@v1
+        with:
+          xcode-version: latest-stable
 
-    - name: Upload to Firebase Test Lab
-      uses: w9jds/firebase-action@master
-      with:
-        args: >
-          firebase test ios run
-          --app app.ipa
-          --test tests.zip
-          --device model=iPadPro12,version=17.0,locale=en_US,orientation=portrait
-      env:
-        GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+      - name: List Available Simulators
+        run: |
+          xcrun simctl list devices
+
+      - name: Check Xcode version
+        run: |
+          xcodebuild -version
+
+      - name: Resolve Swift Package Dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies -project datafight.xcodeproj
+
+      - name: Build and Test
+        run: |
+          xcodebuild test \
+            -project datafight.xcodeproj \
+            -scheme datafight \
+            -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
+            -testPlan datafight \
+            CODE_SIGNING_ALLOWED=NO | xcpretty
+
+      - name: Debug Directory Structure
+        run: |
+          ls -R ${{ github.workspace }}
+          ls -R ${{ github.workspace }}/build
+
+      - name: Package App and Tests
+        run: |
+          # Package the app
+          mkdir -p Payload
+          cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
+          zip -r app.ipa Payload
+
+          # Package the tests
+          cd ${{ github.workspace }}/build/Debug-iphonesimulator
+          zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
+
+      - name: Upload to Firebase Test Lab
+        uses: w9jds/firebase-action@master
+        with:
+          args: >
+            firebase test ios run
+            --app app.ipa
+            --test tests.zip
+            --device model=iPadPro12,version=17.0,locale=en_US,orientation=portrait
+        env:
+          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
