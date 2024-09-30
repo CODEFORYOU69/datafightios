@@ -75,7 +75,7 @@ jobs:
           file_to_build=$(echo "$file_to_build" | awk '{$1=$1;print}')
 
           # Start Firebase Emulator and run tests
-          firebase emulators:exec --only firestore,auth \
+          firebase emulators:exec \
             "xcodebuild test-without-building \
               -scheme \"$scheme\" \
               -\"$filetype_parameter\" \"$file_to_build\" \
