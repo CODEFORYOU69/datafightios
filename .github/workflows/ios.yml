@@ -1,4 +1,4 @@
-name: iOS Tests with Firebase Test Lab
+name: iOS CI
 
 on:
   push:
@@ -7,55 +7,48 @@ on:
     branches: [ main ]
 
 jobs:
-  test:
+  build-and-test:
     runs-on: macos-latest
+
     steps:
     - uses: actions/checkout@v3
-    
+
     - name: Set up Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
 
-    - id: 'auth'
-      name: 'Authenticate to Google Cloud'
-      uses: 'google-github-actions/auth@v1'
-      with:
-        credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
-
-    - name: 'Set up Cloud SDK'
-      uses: 'google-github-actions/setup-gcloud@v1'
-
-    - name: Build app for testing
-      env:
-        IS_TESTING: YES
+    - name: Build and Test
       run: |
         xcodebuild build-for-testing \
           -project datafight.xcodeproj \
           -scheme datafight \
           -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
-          -testPlan datafight \
-          -configuration Debug \
-          COMPILER_INDEX_STORE_ENABLE=NO
-
-    - name: Package app and test for Firebase Test Lab
+          -testPlan datafight
+          
+    - name: Debug Directory Structure
       run: |
-        # Create an IPA file
+        ls -R ${{ github.workspace }}
+        ls -R ${{ github.workspace }}/build
+
+    - name: Package App and Tests
+      run: |
+        # Package the app
         mkdir -p Payload
-        cp -r build/Debug-iphonesimulator/datafight.app Payload/
+        cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
         zip -r app.ipa Payload
-        
-        # Package the tests
-        cd build/Debug-iphonesimulator
-        zip -r ../../tests.zip *.xctest
 
-    - name: Run tests on Firebase Test Lab
+        # Package the tests
+        cd ${{ github.workspace }}/build/Debug-iphonesimulator
+        zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
+
+    - name: Upload to Firebase Test Lab
+      uses: w9jds/firebase-action@master
+      with:
+        args: >
+          firebase test ios run
+          --app app.ipa
+          --test tests.zip
+          --device model=iPadPro12,version=17.0,locale=en_US,orientation=portrait
       env:
-        IS_TESTING: YES
-      run: |
-        gcloud firebase test ios run \
-          --type xctest \
-          --app app.ipa \
-          --test tests.zip \
-          --device model=iPadPro12,version=17.0,locale=en_US,orientation=portrait \
-          --environment-variables IS_TESTING=YES
+        GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
