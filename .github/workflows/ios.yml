@@ -11,68 +11,59 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # Checkout the code from the repository
       - name: Checkout
         uses: actions/checkout@v3
 
-      # Set up Node.js (updated to version 20)
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
-      # Install xcpretty (for Xcode build formatting)
       - name: Install xcpretty
         run: |
           gem install xcpretty
 
-      # Install Firebase CLI globally
-      - name: Install Firebase CLI
+      - name: Install Firebase CLI globally
         run: |
           npm install -g firebase-tools
 
-      # Set up the latest stable version of Xcode
       - name: Set up Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
 
-      # List available simulators (for debugging)
       - name: List Available Simulators
         run: |
           xcrun simctl list devices
 
-      # Check Xcode version (for debugging)
       - name: Check Xcode version
         run: |
           xcodebuild -version
 
-      # Resolve Swift Package Dependencies
       - name: Resolve Swift Package Dependencies
         run: |
           xcodebuild -resolvePackageDependencies \
             -project datafight.xcodeproj
 
-      # Start Firebase Emulator Suite (Auth, Firestore, Storage)
+      # Start Firebase Emulator Suite (with logging)
       - name: Start Firebase Emulator Suite
         run: |
-          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data --token ${{ secrets.FIREBASE_TOKEN }} &
+          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data --token ${{ secrets.FIREBASE_TOKEN }} > firebase-emulator-log.txt &
         
-      # Wait for Firebase Emulator to start
       - name: Wait for Firebase Emulator to Start
         run: sleep 10
 
-      # Create build directory in case Xcode doesn't generate it
+      - name: Show Firebase Emulator Logs
+        run: cat firebase-emulator-log.txt
+
       - name: Create Build Directory
         run: |
           mkdir -p ${{ github.workspace }}/build/Debug-iphonesimulator
 
-      # Debug project files and ensure Xcode project exists
       - name: Debug Project Files
         run: |
           ls -R ${{ github.workspace }}/datafight.xcodeproj
 
-      # Build and Test using Firebase Emulator (Skipping Package Plugin Validation)
       - name: Build and Test
         run: |
           xcodebuild test \
@@ -85,30 +76,24 @@ jobs:
             -test-timeouts-enabled NO \
             -timeout=300
 
-      # Stop Firebase Emulator Suite
       - name: Stop Firebase Emulator Suite
         run: |
           firebase emulators:stop
 
-      # Debug the directory structure after the build
       - name: Debug Directory Structure
         run: |
           ls -R ${{ github.workspace }}
           ls -R ${{ github.workspace }}/build
 
-      # Package the app and the test results into .ipa and .zip files
       - name: Package App and Tests
         run: |
-          # Package the app
           mkdir -p Payload
           cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
           zip -r app.ipa Payload
 
-          # Package the tests
           cd ${{ github.workspace }}/build/Debug-iphonesimulator
           zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
 
-      # Upload the app and test packages to Firebase Test Lab
       - name: Upload to Firebase Test Lab
         uses: w9jds/firebase-action@master
         with:
