@@ -10,19 +10,22 @@ jobs:
   test:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     
     - name: Set up Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
 
-    - name: Set up gcloud CLI
-      uses: google-github-actions/setup-gcloud@v0
+    - id: 'auth'
+      name: 'Authenticate to Google Cloud'
+      uses: 'google-github-actions/auth@v1'
       with:
-        project_id: ${{ secrets.FIREBASE_PROJECT_ID }}
-        service_account_key: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-    
+        credentials_json: '${{ secrets.FIREBASE_SERVICE_ACCOUNT }}'
+
+    - name: 'Set up Cloud SDK'
+      uses: 'google-github-actions/setup-gcloud@v1'
+
     - name: Build app for testing
       env:
         IS_TESTING: YES
