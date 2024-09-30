@@ -72,6 +72,7 @@
 		3EABF45D2CA0FD5000F09559 /* RoundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF45C2CA0FD5000F09559 /* RoundTests.swift */; };
 		3EABF4632CA2082300F09559 /* FightDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF4622CA2082300F09559 /* FightDetailViewController.swift */; };
 		3EABF4762CA417EE00F09559 /* FirebaseGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF4752CA417EE00F09559 /* FirebaseGeneralTests.swift */; };
+		3EC508F72CAAEEAE0044FDCD /* Package.swift in Resources */ = {isa = PBXBuildFile; fileRef = 3EC508F62CAAEEAE0044FDCD /* Package.swift */; };
 		3EE5E4912CA9E0CB00BAB683 /* CountryPickerView in Frameworks */ = {isa = PBXBuildFile; productRef = 3EE5E4902CA9E0CB00BAB683 /* CountryPickerView */; };
 		3EE5E4942CA9E0F000BAB683 /* FlagKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3EE5E4932CA9E0F000BAB683 /* FlagKit */; };
 		3EE5E4972CA9E11900BAB683 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 3EE5E4962CA9E11900BAB683 /* DGCharts */; };
@@ -165,6 +166,7 @@
 		3EABF45C2CA0FD5000F09559 /* RoundTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundTests.swift; sourceTree = "<group>"; };
 		3EABF4622CA2082300F09559 /* FightDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FightDetailViewController.swift; sourceTree = "<group>"; };
 		3EABF4752CA417EE00F09559 /* FirebaseGeneralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseGeneralTests.swift; sourceTree = "<group>"; };
+		3EC508F62CAAEEAE0044FDCD /* Package.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		3EE5E4BD2CA9E3CF00BAB683 /* abseil-cpp-binary */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "abseil-cpp-binary"; path = "/Users/younesouasmi/Library/Developer/Xcode/DerivedData/datafight-aydoysnnfhssrwfscvoiwwavbdhh/SourcePackages/checkouts/abseil-cpp-binary"; sourceTree = "<absolute>"; };
 /* End PBXFileReference section */
 
@@ -286,6 +288,7 @@
 			isa = PBXGroup;
 			children = (
 				3E4D15052C5E523A00A3835A /* GoogleService-Info.plist */,
+				3EC508F62CAAEEAE0044FDCD /* Package.swift */,
 				3E044D582CA4ADFE00DA5EFA /* datafight.xctestplan */,
 				3E87E3272C56B94700D843E2 /* datafight */,
 				3E87E33E2C56B94900D843E2 /* datafightTests */,
@@ -509,6 +512,7 @@
 				3E87E3352C56B94900D843E2 /* Base in Resources */,
 				3E4D15062C5E523A00A3835A /* GoogleService-Info.plist in Resources */,
 				3E61334F2C70224C0060D6E6 /* FighterTableViewCell.xib in Resources */,
+				3EC508F72CAAEEAE0044FDCD /* Package.swift in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
