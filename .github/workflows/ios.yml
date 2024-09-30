@@ -40,39 +40,30 @@ jobs:
         run: |
           xcodebuild -version
 
-      - name: Build app for testing
-        env:
-          IS_TESTING: YES
+      - name: Build and Test
         run: |
-          xcodebuild build-for-testing \
+          xcodebuild test \
             -project datafight.xcodeproj \
             -scheme datafight \
             -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
             -testPlan datafight \
-            -configuration Debug \
-            -derivedDataPath ${{ github.workspace }}/build \
-            COMPILER_INDEX_STORE_ENABLE=NO
-          
-      - name: Check build output
-        if: always()
-        run: |
-          ls -R ${{ github.workspace }}
+            CODE_SIGNING_ALLOWED=NO | xcpretty
 
       - name: Debug Directory Structure
         run: |
           ls -R ${{ github.workspace }}
           ls -R ${{ github.workspace }}/build
 
-      - name: Package app and test for Firebase Test Lab
+      - name: Package App and Tests
         run: |
-          # Create an IPA file
+          # Package the app
           mkdir -p Payload
-          cp -r ${{ github.workspace }}/build/Build/Products/Debug-iphonesimulator/datafight.app Payload/
+          cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
           zip -r app.ipa Payload
-    
+
           # Package the tests
-          cd ${{ github.workspace }}/build/Build/Products/Debug-iphonesimulator
-          zip -r ${{ github.workspace }}/tests.zip *.xctest
+          cd ${{ github.workspace }}/build/Debug-iphonesimulator
+          zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
 
       - name: Upload to Firebase Test Lab
         uses: w9jds/firebase-action@master
