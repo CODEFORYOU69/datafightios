@@ -47,6 +47,12 @@ jobs:
         run: |
           xcodebuild -version
 
+      # Resolve Swift Package Dependencies
+      - name: Resolve Swift Package Dependencies
+        run: |
+          xcodebuild -resolvePackageDependencies \
+            -project datafight.xcodeproj
+
       # Create build directory in case Xcode doesn't generate it
       - name: Create Build Directory
         run: |
@@ -57,7 +63,7 @@ jobs:
         run: |
           ls -R ${{ github.workspace }}/datafight.xcodeproj
 
-      # Build and Test without xcpretty to see full logs (Remove xcpretty to debug errors)
+      # Build and Test (Skipping Package Plugin Validation)
       - name: Build and Test
         run: |
           xcodebuild test \
@@ -65,7 +71,8 @@ jobs:
             -scheme datafight \
             -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
             -testPlan datafight \
-            CODE_SIGNING_ALLOWED=NO
+            CODE_SIGNING_ALLOWED=NO \
+            -skipPackagePluginValidation
 
       # Debug the directory structure after the build
       - name: Debug Directory Structure
@@ -96,4 +103,3 @@ jobs:
             --device model=iPadPro12,version=17.0,locale=en_US,orientation=portrait
         env:
           GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
-
