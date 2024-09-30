@@ -40,10 +40,6 @@ jobs:
         run: |
           xcodebuild -version
 
-      - name: Resolve Swift Package Dependencies
-        run: |
-          xcodebuild -resolvePackageDependencies -project datafight.xcodeproj
-
       - name: Build and Test
         run: |
           xcodebuild test \
