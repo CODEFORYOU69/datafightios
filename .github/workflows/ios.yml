@@ -16,7 +16,7 @@ jobs:
     - name: Set up Xcode
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: latest-stable
+        xcode-version: '14.3'  # ou la version que vous utilisez pour le développement
 
     - name: Build and Test
       run: |
