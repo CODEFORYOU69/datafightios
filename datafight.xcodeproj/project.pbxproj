@@ -285,6 +285,7 @@
 		3E87E31C2C56B94700D843E2 = {
 			isa = PBXGroup;
 			children = (
+				3E4D15052C5E523A00A3835A /* GoogleService-Info.plist */,
 				3E044D582CA4ADFE00DA5EFA /* datafight.xctestplan */,
 				3E87E3272C56B94700D843E2 /* datafight */,
 				3E87E33E2C56B94900D843E2 /* datafightTests */,
@@ -312,7 +313,6 @@
 				3E5F6ED62C5F785000BC4746 /* utils */,
 				3E0F20CC2C727FFD002FA01B /* Main.storyboard */,
 				3E87E3362C56B94900D843E2 /* Info.plist */,
-				3E4D15052C5E523A00A3835A /* GoogleService-Info.plist */,
 				3E7E9B0C2C7949250067586F /* ActionWheelView.swift */,
 			);
 			path = datafight;
