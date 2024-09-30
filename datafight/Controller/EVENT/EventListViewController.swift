@@ -66,8 +66,7 @@ class EventListViewController: UIViewController, UITableViewDataSource, UITableV
     @objc func addEventTapped() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let eventEditVC = storyboard.instantiateViewController(withIdentifier: "EventEditViewController") as? EventEditViewController {
-            let navController = UINavigationController(rootViewController: eventEditVC)
-            present(navController, animated: true, completion: nil)
+            navigationController?.pushViewController(eventEditVC, animated: true)
         }
     }
     

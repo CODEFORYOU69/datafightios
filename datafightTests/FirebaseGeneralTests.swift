@@ -2257,7 +2257,8 @@ extension XCTestCase {
     }
 
     func clearStorage(completion: @escaping () -> Void) {
-        let storageBucket = "test-bucket"  // Replace with your actual bucket name if different
+        let storageBucket = FirebaseApp.app()?.options.storageBucket ?? "default-bucket"
+        print("Using storage bucket: \(storageBucket)")
         let url = URL(string: "http://localhost:9199/storage/v1/b/\(storageBucket)/o?prefix=")!
         var request = URLRequest(url: url)
         request.httpMethod = "GET" // First, list the objects
@@ -2304,48 +2305,19 @@ extension XCTestCase {
         let projectId = FirebaseApp.app()!.options.projectID!
         let url = URL(string: "http://localhost:9099/emulator/v1/projects/\(projectId)/accounts")!
         var request = URLRequest(url: url)
-        request.httpMethod = "GET" // First, list the accounts
+        request.httpMethod = "DELETE"
 
-        let task = URLSession.shared.dataTask(with: request) { data, _, error in
-            guard let data = data, error == nil else {
-                print("Error listing authentication users: \(error?.localizedDescription ?? "Unknown error")")
-                completion()
-                return
+        let task = URLSession.shared.dataTask(with: request) { _, response, error in
+            if let error = error {
+                print("Error clearing Auth emulator: \(error.localizedDescription)")
+            } else if let response = response as? HTTPURLResponse {
+                print("Auth emulator cleared, status code: \(response.statusCode)")
             }
-            do {
-                let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any]
-                let users = json?["users"] as? [[String: Any]] ?? []
-
-                let group = DispatchGroup()
-
-                for user in users {
-                    if let localId = user["localId"] as? String {
-                        group.enter()
-                        let deleteUrl = URL(string: "http://localhost:9099/emulator/v1/projects/\(projectId)/accounts:delete")!
-                        var deleteRequest = URLRequest(url: deleteUrl)
-                        deleteRequest.httpMethod = "POST"
-                        deleteRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
-                        let body = ["localId": localId]
-                        deleteRequest.httpBody = try? JSONSerialization.data(withJSONObject: body)
-
-                        let deleteTask = URLSession.shared.dataTask(with: deleteRequest) { _, _, _ in
-                            print("Deleted auth user: \(localId)")
-                            group.leave()
-                        }
-                        deleteTask.resume()
-                    }
-                }
-                group.notify(queue: .main) {
-                    print("All auth users deleted")
-                    completion()
-                }
-            } catch {
-                print("Error parsing authentication users: \(error.localizedDescription)")
-                completion()
-            }
+            completion()
         }
         task.resume()
     }
+
 
     func clearEmulators(completion: @escaping () -> Void) {
         let dispatchGroup = DispatchGroup()

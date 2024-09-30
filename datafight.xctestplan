@@ -44,15 +44,6 @@
         "identifier" : "3E87E33A2C56B94900D843E2",
         "name" : "datafightTests"
       }
-    },
-    {
-      "enabled" : false,
-      "parallelizable" : true,
-      "target" : {
-        "containerPath" : "container:datafight.xcodeproj",
-        "identifier" : "3E87E3442C56B94900D843E2",
-        "name" : "datafightUITests"
-      }
     }
   ],
   "version" : 1

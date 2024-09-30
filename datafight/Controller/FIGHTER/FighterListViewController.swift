@@ -77,11 +77,9 @@ class FighterListViewController: UIViewController, UITableViewDataSource, UITabl
     @objc func addFighterTapped() {
         let storyboard = UIStoryboard(name: "Main", bundle: nil)
         if let fighterEditVC = storyboard.instantiateViewController(withIdentifier: "FighterEditViewController") as? FighterEditViewController {
-            let navController = UINavigationController(rootViewController: fighterEditVC)
-            present(navController, animated: true, completion: nil)
+            navigationController?.pushViewController(fighterEditVC, animated: true)
         }
     }
-
     func loadFighters() {
         loadingView.isHidden = false
         activityIndicator.startAnimating()

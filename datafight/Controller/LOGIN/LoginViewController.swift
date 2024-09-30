@@ -67,7 +67,7 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         }
     }
     private func handleSuccessfulLogin() {
-          // Utilisez SceneDelegate pour réinitialiser la racine de la navigation
+          // Use SceneDelegate
           if let sceneDelegate = self.view.window?.windowScene?.delegate as? SceneDelegate {
               sceneDelegate.configureInitialViewController()
           }
@@ -79,8 +79,9 @@ class LoginViewController: UIViewController, UITextFieldDelegate {
         present(alert, animated: true)
     }
 
-    // Si vous avez un bouton pour aller à l'écran d'inscription
+    // Signup
     @IBAction func goToSignUpButtonTapped(_ sender: Any) {
+        
         performSegue(withIdentifier: "showSignUp", sender: nil)
     }
 }
