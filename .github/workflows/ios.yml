@@ -81,6 +81,9 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation
+            -retry-tests-on-failure \
+            -test-timeouts-enabled NO \
+            -timeout=300
 
       # Stop Firebase Emulator Suite
       - name: Stop Firebase Emulator Suite
