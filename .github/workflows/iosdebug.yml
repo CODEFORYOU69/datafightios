@@ -1,4 +1,4 @@
-name: iOS CI
+name: iOS Build Workflows
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build-and-test:
+  build:
     runs-on: macos-latest
 
     steps:
@@ -40,6 +40,10 @@ jobs:
         run: |
           xcodebuild -version
 
+      - name: List Schemes
+        run: |
+          xcodebuild -list -project datafight.xcodeproj
+
       - name: Build and Test
         run: |
           xcodebuild test \
@@ -53,25 +57,3 @@ jobs:
         run: |
           ls -R ${{ github.workspace }}
           ls -R ${{ github.workspace }}/build
-
-      - name: Package App and Tests
-        run: |
-          # Package the app
-          mkdir -p Payload
-          cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
-          zip -r app.ipa Payload
-
-          # Package the tests
-          cd ${{ github.workspace }}/build/Debug-iphonesimulator
-          zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
-
-      - name: Upload to Firebase Test Lab
-        uses: w9jds/firebase-action@master
-        with:
-          args: >
-            firebase test ios run
-            --app app.ipa
-            --test tests.zip
-            --device model=iPadPro12,version=17.0,locale=en_US,orientation=portrait
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
