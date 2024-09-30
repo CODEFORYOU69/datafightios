@@ -19,7 +19,6 @@
 		3E0F20C72C7271A9002FA01B /* FightModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0F20C62C7271A9002FA01B /* FightModel.swift */; };
 		3E0F20C92C72735C002FA01B /* FightCategories.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0F20C82C72735C002FA01B /* FightCategories.swift */; };
 		3E0F20CB2C727454002FA01B /* FightEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0F20CA2C727454002FA01B /* FightEditViewController.swift */; };
-		3E0F20CD2C727FFD002FA01B /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3E0F20CC2C727FFD002FA01B /* Main.storyboard */; };
 		3E0F20D22C72AE7D002FA01B /* FightTableViewCell.xib in Resources */ = {isa = PBXBuildFile; fileRef = 3E0F20D12C72AE7D002FA01B /* FightTableViewCell.xib */; };
 		3E0F20D32C72AE7D002FA01B /* FightTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0F20D02C72AE7D002FA01B /* FightTableViewCell.swift */; };
 		3E4D14FE2C5D91CC00A3835A /* FighterEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4D14FD2C5D91CC00A3835A /* FighterEditViewController.swift */; };
@@ -76,6 +75,8 @@
 		3E98A87D2CAB0C8F00123F78 /* FirebaseInstallations in Frameworks */ = {isa = PBXBuildFile; productRef = 3E98A87C2CAB0C8F00123F78 /* FirebaseInstallations */; };
 		3E98A87F2CAB0C8F00123F78 /* FirebasePerformance in Frameworks */ = {isa = PBXBuildFile; productRef = 3E98A87E2CAB0C8F00123F78 /* FirebasePerformance */; };
 		3E98A8812CAB0C8F00123F78 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = 3E98A8802CAB0C8F00123F78 /* FirebaseStorage */; };
+		3E98A8842CAB227900123F78 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3E98A8832CAB227900123F78 /* Main.storyboard */; };
+		3E98A8852CAB227900123F78 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 3E98A8832CAB227900123F78 /* Main.storyboard */; };
 		3E98BF8E2C8A579C00B8C859 /* AddRoundViewController+determineWinner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E98BF8D2C8A579C00B8C859 /* AddRoundViewController+determineWinner.swift */; };
 		3EABF45D2CA0FD5000F09559 /* RoundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF45C2CA0FD5000F09559 /* RoundTests.swift */; };
 		3EABF4632CA2082300F09559 /* FightDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF4622CA2082300F09559 /* FightDetailViewController.swift */; };
@@ -111,7 +112,6 @@
 		3E0F20C62C7271A9002FA01B /* FightModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FightModel.swift; sourceTree = "<group>"; };
 		3E0F20C82C72735C002FA01B /* FightCategories.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FightCategories.swift; sourceTree = "<group>"; };
 		3E0F20CA2C727454002FA01B /* FightEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FightEditViewController.swift; sourceTree = "<group>"; };
-		3E0F20CC2C727FFD002FA01B /* Main.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = Main.storyboard; path = "../../../../../../../Library/Mobile Documents/.Trash/Main.storyboard"; sourceTree = "<group>"; };
 		3E0F20D02C72AE7D002FA01B /* FightTableViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FightTableViewCell.swift; sourceTree = "<group>"; };
 		3E0F20D12C72AE7D002FA01B /* FightTableViewCell.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = FightTableViewCell.xib; sourceTree = "<group>"; };
 		3E21A5E72C8E279200ACDCA4 /* datafight.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = datafight.entitlements; sourceTree = "<group>"; };
@@ -163,6 +163,7 @@
 		3E87E3342C56B94900D843E2 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		3E87E3362C56B94900D843E2 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		3E87E33B2C56B94900D843E2 /* datafightTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = datafightTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3E98A8832CAB227900123F78 /* Main.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = Main.storyboard; sourceTree = "<group>"; };
 		3E98BF8D2C8A579C00B8C859 /* AddRoundViewController+determineWinner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddRoundViewController+determineWinner.swift"; sourceTree = "<group>"; };
 		3EABF45C2CA0FD5000F09559 /* RoundTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundTests.swift; sourceTree = "<group>"; };
 		3EABF4622CA2082300F09559 /* FightDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FightDetailViewController.swift; sourceTree = "<group>"; };
@@ -313,7 +314,7 @@
 				3E4D14FC2C5D91A100A3835A /* Controller */,
 				3E6133362C6EC4FD0060D6E6 /* model */,
 				3E5F6ED62C5F785000BC4746 /* utils */,
-				3E0F20CC2C727FFD002FA01B /* Main.storyboard */,
+				3E98A8832CAB227900123F78 /* Main.storyboard */,
 				3E87E3362C56B94900D843E2 /* Info.plist */,
 				3E7E9B0C2C7949250067586F /* ActionWheelView.swift */,
 			);
@@ -501,9 +502,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				3E98A8852CAB227900123F78 /* Main.storyboard in Resources */,
 				3E0F20D22C72AE7D002FA01B /* FightTableViewCell.xib in Resources */,
 				3E87E3322C56B94900D843E2 /* Assets.xcassets in Resources */,
-				3E0F20CD2C727FFD002FA01B /* Main.storyboard in Resources */,
 				3E87E3352C56B94900D843E2 /* Base in Resources */,
 				3E4D15062C5E523A00A3835A /* GoogleService-Info.plist in Resources */,
 				3E61334F2C70224C0060D6E6 /* FighterTableViewCell.xib in Resources */,
@@ -516,6 +517,7 @@
 			files = (
 				3E6848D12CA788F500EF01A6 /* Assets.xcassets in Resources */,
 				3E6848D32CA9695C00EF01A6 /* testVideo.mp4 in Resources */,
+				3E98A8842CAB227900123F78 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
