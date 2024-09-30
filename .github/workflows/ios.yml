@@ -42,12 +42,18 @@ jobs:
 
       - name: Build and Test
         run: |
-          xcodebuild test \
-            -project datafight.xcodeproj \
-            -scheme datafight \
-            -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
-            -testPlan datafight \
-            CODE_SIGNING_ALLOWED=NO | xcpretty
+          xcodebuild clean build test \
+          -project datafight.xcodeproj \
+          -scheme datafight \
+          -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
+          -testPlan datafight \
+          -derivedDataPath build \
+          CODE_SIGNING_ALLOWED=NO | xcpretty
+          
+      - name: Check build output
+        if: always()
+        run: |
+          ls -R ${{ github.workspace }}
 
       - name: Debug Directory Structure
         run: |
