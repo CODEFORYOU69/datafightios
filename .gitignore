@@ -9,7 +9,7 @@ firebase-debug.*.log*
 
 # Firebase cache
 .firebase/
-GoogleService-Info.plist
+/GoogleService-Info.plist
 
 
 # Firebase config

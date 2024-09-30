@@ -26,8 +26,8 @@
     ],
     "environmentVariableEntries" : [
       {
-        "key" : "unit_tests",
-        "value" : "true"
+        "key" : "IS_TESTING",
+        "value" : "yes"
       }
     ],
     "targetForVariableExpansion" : {
