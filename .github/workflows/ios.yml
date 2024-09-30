@@ -53,6 +53,15 @@ jobs:
           xcodebuild -resolvePackageDependencies \
             -project datafight.xcodeproj
 
+      # Start Firebase Emulator Suite (Auth, Firestore, Storage)
+      - name: Start Firebase Emulator Suite
+        run: |
+          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data &
+        
+      # Wait for Firebase Emulator to start
+      - name: Wait for Firebase Emulator to Start
+        run: sleep 10
+
       # Create build directory in case Xcode doesn't generate it
       - name: Create Build Directory
         run: |
@@ -63,7 +72,7 @@ jobs:
         run: |
           ls -R ${{ github.workspace }}/datafight.xcodeproj
 
-      # Build and Test (Skipping Package Plugin Validation)
+      # Build and Test using Firebase Emulator (Skipping Package Plugin Validation)
       - name: Build and Test
         run: |
           xcodebuild test \
@@ -72,6 +81,11 @@ jobs:
             -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation
+
+      # Stop Firebase Emulator Suite
+      - name: Stop Firebase Emulator Suite
+        run: |
+          firebase emulators:stop
 
       # Debug the directory structure after the build
       - name: Debug Directory Structure
