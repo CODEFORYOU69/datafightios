@@ -44,7 +44,7 @@ jobs:
       # Start Firebase Emulator Suite for Firestore, Auth, and Storage
       - name: Start Firebase Emulator Suite
         run: |
-          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data &
+          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data --token ${{ secrets.FIREBASE_TOKEN }} &
         
       # Wait for Firebase Emulator to start
       - name: Wait for Firebase Emulator to Start
