@@ -41,12 +41,14 @@ jobs:
         run: |
           xcrun simctl list devices
 
-      # Use Firestore Emulator action from GitHub Marketplace
-      - name: Start Firestore Emulator
-        uses: ikemtz/firestore-emulator-action@v2 # Using the action from GitHub Marketplace
-        with:
-          projectId: datafight-5d0cf
-          port: 8080 # Optional, you can specify the port if needed
+      # Start Firebase Emulator Suite for Firestore, Auth, and Storage
+      - name: Start Firebase Emulator Suite
+        run: |
+          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data &
+        
+      # Wait for Firebase Emulator to start
+      - name: Wait for Firebase Emulator to Start
+        run: sleep 15
 
       # Start the simulator manually
       - name: Start iOS Simulator
@@ -83,6 +85,11 @@ jobs:
             -timeout=300
         env:
           IS_TESTING: "yes" # Define the environment variable for testing mode
+
+      # Stop Firebase Emulator Suite after tests
+      - name: Stop Firebase Emulator Suite
+        run: |
+          firebase emulators:stop
 
       # Debug Directory Structure
       - name: Debug Directory Structure
