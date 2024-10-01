@@ -50,10 +50,10 @@ jobs:
       - name: Wait for Firebase Emulator to Start
         run: sleep 15
 
-      # Start the simulator manually
+      # Start the simulator manually (iPad Pro 13-inch (M4))
       - name: Start iOS Simulator
         run: |
-          xcrun simctl boot "B4ECBE36-5D64-4FBC-97CC-6EE37A97A011"
+          xcrun simctl boot "iPad Pro (13-inch) (M4)"
 
       # Wait for the simulator to fully boot
       - name: Wait for Simulator to Boot
@@ -62,7 +62,7 @@ jobs:
       # Verify Simulator State
       - name: Verify Simulator State
         run: |
-          xcrun simctl list devices | grep "B4ECBE36-5D64-4FBC-97CC-6EE37A97A011"
+          xcrun simctl list devices | grep "iPad Pro (13-inch) (M4)"
 
       # Resolve Swift Package Dependencies
       - name: Resolve Swift Package Dependencies
@@ -70,21 +70,20 @@ jobs:
           xcodebuild -resolvePackageDependencies \
             -project datafight.xcodeproj
 
-      # Build and Test with additional timeout and environment variable
-      - name: Build and Test
+      # Build and Test with environment variable for iPad Pro (13-inch) (M4)
+      - name: Build and Test with Environment Variable
         run: |
           xcodebuild test \
             -project datafight.xcodeproj \
             -scheme datafight \
-            -destination 'platform=iOS Simulator,name=B4ECBE36-5D64-4FBC-97CC-6EE37A97A011' \
-            -destination-timeout 60 \
+            -destination 'platform=iOS Simulator,name=iPad Pro (13-inch) (M4),OS=17.0' \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation \
             -retry-tests-on-failure \
             -test-timeouts-enabled NO \
             -timeout=300
         env:
-          IS_TESTING: "yes" # Define the environment variable for testing mode
+          IS_TESTING: "yes"
 
       # Stop Firebase Emulator Suite after tests
       - name: Stop Firebase Emulator Suite
@@ -96,6 +95,12 @@ jobs:
         run: |
           ls -R ${{ github.workspace }}
           ls -R ${{ github.workspace }}/build
+
+      # Fetch Simulator Logs for debugging
+      - name: Fetch Simulator Logs
+        run: |
+          xcrun simctl spawn booted log collect --output sim_logs.log
+          cat sim_logs.log
 
       # Package App and Tests (if needed)
       - name: Package App and Tests
