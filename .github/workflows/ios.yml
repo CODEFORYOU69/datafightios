@@ -41,19 +41,17 @@ jobs:
         run: |
           xcrun simctl list devices
 
-      # Start Firebase Emulator Suite (Auth, Firestore, Storage)
-      - name: Start Firebase Emulator Suite
-        run: |
-          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data &
-        
-      # Wait for Firebase Emulator to start
-      - name: Wait for Firebase Emulator to Start
-        run: sleep 15
+      # Use Firestore Emulator action from GitHub Marketplace
+      - name: Start Firestore Emulator
+        uses: ikemtz/firestore-emulator-action@v2 # Using the action from GitHub Marketplace
+        with:
+          projectId: datafight-5d0cf
+          port: 8080 # Optional, you can specify the port if needed
 
       # Start the simulator manually
       - name: Start iOS Simulator
         run: |
-          xcrun simctl boot "iPad Pro 13-inch (M4)"
+          xcrun simctl boot "iPad Pro (12.9-inch) (6th generation)"
 
       # Wait for the simulator to fully boot
       - name: Wait for Simulator to Boot
@@ -62,7 +60,7 @@ jobs:
       # Verify Simulator State
       - name: Verify Simulator State
         run: |
-          xcrun simctl list devices | grep "iPad Pro 13-inch (M4)"
+          xcrun simctl list devices | grep "iPad Pro (12.9-inch) (6th generation)"
 
       # Resolve Swift Package Dependencies
       - name: Resolve Swift Package Dependencies
@@ -76,7 +74,7 @@ jobs:
           xcodebuild test \
             -project datafight.xcodeproj \
             -scheme datafight \
-            -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4)' \
+            -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4) (6th generation)' \
             -destination-timeout 60 \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation \
@@ -85,11 +83,6 @@ jobs:
             -timeout=300
         env:
           IS_TESTING: "yes" # Define the environment variable for testing mode
-
-      # Stop Firebase Emulator Suite after tests
-      - name: Stop Firebase Emulator Suite
-        run: |
-          firebase emulators:stop
 
       # Debug Directory Structure
       - name: Debug Directory Structure
