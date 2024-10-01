@@ -1,4 +1,4 @@
-name: iOS CI
+name: iOS CI with Firebase Test Lab
 
 on:
   push:
@@ -11,78 +11,64 @@ jobs:
     runs-on: macos-latest
 
     steps:
+      # Checkout the code from the repository
       - name: Checkout
         uses: actions/checkout@v3
 
+      # Set up Node.js (updated to version 20)
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
 
+      # Install xcpretty (for Xcode build formatting)
       - name: Install xcpretty
         run: |
           gem install xcpretty
 
-      - name: Install Firebase CLI globally
+      # Install Firebase CLI globally
+      - name: Install Firebase CLI
         run: |
           npm install -g firebase-tools
 
+      # Set up the latest stable version of Xcode
       - name: Set up Xcode
         uses: maxim-lobanov/setup-xcode@v1
         with:
           xcode-version: latest-stable
 
-      - name: List Available Simulators
-        run: |
-          xcrun simctl list devices
-
-      # Start the simulator manually
-      - name: Start iOS Simulator
-        run: |
-          xcrun simctl boot "iPad Pro (12.9-inch) (6th generation)"
-
-      # Wait for the simulator to fully boot
-      - name: Wait for Simulator to Boot
-        run: sleep 30
-
-      # Verify Simulator State
-      - name: Verify Simulator State
-        run: |
-          xcrun simctl list devices | grep "iPad Pro (12.9-inch) (6th generation)"
-
+      # Resolve Swift Package Dependencies
       - name: Resolve Swift Package Dependencies
         run: |
           xcodebuild -resolvePackageDependencies \
             -project datafight.xcodeproj
 
-      # Build and Test with additional timeout
+      # Build and Test for Firebase Test Lab (skip local emulators)
       - name: Build and Test
         run: |
           xcodebuild test \
             -project datafight.xcodeproj \
             -scheme datafight \
             -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
-            -destination-timeout 60 \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation \
             -retry-tests-on-failure \
             -test-timeouts-enabled NO \
             -timeout=300
 
-      - name: Debug Directory Structure
-        run: |
-          ls -R ${{ github.workspace }}
-          ls -R ${{ github.workspace }}/build
-
+      # Package the app and the test results into .ipa and .zip files
       - name: Package App and Tests
         run: |
+          # Package the app
           mkdir -p Payload
           cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
           zip -r app.ipa Payload
 
+          # Package the tests
           cd ${{ github.workspace }}/build/Debug-iphonesimulator
           zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
 
+      # Upload the app and test packages to Firebase Test Lab for execution
       - name: Upload to Firebase Test Lab
         uses: w9jds/firebase-action@master
         with:
