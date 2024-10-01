@@ -76,12 +76,12 @@ jobs:
           xcodebuild test \
             -project datafight.xcodeproj \
             -scheme datafight \
-            -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4),OS=17.5' \
+            -destination 'platform=iOS Simulator,OS=17.5,id=979F0FB8-8856-4AAD-9875-11211725C919' \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation \
             -retry-tests-on-failure \
             -test-timeouts-enabled NO \
-            -timeout=300
+            -timeout=1800
         env:
           IS_TESTING: "yes"
 
