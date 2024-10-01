@@ -36,6 +36,21 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      # Cache Firebase Emulator data to avoid repeated downloads
+      - name: Cache Firebase Emulator
+        uses: actions/cache@v3
+        with:
+          path: /Users/runner/.cache/firebase/emulators
+          key: ${{ runner.os }}-firebase-emulator
+          restore-keys: |
+            ${{ runner.os }}-firebase-emulator
+
+      # Export Service Account credentials
+      - name: Set up Google Application Credentials
+        run: echo "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}" > $HOME/firebase-key.json
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: $HOME/firebase-key.json
+
       # List available simulators (for debugging)
       - name: List Available Simulators
         run: |
@@ -44,7 +59,7 @@ jobs:
       # Start Firebase Emulator Suite for Firestore, Auth, and Storage
       - name: Start Firebase Emulator Suite
         run: |
-          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data --token ${{ secrets.FIREBASE_TOKEN }} &
+          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data &
         
       # Wait for Firebase Emulator to start
       - name: Wait for Firebase Emulator to Start
