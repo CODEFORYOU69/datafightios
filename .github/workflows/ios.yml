@@ -1,4 +1,4 @@
-name: iOS CI with Firebase Test Lab
+name: iOS CI
 
 on:
   push:
@@ -11,7 +11,6 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # Checkout the code from the repository
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -37,45 +36,73 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      # List available simulators (for debugging)
+      - name: List Available Simulators
+        run: |
+          xcrun simctl list devices
+
+      # Start Firebase Emulator Suite (Auth, Firestore, Storage)
+      - name: Start Firebase Emulator Suite
+        run: |
+          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data &
+        
+      # Wait for Firebase Emulator to start
+      - name: Wait for Firebase Emulator to Start
+        run: sleep 15
+
+      # Start the simulator manually
+      - name: Start iOS Simulator
+        run: |
+          xcrun simctl boot "iPad Pro 13-inch (M4)"
+
+      # Wait for the simulator to fully boot
+      - name: Wait for Simulator to Boot
+        run: sleep 30
+
+      # Verify Simulator State
+      - name: Verify Simulator State
+        run: |
+          xcrun simctl list devices | grep "iPad Pro 13-inch (M4)"
+
       # Resolve Swift Package Dependencies
       - name: Resolve Swift Package Dependencies
         run: |
           xcodebuild -resolvePackageDependencies \
             -project datafight.xcodeproj
 
-      # Build and Test for Firebase Test Lab (skip local emulators)
+      # Build and Test with additional timeout and environment variable
       - name: Build and Test
         run: |
           xcodebuild test \
             -project datafight.xcodeproj \
             -scheme datafight \
-            -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
+            -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4)' \
+            -destination-timeout 60 \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation \
             -retry-tests-on-failure \
             -test-timeouts-enabled NO \
             -timeout=300
+        env:
+          IS_TESTING: "yes" # Define the environment variable for testing mode
 
-      # Package the app and the test results into .ipa and .zip files
+      # Stop Firebase Emulator Suite after tests
+      - name: Stop Firebase Emulator Suite
+        run: |
+          firebase emulators:stop
+
+      # Debug Directory Structure
+      - name: Debug Directory Structure
+        run: |
+          ls -R ${{ github.workspace }}
+          ls -R ${{ github.workspace }}/build
+
+      # Package App and Tests (if needed)
       - name: Package App and Tests
         run: |
-          # Package the app
           mkdir -p Payload
           cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
           zip -r app.ipa Payload
 
-          # Package the tests
           cd ${{ github.workspace }}/build/Debug-iphonesimulator
           zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
-
-      # Upload the app and test packages to Firebase Test Lab for execution
-      - name: Upload to Firebase Test Lab
-        uses: w9jds/firebase-action@master
-        with:
-          args: >
-            firebase test ios run
-            --app app.ipa
-            --test tests.zip
-            --device model=iPadPro12,version=17.0,locale=en_US,orientation=portrait
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
