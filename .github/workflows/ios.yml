@@ -53,7 +53,7 @@ jobs:
       # Start the simulator manually
       - name: Start iOS Simulator
         run: |
-          xcrun simctl boot "iPad Pro 13-inch (M4)"
+          xcrun simctl boot "iPad Pro 13-inch (M4) (8D7DACF8-3A0C-4943-BBE9-24F4C349512F)"
 
       # Wait for the simulator to fully boot
       - name: Wait for Simulator to Boot
@@ -62,7 +62,7 @@ jobs:
       # Verify Simulator State
       - name: Verify Simulator State
         run: |
-          xcrun simctl list devices | grep "iPad Pro 13-inch (M4)"
+          xcrun simctl list devices | grep "iPad Pro 13-inch (M4) (8D7DACF8-3A0C-4943-BBE9-24F4C349512F)"
 
       # Resolve Swift Package Dependencies
       - name: Resolve Swift Package Dependencies
@@ -76,7 +76,7 @@ jobs:
           xcodebuild test \
             -project datafight.xcodeproj \
             -scheme datafight \
-            -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4)' \
+            -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4) (8D7DACF8-3A0C-4943-BBE9-24F4C349512F)' \
             -destination-timeout 60 \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation \
