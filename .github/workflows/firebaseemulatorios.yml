@@ -72,7 +72,7 @@ jobs:
           xcodebuild build-for-testing \
             -project datafight.xcodeproj \
             -scheme "$scheme" \
-            -destination 'platform=iOS Simulator,OS=17.5,name=iPad Pro (13-inch) (M4)' \
+            -destination 'platform=iOS Simulator,OS=18,name=iPad Pro 13-inch (M4)' \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation | xcpretty
 
