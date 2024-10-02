@@ -91,10 +91,11 @@ jobs:
               -scheme \"$scheme\" \
               -destination 'platform=iOS Simulator,OS=18.0,id=C34E5E41-DE63-498D-9D85-2CB4650348F9' \
               CODE_SIGNING_ALLOWED=NO \
-              -parallel-testing-enabled NO \   # Désactivation des tests parallèles
+              -parallel-testing-enabled NO \
               -retry-tests-on-failure \
               -test-timeouts-enabled NO \
               -timeout=3600 | xcpretty"
+
 
               
 
