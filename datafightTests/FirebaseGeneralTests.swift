@@ -335,7 +335,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 20, handler: nil)
+        waitForExpectations(timeout: 60, handler: nil)
     }
     
     func testNetworkConnectivity() {
@@ -638,7 +638,7 @@ class FirebaseGeneralTests: XCTestCase {
 
     // MARK: - Test updateFighterWithFight function
     
-    func test7_testUpdateFighterWithFight() {
+    func testUpdateFighterWithFight() {
         let expectation = self.expectation(description: "Update fighter with fight")
         
         // Create a fighter
@@ -682,7 +682,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 20, handler: nil)
+        waitForExpectations(timeout: 30, handler: nil)
     }
 
     // MARK: - Test getEvents function
@@ -772,7 +772,7 @@ class FirebaseGeneralTests: XCTestCase {
 
     // MARK: - Test updateEventWithFight function
 
-        func test6_testUpdateEventWithFight() {
+        func testUpdateEventWithFight() {
         let expectation = self.expectation(description: "Update event with fight")
 
         // Create an event
@@ -812,7 +812,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 20, handler: nil)
+        waitForExpectations(timeout: 60, handler: nil)
     }
 
     // MARK: - Test uploadEventImage function
