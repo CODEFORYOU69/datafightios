@@ -49,7 +49,7 @@ jobs:
 
       - name: Build and Test
         run: |
-          xcodebuild test -project datafight.xcodeproj -scheme datafight -destination 'platform=iOS Simulator,name=iPad Pro (13-inch) (5th generation),OS=latest' CODE_SIGNING_ALLOWED=NO
+          xcodebuild test -project datafight.xcodeproj -scheme datafight -destination 'platform=iOS Simulator,name=iPad Pro 13-inch (M4),OS=latest' CODE_SIGNING_ALLOWED=NO
         env:
           IS_TESTING: "YES"
 
