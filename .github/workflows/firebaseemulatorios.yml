@@ -1,116 +1,32 @@
-name: iOS CI with Firebase Emulator
+- name: Build
+  env:
+    scheme: ${{ 'default' }}
+    platform: ${{ 'iOS Simulator' }}
+  run: |
+    if [ $scheme = default ]; then scheme=$(cat default); fi
+    xcodebuild build-for-testing \
+      -project datafight.xcodeproj \
+      -scheme "$scheme" \
+      -destination 'platform=iOS Simulator,OS=18.0,name=iPad Pro 13-inch (M4)' \
+      CODE_SIGNING_ALLOWED=NO \
+      -skipPackagePluginValidation | xcpretty
 
-on:
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-
-env:
-  IS_TESTING: "YES"
-
-jobs:
-  build-and-test:
-    name: Build and Test with Firebase Emulator
-    runs-on: macos-latest
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: '20'
-
-      - name: Install xcpretty
-        run: gem install xcpretty
-
-      - name: Install Firebase CLI
-        run: npm install -g firebase-tools
-
-      - name: Set up Xcode
-        uses: maxim-lobanov/setup-xcode@v1
-        with:
-          xcode-version: latest-stable
-
-      - name: Cache Firebase Emulator
-        uses: actions/cache@v3
-        with:
-          path: ~/.cache/firebase/emulators
-          key: ${{ runner.os }}-firebase-emulators-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-firebase-emulators-
-
-      - name: Set GOOGLE_APPLICATION_CREDENTIALS
-        run: |
-          echo "${{ secrets.GCP_SA_KEY }}" > ${{ runner.temp }}/gcp-key.json
-          export GOOGLE_APPLICATION_CREDENTIALS="${{ runner.temp }}/gcp-key.json"
-        shell: bash
-
-      - name: List Available Simulators
-        run: xcrun simctl list devices
-
-      - name: Set Default Scheme
-        run: |
-          scheme_list=$(xcodebuild -list -json | tr -d "\n")
-          default=$(echo $scheme_list | ruby -e "require 'json'; puts JSON.parse(STDIN.gets)['project']['targets'][0]")
-          echo $default | cat >default
-          echo Using default scheme: $default
-
-      - name: Resolve Swift Package Dependencies
-        run: |
-          xcodebuild -resolvePackageDependencies \
-            -project datafight.xcodeproj
-
-      - name: Build
-        env:
-          scheme: ${{ 'default' }}
-          platform: ${{ 'iOS Simulator' }}
-        run: |
-          if [ $scheme = default ]; then scheme=$(cat default); fi
-          xcodebuild build-for-testing \
-            -project datafight.xcodeproj \
-            -scheme "$scheme" \
-            -destination 'platform=iOS Simulator,OS=18,name=iPad Pro 13-inch (M4)' \
-            CODE_SIGNING_ALLOWED=NO \
-            -skipPackagePluginValidation | xcpretty
-
-      - name: Test with Firebase Emulator
-        env:
-          scheme: ${{ 'default' }}
-          platform: ${{ 'iOS Simulator' }}
-          IS_TESTING: "YES"
-          FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
-          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp-key.json
-        run: |
-          if [ $scheme = default ]; then scheme=$(cat default); fi
-          firebase emulators:exec --only firestore,auth,storage --project datafight-5d0cf \
-            "xcodebuild test-without-building \
-              -project datafight.xcodeproj \
-              -scheme \"$scheme\" \
-              -destination 'platform=iOS Simulator,OS=18,name=iPad Pro 13-inch (M4)' \
-              CODE_SIGNING_ALLOWED=NO \
-              -skipPackagePluginValidation \
-              -retry-tests-on-failure \
-              -test-timeouts-enabled NO \
-              -timeout=1800 | xcpretty"
-
-      - name: Debug Directory Structure
-        run: |
-          ls -R ${{ github.workspace }}
-          ls -R ${{ github.workspace }}/build
-
-      - name: Fetch Simulator Logs
-        run: |
-          xcrun simctl spawn booted log collect --output sim_logs.log
-          cat sim_logs.log
-
-      - name: Package App and Tests
-        run: |
-          mkdir -p Payload
-          cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
-          zip -r app.ipa Payload
-
-          cd ${{ github.workspace }}/build/Debug-iphonesimulator
-          zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
+- name: Test with Firebase Emulator
+  env:
+    scheme: ${{ 'default' }}
+    platform: ${{ 'iOS Simulator' }}
+    IS_TESTING: "YES"
+    FIREBASE_TOKEN: ${{ secrets.FIREBASE_TOKEN }}
+    GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp-key.json
+  run: |
+    if [ $scheme = default ]; then scheme=$(cat default); fi
+    firebase emulators:exec --only firestore,auth,storage --project datafight-5d0cf \
+      "xcodebuild test-without-building \
+        -project datafight.xcodeproj \
+        -scheme \"$scheme\" \
+        -destination 'platform=iOS Simulator,OS=18.0,name=iPad Pro 13-inch (M4)' \
+        CODE_SIGNING_ALLOWED=NO \
+        -skipPackagePluginValidation \
+        -retry-tests-on-failure \
+        -test-timeouts-enabled NO \
+        -timeout=1800 | xcpretty"
