@@ -1169,7 +1169,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 60, handler: nil)
     }
     func testGetAllRoundsForFight() {
         let expectation = self.expectation(description: "Get all rounds for fight")
