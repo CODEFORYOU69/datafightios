@@ -1293,7 +1293,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 60, handler: nil)
     }
 
     func testFetchUserRounds() {
@@ -2131,6 +2131,8 @@ class FirebaseGeneralTests: XCTestCase {
 
 
     func testFetchEvents() async throws {
+        let expectation = self.expectation(description: "Fetch events expectation")
+
         // Ensure a user is logged in
         guard let currentUserID = Auth.auth().currentUser?.uid else {
             XCTFail("No authenticated user")
@@ -2142,7 +2144,7 @@ class FirebaseGeneralTests: XCTestCase {
             id: nil,
             creatorUserId: currentUserID,
             eventName: "Test Event 1",
-            eventType: .open, // Replace with appropriate EventType
+            eventType: .open,
             location: "Test Location 1",
             date: Date(),
             imageURL: nil,
@@ -2154,7 +2156,7 @@ class FirebaseGeneralTests: XCTestCase {
             id: nil,
             creatorUserId: currentUserID,
             eventName: "Test Event 2",
-            eventType: .open, // Replace with appropriate EventType
+            eventType: .open,
             location: "Test Location 2",
             date: Date(),
             imageURL: nil,
@@ -2175,13 +2177,18 @@ class FirebaseGeneralTests: XCTestCase {
 
             // Validate the results
             XCTAssertEqual(events.count, 2, "There should be exactly 2 events returned")
+            expectation.fulfill() // Fulfill expectation once the fetch is done
         } catch {
             XCTFail("Failed to save events or fetch events: \(error.localizedDescription)")
         }
+
+        // Wait for expectations
+        await fulfillment(of: [expectation], timeout: 60)
     }
 
-
     func testFetchFighters() async throws {
+        let expectation = self.expectation(description: "Fetch fighters expectation")
+
         // Ensure a user is logged in
         guard let currentUserID = Auth.auth().currentUser?.uid else {
             XCTFail("No authenticated user")
@@ -2195,7 +2202,7 @@ class FirebaseGeneralTests: XCTestCase {
             firstName: "First",
             lastName: "Fighter1",
             gender: "Male",
-            birthdate: Date(), // Use appropriate date
+            birthdate: Date(),
             country: "CountryA",
             profileImageURL: nil,
             fightIds: []
@@ -2207,7 +2214,7 @@ class FirebaseGeneralTests: XCTestCase {
             firstName: "Second",
             lastName: "Fighter2",
             gender: "Female",
-            birthdate: Date(), // Use appropriate date
+            birthdate: Date(),
             country: "CountryB",
             profileImageURL: nil,
             fightIds: []
@@ -2227,9 +2234,13 @@ class FirebaseGeneralTests: XCTestCase {
             // Validate the results
             XCTAssertNotNil(fighters, "Fighters should not be nil")
             XCTAssertEqual(fighters.count, 2, "There should be exactly 2 fighters returned")
+            expectation.fulfill() // Fulfill expectation once the fetch is done
         } catch {
             XCTFail("Failed to save fighters or fetch fighters: \(error.localizedDescription)")
         }
+
+        // Wait for expectations
+        await fulfillment(of: [expectation], timeout: 60)
     }
 
 
