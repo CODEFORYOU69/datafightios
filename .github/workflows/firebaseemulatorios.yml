@@ -101,8 +101,8 @@ jobs:
 
       - name: Debug Directory Structure
         run: |
-          ls -R ${{ github.workspace }}
-          ls -R ${{ github.workspace }}/build
+          ls -R /Users/runner/Library/Developer/Xcode/DerivedData/datafight-asepzooxogezwlcjsjikitkmswmd/Build/Products/Debug-iphonesimulator/
+
 
       - name: Fetch Simulator Logs
         run: |
