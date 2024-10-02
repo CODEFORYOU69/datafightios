@@ -96,13 +96,16 @@ jobs:
               -test-timeouts-enabled NO \
               -timeout=3600 | xcpretty"
 
-
-              
-
       - name: Debug Directory Structure
         run: |
           ls -R /Users/runner/Library/Developer/Xcode/DerivedData/datafight-asepzooxogezwlcjsjikitkmswmd/Build/Products/Debug-iphonesimulator/
 
+      - name: Boot iOS Simulator
+        run: |
+          xcrun simctl boot "iPad Pro 13-inch (M4)"
+          
+      - name: Wait for Simulator to boot
+        run: sleep 10
 
       - name: Fetch Simulator Logs
         run: |
