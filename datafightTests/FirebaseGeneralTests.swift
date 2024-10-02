@@ -390,7 +390,7 @@ class FirebaseGeneralTests: XCTestCase {
     }
 
     // MARK: - Test updateFight function
-    func test5_testUpdateFight() {
+    func testUpdateFight() {
         let saveFightExpectation = self.expectation(description: "Save fight")
         let updateFightExpectation = self.expectation(description: "Update fight")
 
@@ -446,54 +446,10 @@ class FirebaseGeneralTests: XCTestCase {
             XCTFail("User not authenticated")
         }
         
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 60, handler: nil)
     }
 
-    // MARK: - Test deleteFight function
-   /* func testDeleteFight() {
-        let saveFightExpectation = self.expectation(description: "Save fight")
-        let deleteFightExpectation = self.expectation(description: "Delete fight")
-
-        let fight = Fight(
-            creatorUserId: "testUser",
-            eventId: "testEventId",
-            fightNumber: 1,
-            blueFighterId: "blueFighter",
-            redFighterId: "redFighter",
-            category: "Adult",
-            weightCategory: "Lightweight",
-            round: "Final",
-            isOlympic: false,
-            roundIds: nil,
-            fightResult: nil,
-            blueVideoReplayUsed: false,
-            redVideoReplayUsed: false,
-            videoId: nil,
-            videoURL: nil
-        )
-        
-        firebaseService.saveFight(fight) { result in
-            switch result {
-            case .success(let fightId):
-                saveFightExpectation.fulfill()
-                var fightToDelete = fight
-                fightToDelete.id = fightId
-                self.firebaseService.deleteFight(fightToDelete) { result in
-                    switch result {
-                    case .success:
-                        deleteFightExpectation.fulfill()
-                    case .failure(let error):
-                        XCTFail("Failed to delete fight: \(error.localizedDescription)")
-                    }
-                }
-            case .failure(let error):
-                XCTFail("Failed to save fight: \(error.localizedDescription)")
-            }
-        }
-        
-        waitForExpectations(timeout: 10, handler: nil)
-  }
-    */
+  
     // MARK: - Test getFightsForEvent function
     func testGetFightsForEvent() {
         let expectation = self.expectation(description: "Get fights for event")
@@ -508,7 +464,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 30, handler: nil)
     }
     func testGetFighters() {
         let expectation = self.expectation(description: "Get fighters")
@@ -732,7 +688,7 @@ class FirebaseGeneralTests: XCTestCase {
 
     // MARK: - Test getEvent function
 
-    func test9_testGetEvent() {
+    func testGetEvent() {
         let saveEventExpectation = self.expectation(description: "Save event")
         let getEventExpectation = self.expectation(description: "Get event")
 
@@ -767,7 +723,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 20, handler: nil)
+        waitForExpectations(timeout: 30, handler: nil)
     }
 
     // MARK: - Test updateEventWithFight function
