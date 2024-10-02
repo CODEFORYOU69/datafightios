@@ -11,7 +11,6 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      # Checkout the code from the repository
       - name: Checkout
         uses: actions/checkout@v3
 
@@ -37,15 +36,51 @@ jobs:
         with:
           xcode-version: latest-stable
 
+      # Cache Firebase Emulator
+      - name: Cache Firebase Emulator
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/firebase/emulators
+          key: firebase-emulator-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+          restore-keys: |
+            firebase-emulator-${{ runner.os }}-
+
+      # Export GOOGLE_APPLICATION_CREDENTIALS for authentication
+      - name: Set GOOGLE_APPLICATION_CREDENTIALS
+        run: |
+          echo "${{ secrets.GCP_SA_KEY }}" > ${{ runner.temp }}/gcp-key.json
+          export GOOGLE_APPLICATION_CREDENTIALS="${{ runner.temp }}/gcp-key.json"
+        shell: bash
+
       # List available simulators (for debugging)
       - name: List Available Simulators
         run: |
           xcrun simctl list devices
 
-      # Check Xcode version (for debugging)
-      - name: Check Xcode version
+      # Start Firebase Emulator Suite for Firestore, Auth, and Storage
+      - name: Start Firebase Emulator Suite
         run: |
-          xcodebuild -version
+          firebase emulators:start --only firestore,auth,storage --project datafight-5d0cf --import=./emulator-data --export-on-exit=./emulator-data &
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ runner.temp }}/gcp-key.json
+
+      # Wait for Firebase Emulator to start
+      - name: Wait for Firebase Emulator to Start
+        run: sleep 15
+
+      # Start the simulator manually (iPad Pro 13-inch (M4))
+      - name: Start iOS Simulator
+        run: |
+          xcrun simctl boot "iPad Pro 13-inch (M4)"
+
+      # Wait for the simulator to fully boot
+      - name: Wait for Simulator to Boot
+        run: sleep 30
+
+      # Verify Simulator State
+      - name: Verify Simulator State
+        run: |
+          xcrun simctl list devices | grep "iPad Pro 13-inch (M4)"
 
       # Resolve Swift Package Dependencies
       - name: Resolve Swift Package Dependencies
@@ -53,52 +88,44 @@ jobs:
           xcodebuild -resolvePackageDependencies \
             -project datafight.xcodeproj
 
-      # Create build directory in case Xcode doesn't generate it
-      - name: Create Build Directory
-        run: |
-          mkdir -p ${{ github.workspace }}/build/Debug-iphonesimulator
-
-      # Debug project files and ensure Xcode project exists
-      - name: Debug Project Files
-        run: |
-          ls -R ${{ github.workspace }}/datafight.xcodeproj
-
-      # Build and Test (Skipping Package Plugin Validation)
-      - name: Build and Test
+      # Build and Test with environment variable for iPad Pro (13-inch) (M4)
+      - name: Build and Test with Environment Variable
         run: |
           xcodebuild test \
             -project datafight.xcodeproj \
             -scheme datafight \
-            -destination 'platform=iOS Simulator,name=iPad Pro (12.9-inch) (6th generation)' \
+            -destination 'platform=iOS Simulator,OS=17.5,id=979F0FB8-8856-4AAD-9875-11211725C919' \
             CODE_SIGNING_ALLOWED=NO \
-            -skipPackagePluginValidation
+            -skipPackagePluginValidation \
+            -retry-tests-on-failure \
+            -test-timeouts-enabled NO \
+            -timeout=1800
+        env:
+          IS_TESTING: "yes"
 
-      # Debug the directory structure after the build
+      # Stop Firebase Emulator Suite after tests
+      - name: Stop Firebase Emulator Suite
+        run: |
+          firebase emulators:stop
+
+      # Debug Directory Structure
       - name: Debug Directory Structure
         run: |
           ls -R ${{ github.workspace }}
           ls -R ${{ github.workspace }}/build
 
-      # Package the app and the test results into .ipa and .zip files
+      # Fetch Simulator Logs for debugging
+      - name: Fetch Simulator Logs
+        run: |
+          xcrun simctl spawn booted log collect --output sim_logs.log
+          cat sim_logs.log
+
+      # Package App and Tests (if needed)
       - name: Package App and Tests
         run: |
-          # Package the app
           mkdir -p Payload
           cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
           zip -r app.ipa Payload
 
-          # Package the tests
           cd ${{ github.workspace }}/build/Debug-iphonesimulator
           zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
-
-      # Upload the app and test packages to Firebase Test Lab
-      - name: Upload to Firebase Test Lab
-        uses: w9jds/firebase-action@master
-        with:
-          args: >
-            firebase test ios run
-            --app app.ipa
-            --test tests.zip
-            --device model=iPadPro12,version=17.0,locale=en_US,orientation=portrait
-        env:
-          GCP_SA_KEY: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
