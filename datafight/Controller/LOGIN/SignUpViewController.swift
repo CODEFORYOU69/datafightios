@@ -1,5 +1,6 @@
 import UIKit
 import FirebaseAuth
+import Firebase
 
 class SignUpViewController: UIViewController {
 
@@ -35,9 +36,14 @@ class SignUpViewController: UIViewController {
         Auth.auth().createUser(withEmail: email, password: password) { [weak self] authResult, error in
             if let error = error {
                 self?.showAlert(message: "Erreur d'inscription: \(error.localizedDescription)")
-            } else {
+            }else {
+                // Log a Firebase Analytics event
+                Analytics.logEvent("sign_up", parameters: [
+                    "email": email as NSObject,
+                    "sign_up_method": "email" as NSObject
+                ])
+
                 self?.showAlert(message: "Inscription réussie!") {
-                    // Naviguer vers l'écran principal de l'application
                     self?.performSegue(withIdentifier: "showMainApp", sender: nil)
                 }
             }

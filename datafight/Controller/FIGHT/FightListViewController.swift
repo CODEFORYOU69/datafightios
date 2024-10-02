@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import Firebase
 
 
 class FightListViewController: UIViewController, UITableViewDataSource, UITableViewDelegate {
@@ -182,8 +183,12 @@ class FightListViewController: UIViewController, UITableViewDataSource, UITableV
              showAlert(title: "Error", message: "Please select a fight first")
              return
          }
-
-         if let fightResult = fight.fightResult {
+        // Log Firebase Analytics event for adding a round
+            Analytics.logEvent("add_round", parameters: [
+                "fight_id": fight.id ?? "unknown_fight_id",
+                "rounds_count": (fight.roundIds?.count ?? 0) as NSObject
+            ])
+        if let fightResult = fight.fightResult {
              // Le combat est déjà terminé
              showAlert(title: "Fight Completed", message: "This fight has already ended with the following result:\nWinner: \(fightResult.winner)\nMethod: \(fightResult.method)")
          } else if (fight.roundIds?.count ?? 0) >= 3 {

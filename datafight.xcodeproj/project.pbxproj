@@ -82,6 +82,7 @@
 		3EABF4632CA2082300F09559 /* FightDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF4622CA2082300F09559 /* FightDetailViewController.swift */; };
 		3EABF4762CA417EE00F09559 /* FirebaseGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF4752CA417EE00F09559 /* FirebaseGeneralTests.swift */; };
 		3EC508FE2CAAFAB00044FDCD /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 3EE5E4BB2CA9E28F00BAB683 /* SDWebImage */; };
+		3EE3E2132CACB888001D684D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3E4D15052C5E523A00A3835A /* GoogleService-Info.plist */; };
 		3EE5E4912CA9E0CB00BAB683 /* CountryPickerView in Frameworks */ = {isa = PBXBuildFile; productRef = 3EE5E4902CA9E0CB00BAB683 /* CountryPickerView */; };
 		3EE5E4942CA9E0F000BAB683 /* FlagKit in Frameworks */ = {isa = PBXBuildFile; productRef = 3EE5E4932CA9E0F000BAB683 /* FlagKit */; };
 		3EE5E4972CA9E11900BAB683 /* DGCharts in Frameworks */ = {isa = PBXBuildFile; productRef = 3EE5E4962CA9E11900BAB683 /* DGCharts */; };
@@ -516,6 +517,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3E6848D12CA788F500EF01A6 /* Assets.xcassets in Resources */,
+				3EE3E2132CACB888001D684D /* GoogleService-Info.plist in Resources */,
 				3E6848D32CA9695C00EF01A6 /* testVideo.mp4 in Resources */,
 				3E98A8842CAB227900123F78 /* Main.storyboard in Resources */,
 			);
@@ -674,6 +676,7 @@
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = "-ObjC";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
@@ -731,6 +734,7 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = NO;
+				OTHER_LDFLAGS = "-ObjC";
 				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				VALIDATE_PRODUCT = YES;

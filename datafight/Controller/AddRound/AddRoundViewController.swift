@@ -13,6 +13,7 @@ import AVKit
 import MobileCoreServices
 import FirebaseStorage
 import UniformTypeIdentifiers
+import Firebase
 
 
 
@@ -99,6 +100,12 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
         button.setTitleColor(.white, for: .normal)
     }
     @IBAction func endRoundButtonTapped(_ sender: UIButton) {
+        // Log Firebase Analytics event when the round ends
+           Analytics.logEvent("end_round", parameters: [
+               "round_number": currentRound?.roundNumber ?? 0,
+               "blue_fighter_id": fight?.blueFighterId ?? "unknown",
+               "red_fighter_id": fight?.redFighterId ?? "unknown"
+           ])
         endRound()
     }
     

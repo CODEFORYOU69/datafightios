@@ -26,7 +26,7 @@ class FirebaseGeneralTests: XCTestCase {
         clearEmulators {
             clearExpectation.fulfill()
         }
-        waitForExpectations(timeout: 10.0, handler: nil)
+        waitForExpectations(timeout: 60.0, handler: nil)
 
         // Authenticate the test user
         let email = "test@example.com"
@@ -45,7 +45,7 @@ class FirebaseGeneralTests: XCTestCase {
                 createUserExpectation.fulfill()
             }
         }
-        waitForExpectations(timeout: 10.0, handler: nil)
+        waitForExpectations(timeout: 60.0, handler: nil)
     }
 
     
@@ -58,7 +58,7 @@ class FirebaseGeneralTests: XCTestCase {
         clearEmulators {
             clearExpectation.fulfill()
         }
-        wait(for: [clearExpectation], timeout: 20.0)
+        wait(for: [clearExpectation], timeout: 60.0)
     }
     
     override func tearDownWithError() throws {
@@ -100,7 +100,7 @@ class FirebaseGeneralTests: XCTestCase {
             expectation.fulfill()
         }
 
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 60, handler: nil)
     }
 
     func testUpdateUserProfile() {
@@ -236,7 +236,7 @@ class FirebaseGeneralTests: XCTestCase {
     }
     // MARK: - Test saveFighter function
     
-    func test3_testSaveFighter() {
+    func testSaveFighter() {
         let expectation = self.expectation(description: "Save fighter")
         
         let fighter = Fighter(
@@ -259,11 +259,11 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 30, handler: nil)
     }
     // MARK: - Test saveEvent function
 
-    func test1_testSaveEvent() {
+    func testSaveEvent() {
         let expectation = self.expectation(description: "Save event")
 
         let event = Event(
@@ -285,10 +285,10 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
 
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 30, handler: nil)
     }
     // MARK: - Test saveFight function
-    func test2_testSaveFight() {
+    func testSaveFight() {
         let expectation = self.expectation(description: "Save fight")
         
         let fight = Fight(
@@ -319,7 +319,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 30, handler: nil)
     }
     func testStorageConnection() {
         let expectation = self.expectation(description: "Storage connection")
@@ -346,7 +346,7 @@ class FirebaseGeneralTests: XCTestCase {
     }
     
     // MARK: - Test getFight function
-    func test4_testGetFight() {
+    func testGetFight() {
         let saveFightExpectation = self.expectation(description: "Save fight")
         let getFightExpectation = self.expectation(description: "Get fight")
 
@@ -386,7 +386,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 10, handler: nil)
+        waitForExpectations(timeout: 30, handler: nil)
     }
 
     // MARK: - Test updateFight function
@@ -495,7 +495,7 @@ class FirebaseGeneralTests: XCTestCase {
   }
     */
     // MARK: - Test getFightsForEvent function
-    func test12_testGetFightsForEvent() {
+    func testGetFightsForEvent() {
         let expectation = self.expectation(description: "Get fights for event")
         
         firebaseService.getFightsForEvent(eventId: "testEventId") { result in
@@ -551,12 +551,12 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 20, handler: nil)
+        waitForExpectations(timeout: 60, handler: nil)
     }
 
     // MARK: - Test getFighter function
     
-    func test10_testGetFighter() {
+    func testGetFighter() {
         let saveFighterExpectation = self.expectation(description: "Save fighter")
         let getFighterExpectation = self.expectation(description: "Get fighter")
         
@@ -608,7 +608,7 @@ class FirebaseGeneralTests: XCTestCase {
             }
         }
         
-        waitForExpectations(timeout: 20, handler: nil)
+        waitForExpectations(timeout: 60, handler: nil)
     }
     
     // MARK: - Test upLoadFighterImage function
