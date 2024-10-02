@@ -71,7 +71,7 @@ jobs:
           xcodebuild build-for-testing \
             -project datafight.xcodeproj \
             -scheme "$scheme" \
-            -destination 'platform=iOS Simulator,OS=18.0,name=iPad Pro 13-inch (M4)' \
+            -destination 'platform=iOS Simulator,OS=18.0,id=C34E5E41-DE63-498D-9D85-2CB4650348F9'
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation | xcpretty
 
@@ -88,12 +88,13 @@ jobs:
             "xcodebuild test-without-building \
               -project datafight.xcodeproj \
               -scheme \"$scheme\" \
-              -destination 'platform=iOS Simulator,OS=18.0,name=iPad Pro 13-inch (M4)' \
+              -destination 'platform=iOS Simulator,OS=18.0,id=C34E5E41-DE63-498D-9D85-2CB4650348F9'
               CODE_SIGNING_ALLOWED=NO \
               -skipPackagePluginValidation \
               -retry-tests-on-failure \
               -test-timeouts-enabled NO \
-              -timeout=1800 | xcpretty"
+              -timeout=3600 | xcpretty"
+              
 
       - name: Debug Directory Structure
         run: |
