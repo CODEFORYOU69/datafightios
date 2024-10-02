@@ -90,6 +90,8 @@ jobs:
               -project datafight.xcodeproj \
               -scheme \"$scheme\" \
               -destination 'platform=iOS Simulator,OS=18.0,id=C34E5E41-DE63-498D-9D85-2CB4650348F9'
+              -parallel-testing-enabled NO \
+              -maximum-parallel-testing-workers 1 \
               CODE_SIGNING_ALLOWED=NO \
               -skipPackagePluginValidation \
               -retry-tests-on-failure \
