@@ -2122,10 +2122,13 @@ class FirebaseGeneralTests: XCTestCase {
 
         do {
             // Save events asynchronously
+            print("Attempting to save event 1")
             let eventId1 = try await firebaseService.saveEventAsync(event1)
-            event1.id = eventId1
+            print("Event 1 saved with ID: \(eventId1)")
+
+            print("Attempting to save event 2")
             let eventId2 = try await firebaseService.saveEventAsync(event2)
-            event2.id = eventId2
+            print("Event 2 saved with ID: \(eventId2)")
 
             // Now fetch events asynchronously
             let eventIds = [eventId1, eventId2]
