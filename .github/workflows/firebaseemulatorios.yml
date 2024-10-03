@@ -104,7 +104,8 @@ jobs:
       - name: Package App and Tests
         run: |
           mkdir -p Payload
-          cp -r ${{ github.workspace }}/build/Debug-iphonesimulator/datafight.app Payload/
+          cp -r /Users/runner/Library/Developer/Xcode/DerivedData/datafight-asepzooxogezwlcjsjikitkmswmd/Build/Products/Debug-iphonesimulator/datafight.app Payload/
           zip -r app.ipa Payload
-          cd ${{ github.workspace }}/build/Debug-iphonesimulator
+          cd /Users/runner/Library/Developer/Xcode/DerivedData/datafight-asepzooxogezwlcjsjikitkmswmd/Build/Products/Debug-iphonesimulator
           zip -r ${{ github.workspace }}/tests.zip datafightTests.xctest
+
