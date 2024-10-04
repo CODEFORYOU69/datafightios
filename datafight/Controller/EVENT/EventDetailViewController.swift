@@ -25,7 +25,9 @@ class EventDetailViewController: UIViewController {
     // MARK: - Properties
     var event: Event?
     var fights: [Fight] = []
-
+    var fighters: [String: Fighter] = [:]
+    var rounds: [String: [Round]] = [:]
+    
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -60,21 +62,67 @@ class EventDetailViewController: UIViewController {
     // MARK: - Data Loading
     func loadFights() {
         guard let eventId = event?.id else { return }
-
-        FirebaseService.shared.getFightsForEvent(eventId: eventId) {
-            [weak self] result in
+        
+        FirebaseService.shared.getFightsForEvent(eventId: eventId) { [weak self] result in
             switch result {
             case .success(let fights):
                 self?.fights = fights
-                DispatchQueue.main.async {
-                    self?.fightsCollectionView.reloadData()
-                }
+                self?.loadFightersForFights(fights)
+                self?.loadRounds() // Ajoutez cet appel ici
             case .failure(let error):
                 print("Failed to load fights: \(error.localizedDescription)")
             }
         }
     }
 
+    func loadFightersForFights(_ fights: [Fight]) {
+        let fighterIds = Set(fights.flatMap { [$0.blueFighterId, $0.redFighterId] })
+        let group = DispatchGroup()
+        var fighters: [String: Fighter] = [:]
+        
+        for fighterId in fighterIds {
+            group.enter()
+            FirebaseService.shared.getFighter(id: fighterId) { result in
+                defer { group.leave() }
+                switch result {
+                case .success(let fighter):
+                    fighters[fighterId] = fighter
+                case .failure(let error):
+                    print("Failed to load fighter \(fighterId): \(error.localizedDescription)")
+                }
+            }
+        }
+        
+        group.notify(queue: .main) { [weak self] in
+            self?.fighters = fighters
+            self?.fightsCollectionView.reloadData()
+        }
+    }
+    func loadRounds() {
+        let globalGroup = DispatchGroup()
+
+        for fight in fights {
+            guard let fightId = fight.id else {
+                continue
+            }
+
+            globalGroup.enter()
+            FirebaseService.shared.getAllRoundsForFight(fight) { [weak self] result in
+                defer { globalGroup.leave() }
+                switch result {
+                case .success(let loadedRounds):
+                    self?.rounds[fightId] = loadedRounds.sorted { $0.roundNumber < $1.roundNumber }
+                    print("Loaded \(loadedRounds.count) rounds for fight \(fightId)")
+                case .failure(let error):
+                    print("Failed to load rounds for fight \(fightId): \(error)")
+                }
+            }
+        }
+
+        globalGroup.notify(queue: .main) { [weak self] in
+            self?.fightsCollectionView.reloadData()
+        }
+    }
     // MARK: - UI Setup
     func setupUI() {
         guard let event = event else { return }
@@ -181,20 +229,15 @@ extension EventDetailViewController: UICollectionViewDelegate,
         return fights.count
     }
 
-    func collectionView(
-        _ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath
-    ) -> UICollectionViewCell {
-        let cell =
-            collectionView.dequeueReusableCell(
-                withReuseIdentifier: "FightsCell", for: indexPath)
-            as! FightCollectionViewCell
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FightsCell", for: indexPath) as! FightCollectionViewCell
         let fight = fights[indexPath.item]
-
-        // Configure the cell
-        cell.configure(
-            with: fight, blueFighterName: fight.blueFighterId,
-            redFighterName: fight.redFighterId)
-
+        
+        let blueFighterName = fighters[fight.blueFighterId]?.fullName ?? "Unknown Blue"
+        let redFighterName = fighters[fight.redFighterId]?.fullName ?? "Unknown Red"
+        
+        cell.configure(with: fight, blueFighterName: blueFighterName, redFighterName: redFighterName)
+        
         return cell
     }
 
@@ -211,11 +254,23 @@ extension EventDetailViewController: UICollectionViewDelegate,
         _ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath
     ) {
         let selectedFight = fights[indexPath.item]
-        presentFightResultViewController(for: selectedFight)
+        presentFightDetailViewController(for: selectedFight)
     }
 
-    func presentFightResultViewController(for fight: Fight) {
-        // Presentation logic for the fight result view controller
+    func presentFightDetailViewController(for fight: Fight) {
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        if let detailVC = storyboard.instantiateViewController(withIdentifier: "FightDetailViewController") as? FightDetailViewController {
+            detailVC.fight = fight
+            detailVC.rounds = rounds[fight.id ?? ""] ?? []
+            detailVC.fightResult = fight.fightResult
+            detailVC.blueFighter = fighters[fight.blueFighterId]
+            detailVC.redFighter = fighters[fight.redFighterId]
+            
+            detailVC.modalPresentationStyle = .fullScreen
+            present(detailVC, animated: true, completion: nil)
+            
+           
+        }
     }
 }
 

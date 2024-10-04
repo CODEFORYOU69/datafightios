@@ -81,6 +81,8 @@
 		3EABF45D2CA0FD5000F09559 /* RoundTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF45C2CA0FD5000F09559 /* RoundTests.swift */; };
 		3EABF4632CA2082300F09559 /* FightDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF4622CA2082300F09559 /* FightDetailViewController.swift */; };
 		3EABF4762CA417EE00F09559 /* FirebaseGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF4752CA417EE00F09559 /* FirebaseGeneralTests.swift */; };
+		3EBE957A2CAFF57200C77663 /* githubproject.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3EBE95792CAFF57200C77663 /* githubproject.txt */; };
+		3EBE957B2CAFF57200C77663 /* githubproject.txt in Resources */ = {isa = PBXBuildFile; fileRef = 3EBE95792CAFF57200C77663 /* githubproject.txt */; };
 		3EC508FE2CAAFAB00044FDCD /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 3EE5E4BB2CA9E28F00BAB683 /* SDWebImage */; };
 		3EE3E2152CAD6CE5001D684D /* FightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE3E2142CAD6CE5001D684D /* FightTests.swift */; };
 		3EE3E2172CAD6DC6001D684D /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE3E2162CAD6DC6001D684D /* EventTests.swift */; };
@@ -173,6 +175,7 @@
 		3EABF45C2CA0FD5000F09559 /* RoundTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundTests.swift; sourceTree = "<group>"; };
 		3EABF4622CA2082300F09559 /* FightDetailViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FightDetailViewController.swift; sourceTree = "<group>"; };
 		3EABF4752CA417EE00F09559 /* FirebaseGeneralTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirebaseGeneralTests.swift; sourceTree = "<group>"; };
+		3EBE95792CAFF57200C77663 /* githubproject.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = githubproject.txt; sourceTree = "<group>"; };
 		3EE3E2142CAD6CE5001D684D /* FightTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FightTests.swift; sourceTree = "<group>"; };
 		3EE3E2162CAD6DC6001D684D /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
 		3EE3E2182CAD6FF4001D684D /* FighterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterTests.swift; sourceTree = "<group>"; };
@@ -321,6 +324,7 @@
 		3E87E3272C56B94700D843E2 /* datafight */ = {
 			isa = PBXGroup;
 			children = (
+				3EBE95792CAFF57200C77663 /* githubproject.txt */,
 				3E21A5E72C8E279200ACDCA4 /* datafight.entitlements */,
 				3E98BF862C89D92F00B8C859 /* VIEW */,
 				3E4D14FC2C5D91A100A3835A /* Controller */,
@@ -525,6 +529,7 @@
 				3E87E3352C56B94900D843E2 /* Base in Resources */,
 				3E4D15062C5E523A00A3835A /* GoogleService-Info.plist in Resources */,
 				3E61334F2C70224C0060D6E6 /* FighterTableViewCell.xib in Resources */,
+				3EBE957A2CAFF57200C77663 /* githubproject.txt in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -534,6 +539,7 @@
 			files = (
 				3E6848D12CA788F500EF01A6 /* Assets.xcassets in Resources */,
 				3E6848D32CA9695C00EF01A6 /* testVideo.mp4 in Resources */,
+				3EBE957B2CAFF57200C77663 /* githubproject.txt in Resources */,
 				3E98A8842CAB227900123F78 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
