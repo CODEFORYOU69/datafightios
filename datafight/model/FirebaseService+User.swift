@@ -8,17 +8,23 @@
 // FirebaseService+User.swift
 
 import Firebase
+import FirebaseAuth
 import FirebaseFirestore
 import FirebaseStorage
 import UIKit
-import FirebaseAuth
 
 extension FirebaseService {
     // MARK: - User Methods
 
     func getUserProfile(completion: @escaping (Result<User, Error>) -> Void) {
         guard let uid = Auth.auth().currentUser?.uid else {
-            completion(.failure(NSError(domain: "FirebaseService", code: 0, userInfo: [NSLocalizedDescriptionKey: "User not authenticated"])))
+            completion(
+                .failure(
+                    NSError(
+                        domain: "FirebaseService", code: 0,
+                        userInfo: [
+                            NSLocalizedDescriptionKey: "User not authenticated"
+                        ])))
             return
         }
 
@@ -35,7 +41,9 @@ extension FirebaseService {
                 }
             } else {
                 // L'utilisateur n'existe pas encore dans Firestore, créez un nouveau profil
-                let newUser = User(id: uid, firstName: "", lastName: "", dateOfBirth: Date(), role: "", teamName: "", country: "", profileImageURL: nil)
+                let newUser = User(
+                    id: uid, firstName: "", lastName: "", dateOfBirth: Date(),
+                    role: "", teamName: "", country: "", profileImageURL: nil)
                 self.updateUserProfile(newUser) { result in
                     switch result {
                     case .success:
@@ -48,7 +56,9 @@ extension FirebaseService {
         }
     }
 
-    func updateUserProfile(_ user: User, completion: @escaping (Result<Void, Error>) -> Void) {
+    func updateUserProfile(
+        _ user: User, completion: @escaping (Result<Void, Error>) -> Void
+    ) {
         switch getCurrentUserID() {
         case .success(let uid):
             var userData: [String: Any] = [
@@ -56,7 +66,7 @@ extension FirebaseService {
                 "lastName": user.lastName,
                 "role": user.role,
                 "teamName": user.teamName,
-                "country": user.country
+                "country": user.country,
             ]
 
             if let dateOfBirth = user.dateOfBirth {
@@ -67,9 +77,12 @@ extension FirebaseService {
                 userData["profileImageURL"] = profileImageURL
             }
 
-            db.collection("users").document(uid).setData(userData, merge: true) { error in
+            db.collection("users").document(uid).setData(userData, merge: true)
+            { error in
                 if let error = error {
-                    print("Failed to update Firestore: \(error.localizedDescription)")
+                    print(
+                        "Failed to update Firestore: \(error.localizedDescription)"
+                    )
                     completion(.failure(error))
                 } else {
                     print("User profile successfully updated in Firestore")
@@ -82,12 +95,20 @@ extension FirebaseService {
         }
     }
 
-
-    func uploadProfileImage(_ image: UIImage, completion: @escaping (Result<URL, Error>) -> Void) {
+    func uploadProfileImage(
+        _ image: UIImage, completion: @escaping (Result<URL, Error>) -> Void
+    ) {
         switch getCurrentUserID() {
         case .success(let uid):
             guard let imageData = image.jpegData(compressionQuality: 0.8) else {
-                completion(.failure(NSError(domain: "FirebaseService", code: 4, userInfo: [NSLocalizedDescriptionKey: "Failed to prepare image data"])))
+                completion(
+                    .failure(
+                        NSError(
+                            domain: "FirebaseService", code: 4,
+                            userInfo: [
+                                NSLocalizedDescriptionKey:
+                                    "Failed to prepare image data"
+                            ])))
                 return
             }
 
@@ -102,7 +123,14 @@ extension FirebaseService {
                         } else if let error = error {
                             completion(.failure(error))
                         } else {
-                            completion(.failure(NSError(domain: "FirebaseService", code: 5, userInfo: [NSLocalizedDescriptionKey: "Failed to get download URL"])))
+                            completion(
+                                .failure(
+                                    NSError(
+                                        domain: "FirebaseService", code: 5,
+                                        userInfo: [
+                                            NSLocalizedDescriptionKey:
+                                                "Failed to get download URL"
+                                        ])))
                         }
                     }
                 }

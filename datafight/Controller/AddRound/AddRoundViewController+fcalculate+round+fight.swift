@@ -7,53 +7,80 @@
 import UIKit
 
 extension AddRoundViewController {
+
+    // MARK: - Score Calculation
+
+    /// Calculates the total score for the given fighter color, taking into account direct points and opponent's penalties (gamjeons).
     func calculateScore(for color: FighterColor) -> Int {
         print("Calculating score for \(color)")
-        let directPoints = currentRound?.actions.filter { $0.color == color && $0.actionType != .gamJeon && ($0.isActive != nil) }.reduce(0) { $0 + $1.points } ?? 0
+        let directPoints =
+            currentRound?.actions.filter {
+                $0.color == color && $0.actionType != .gamJeon
+                    && ($0.isActive != nil)
+            }.reduce(0) { $0 + $1.points } ?? 0
         let opponentColor: FighterColor = color == .blue ? .red : .blue
-        let gamjeonPoints = currentRound?.actions.filter { $0.color == opponentColor && $0.actionType == .gamJeon && ($0.isActive != nil) }.count ?? 0
+        let gamjeonPoints =
+            currentRound?.actions.filter {
+                $0.color == opponentColor && $0.actionType == .gamJeon
+                    && ($0.isActive != nil)
+            }.count ?? 0
         let totalPoints = directPoints + gamjeonPoints
-        print("Total points for \(color): \(totalPoints) (Direct: \(directPoints), Gamjeon: \(gamjeonPoints))")
+        print(
+            "Total points for \(color): \(totalPoints) (Direct: \(directPoints), Gamjeon: \(gamjeonPoints))"
+        )
         return totalPoints
     }
-    
+    /// Counts the number of penalties (gamjeons) for the given fighter color.
     func countGamjeons(for color: FighterColor) -> Int {
-        let count = currentRound?.actions.filter { $0.color == color && $0.actionType == .gamJeon && ($0.isActive != nil) }.count ?? 0
+        let count =
+            currentRound?.actions.filter {
+                $0.color == color && $0.actionType == .gamJeon
+                    && ($0.isActive != nil)
+            }.count ?? 0
         print("Gamjeons for \(color): \(count)")
         return count
     }
-    
+    // MARK: - Round Handling
+    /// Saves the current round data to Firebase, and then updates the fight result if needed.
     func saveRoundData(_ round: Round) {
         print("Saving round data")
         guard let fight = fight else {
             print("Error: No fight found")
             return
         }
-        
-        FirebaseService.shared.saveRound(round, for: fight) { [weak self] result in
+
+        FirebaseService.shared.saveRound(round, for: fight) {
+            [weak self] result in
             switch result {
             case .success:
                 print("Round saved successfully")
                 self?.updateFightResult(with: round)
-                self?.showAlert(title: "Success", message: "Round saved successfully")
+                self?.showAlert(
+                    title: "Success", message: "Round saved successfully")
             case .failure(let error):
                 print("Failed to save round: \(error.localizedDescription)")
-                self?.showAlert(title: "Error", message: "Failed to save round: \(error.localizedDescription)")
+                self?.showAlert(
+                    title: "Error",
+                    message:
+                        "Failed to save round: \(error.localizedDescription)")
             }
         }
     }
-    
+
+    // MARK: - Fight Handling
+    /// Updates the fight record with the provided result and saves it to Firebase.
     func updateFightWithResult(_ result: FightResult) {
         print("Updating fight with result: \(result)")
         guard var updatedFight = fight else {
             print("Error: No fight found")
             return
         }
-        
+
         updatedFight.fightResult = result
         print("Updated fight: \(updatedFight)")
-        
-        FirebaseService.shared.updateFight(updatedFight) { [weak self] updateResult in
+
+        FirebaseService.shared.updateFight(updatedFight) {
+            [weak self] updateResult in
             switch updateResult {
             case .success:
                 print("Fight updated successfully")
@@ -61,7 +88,10 @@ extension AddRoundViewController {
             case .failure(let error):
                 print("Failed to update fight: \(error.localizedDescription)")
                 print("Error details: \(error)")
-                self?.showAlert(title: "Error", message: "Failed to update fight: \(error.localizedDescription)")
+                self?.showAlert(
+                    title: "Error",
+                    message:
+                        "Failed to update fight: \(error.localizedDescription)")
             }
         }
     }
@@ -71,59 +101,79 @@ extension AddRoundViewController {
             completion()
             return
         }
-        
-        FirebaseService.shared.getAllRoundsForFight(fight) { [weak self] result in
+
+        FirebaseService.shared.getAllRoundsForFight(fight) {
+            [weak self] result in
             switch result {
             case .success(let fetchedRounds):
                 self?.rounds = fetchedRounds
-                print("Successfully updated rounds. Total rounds: \(fetchedRounds.count)")
+                print(
+                    "Successfully updated rounds. Total rounds: \(fetchedRounds.count)"
+                )
             case .failure(let error):
                 print("Failed to fetch rounds: \(error.localizedDescription)")
             }
             completion()
         }
     }
+
+    /// Updates the fight results based on the current round's outcome and total score.
     func updateFightResult(with round: Round) {
         print("Updating fight result")
         guard var fight = fight else {
             print("Error: No fight found")
             return
         }
-        
+
         if fight.roundIds == nil {
             fight.roundIds = []
         }
         fight.roundIds?.append(round.id ?? "")
-        
-        calculateRoundWins(for: fight) { [weak self] blueRoundsWon, redRoundsWon in
+
+        calculateRoundWins(for: fight) {
+            [weak self] blueRoundsWon, redRoundsWon in
             guard let self = self else { return }
-            
+
             print("Rounds won - Blue: \(blueRoundsWon), Red: \(redRoundsWon)")
-            
-            if blueRoundsWon == 2 || redRoundsWon == 2 || self.isDirectVictory(round.victoryDecision) {
-                let winner = blueRoundsWon > redRoundsWon ? fight.blueFighterId : fight.redFighterId
+
+            if blueRoundsWon == 2 || redRoundsWon == 2
+                || self.isDirectVictory(round.victoryDecision)
+            {
+                let winner =
+                    blueRoundsWon > redRoundsWon
+                    ? fight.blueFighterId : fight.redFighterId
                 let method = round.victoryDecision?.rawValue ?? "Points"
-                
+
                 print("Fight winner determined: \(winner), Method: \(method)")
-                
+
                 self.calculateTotalScore(for: .blue) { blueTotalScore in
                     self.calculateTotalScore(for: .red) { redTotalScore in
                         let fightResult = FightResult(
                             winner: winner,
                             method: method,
-                            totalScore: (blue: blueTotalScore, red: redTotalScore)
+                            totalScore: (
+                                blue: blueTotalScore, red: redTotalScore
+                            )
                         )
-                        
+
                         print("Final fight result: \(fightResult)")
-                        
+
                         FirebaseService.shared.updateFight(fight) { result in
                             switch result {
                             case .success:
                                 print("Fight updated successfully")
-                                self.showAlert(title: "Success", message: "Fight updated successfully")
+                                self.showAlert(
+                                    title: "Success",
+                                    message: "Fight updated successfully")
                             case .failure(let error):
-                                print("Failed to update fight: \(error.localizedDescription)")
-                                self.showAlert(title: "Error", message: "Failed to update fight: \(error.localizedDescription)")
+                                print(
+                                    "Failed to update fight: \(error.localizedDescription)"
+                                )
+                                self.showAlert(
+                                    title: "Error",
+                                    message:
+                                        "Failed to update fight: \(error.localizedDescription)"
+                                )
                             }
                         }
                     }
@@ -131,29 +181,38 @@ extension AddRoundViewController {
             }
         }
     }
-    
+
+    // MARK: - Helper Methods
+    /// Checks if the given victory decision leads to an immediate win (e.g., knockout, technical knockout).
     func isDirectVictory(_ decision: VictoryDecision?) -> Bool {
         print("Checking if it's a direct victory")
         guard let decision = decision else {
             print("No decision provided, not a direct victory")
             return false
         }
-        let result = [.knockout, .technicalKnockout, .disqualification].contains(decision)
+        let result = [.knockout, .technicalKnockout, .disqualification]
+            .contains(decision)
         print("Is direct victory: \(result), Decision: \(decision)")
         return result
     }
-    func calculateTotalScore(for color: FighterColor, completion: @escaping (Int) -> Void) {
+
+    /// Calculates the total score for the given fighter color across all rounds.
+    func calculateTotalScore(
+        for color: FighterColor, completion: @escaping (Int) -> Void
+    ) {
         print("Calculating total score for \(color)")
         guard let fight = fight else {
             print("Error: No fight found")
             completion(0)
             return
         }
-        
+
         FirebaseService.shared.getAllRoundsForFight(fight) { result in
             switch result {
             case .success(let rounds):
-                let totalScore = rounds.reduce(0) { $0 + (color == .blue ? $1.blueScore : $1.redScore) }
+                let totalScore = rounds.reduce(0) {
+                    $0 + (color == .blue ? $1.blueScore : $1.redScore)
+                }
                 print("Total score for \(color): \(totalScore)")
                 completion(totalScore)
             case .failure(let error):
@@ -162,21 +221,32 @@ extension AddRoundViewController {
             }
         }
     }
-    
-    func calculateRoundWins(for fight: Fight, completion: @escaping (Int, Int) -> Void) {
-        print("🔄 Starting calculation of round wins for fight: \(fight.id ?? "Unknown fight ID")")
-           print("Blue Fighter ID: \(fight.blueFighterId)")
-           print("Red Fighter ID: \(fight.redFighterId)")
-           print("Round IDs: \(fight.roundIds ?? [])")
-        
+
+    /// Calculates the number of rounds won by each fighter for the given fight.
+    func calculateRoundWins(
+        for fight: Fight, completion: @escaping (Int, Int) -> Void
+    ) {
+        print(
+            "🔄 Starting calculation of round wins for fight: \(fight.id ?? "Unknown fight ID")"
+        )
+        print("Blue Fighter ID: \(fight.blueFighterId)")
+        print("Red Fighter ID: \(fight.redFighterId)")
+        print("Round IDs: \(fight.roundIds ?? [])")
+
         FirebaseService.shared.getAllRoundsForFight(fight) { result in
             switch result {
             case .success(let rounds):
-                print("✅ Successfully fetched rounds. Total rounds: \(rounds.count)")
-                
-                let blueRoundsWon = rounds.filter { $0.roundWinner == fight.blueFighterId }.count
-                let redRoundsWon = rounds.filter { $0.roundWinner == fight.redFighterId }.count
-                
+                print(
+                    "✅ Successfully fetched rounds. Total rounds: \(rounds.count)"
+                )
+
+                let blueRoundsWon = rounds.filter {
+                    $0.roundWinner == fight.blueFighterId
+                }.count
+                let redRoundsWon = rounds.filter {
+                    $0.roundWinner == fight.redFighterId
+                }.count
+
                 rounds.forEach { round in
                     if round.roundWinner == fight.blueFighterId {
                         print("🔵 Blue won round \(round.roundNumber)")
@@ -186,8 +256,10 @@ extension AddRoundViewController {
                         print("❔ No winner for round \(round.roundNumber)")
                     }
                 }
-                
-                print("🏆 Final round wins - Blue: \(blueRoundsWon), Red: \(redRoundsWon)")
+
+                print(
+                    "🏆 Final round wins - Blue: \(blueRoundsWon), Red: \(redRoundsWon)"
+                )
                 completion(blueRoundsWon, redRoundsWon)
             case .failure(let error):
                 print("❌ Failed to get rounds: \(error.localizedDescription)")

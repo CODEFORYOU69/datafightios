@@ -48,7 +48,8 @@ let isRunningTests = false
         print("Storage emulator configured")
 
         print("All Firebase Emulators configured for testing")
-
+        let providerFactory = AppCheckDebugProviderFactory()
+            AppCheck.setAppCheckProviderFactory(providerFactory)
         // Test Firestore connection
         testFirestoreConnection()
     }

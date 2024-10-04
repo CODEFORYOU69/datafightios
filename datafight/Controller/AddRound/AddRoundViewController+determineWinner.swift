@@ -6,7 +6,11 @@
 //
 import UIKit
 
+// MARK: - Victory Decision Alert Extension
 extension AddRoundViewController {
+    
+    // MARK: - Show Victory Decision Alert
+    // Displays an action sheet for the user to select a victory decision.
     func showVictoryDecisionAlert(completion: @escaping (VictoryDecision) -> Void) {
         print("Showing Victory Decision Alert")
         let alertController = UIAlertController(title: "Select Victory Decision", message: nil, preferredStyle: .actionSheet)
@@ -34,6 +38,8 @@ extension AddRoundViewController {
         present(alertController, animated: true, completion: nil)
     }
 
+    // MARK: - Show Winner Selection Alert
+    // Presents an alert for the user to select the winning fighter.
     func showWinnerSelectionAlert(completion: @escaping (FighterColor) -> Void) {
         print("Showing Winner Selection Alert")
         let alertController = UIAlertController(title: "Select Winner", message: nil, preferredStyle: .alert)
@@ -53,6 +59,8 @@ extension AddRoundViewController {
         present(alertController, animated: true, completion: nil)
     }
 
+    // MARK: - Determine Non-Time End Winner
+    // Determines the winner of a round based on gamjeon penalties or user input if no automatic winner is found.
     func determineNonTimeEndWinner() -> (winner: FighterColor?, decision: VictoryDecision) {
         print("Determining non-time end winner")
         if let currentRound = currentRound {
@@ -69,6 +77,8 @@ extension AddRoundViewController {
         return requestVictoryDecisionAndWinner()
     }
 
+    // MARK: - Request Victory Decision and Winner
+    // Requests the user to select a victory decision and winner if no automatic outcome is determined.
     func requestVictoryDecisionAndWinner() -> (winner: FighterColor?, decision: VictoryDecision) {
         print("Requesting Victory Decision and Winner from user")
         var selectedDecision: VictoryDecision?
@@ -99,6 +109,9 @@ extension AddRoundViewController {
         print("Final decision: Winner - \(selectedWinner?.rawValue ?? "None"), Decision - \(selectedDecision?.rawValue ?? "referee")")
         return (selectedWinner, selectedDecision ?? .referee)
     }
+
+    // MARK: - Present Referee Decision Alert
+    // Displays an alert to request the referee's decision if no winner is automatically determined.
     func presentRefereeDecisionAlert(completion: @escaping (FighterColor) -> Void) {
         print("Entering presentRefereeDecisionAlert")
         DispatchQueue.main.async { [weak self] in
@@ -161,5 +174,3 @@ extension AddRoundViewController {
         }
     }
 }
-
-

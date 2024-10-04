@@ -2096,7 +2096,7 @@ class FirebaseGeneralTests: XCTestCase {
         }
 
         // Create event objects
-        var event1 = Event(
+        let event1 = Event(
             id: nil,
             creatorUserId: currentUserID,
             eventName: "Test Event 1",
@@ -2108,7 +2108,7 @@ class FirebaseGeneralTests: XCTestCase {
             country: "CountryA"
         )
 
-        var event2 = Event(
+        let event2 = Event(
             id: nil,
             creatorUserId: currentUserID,
             eventName: "Test Event 2",

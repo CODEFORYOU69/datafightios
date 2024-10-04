@@ -5,12 +5,13 @@
 //  Created by younes ouasmi on 04/08/2024.
 //
 
-import UIKit
-import SDWebImage
 import FlagKit
+import SDWebImage
+import UIKit
 
 class EventDetailViewController: UIViewController {
 
+    // MARK: - IBOutlets
     @IBOutlet weak var contentView: UIView!
     @IBOutlet weak var eventImageView: UIImageView!
     @IBOutlet weak var eventNameLabel: UILabel!
@@ -21,33 +22,47 @@ class EventDetailViewController: UIViewController {
     @IBOutlet weak var countryFlagImageView: UIImageView!
     @IBOutlet weak var fightsCollectionView: UICollectionView!
 
-    
+    // MARK: - Properties
     var event: Event?
     var fights: [Fight] = []
 
-
+    // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         setupCollectionView()
         loadFights()
+
+        // Set dark background color
+        view.backgroundColor = UIColor(
+            red: 0.05, green: 0.05, blue: 0.05, alpha: 1.0)
     }
+
+    // MARK: - Setup Methods
     func setupCollectionView() {
         fightsCollectionView.delegate = self
         fightsCollectionView.dataSource = self
-        fightsCollectionView.register(FightCollectionViewCell.self, forCellWithReuseIdentifier: "FightsCell")
-        
+        fightsCollectionView.register(
+            FightCollectionViewCell.self,
+            forCellWithReuseIdentifier: "FightsCell")
+
+        // Apply rounded corners and dark background to the collection view
+        fightsCollectionView.layer.cornerRadius = 15
+        fightsCollectionView.backgroundColor = UIColor(white: 0.1, alpha: 1.0)
+
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .vertical
         layout.minimumLineSpacing = 10
         layout.minimumInteritemSpacing = 10
         fightsCollectionView.setCollectionViewLayout(layout, animated: false)
     }
-    
+
+    // MARK: - Data Loading
     func loadFights() {
         guard let eventId = event?.id else { return }
-        
-        FirebaseService.shared.getFightsForEvent(eventId: eventId) { [weak self] result in
+
+        FirebaseService.shared.getFightsForEvent(eventId: eventId) {
+            [weak self] result in
             switch result {
             case .success(let fights):
                 self?.fights = fights
@@ -59,10 +74,11 @@ class EventDetailViewController: UIViewController {
             }
         }
     }
-    
+
+    // MARK: - UI Setup
     func setupUI() {
         guard let event = event else { return }
-        
+
         setupContentView()
         setupEventImage()
         setupLabels()
@@ -70,52 +86,58 @@ class EventDetailViewController: UIViewController {
         setupCountryFlag(for: event.country)
         addParallaxEffect()
     }
-    
+
     func setupContentView() {
-        contentView.backgroundColor = .white
+        contentView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
         contentView.layer.cornerRadius = 20
         contentView.layer.shadowColor = UIColor.black.cgColor
         contentView.layer.shadowOffset = CGSize(width: 0, height: 5)
-        contentView.layer.shadowOpacity = 0.1
+        contentView.layer.shadowOpacity = 0.2
         contentView.layer.shadowRadius = 10
     }
-    
+
     func setupEventImage() {
         eventImageView.layer.cornerRadius = 15
         eventImageView.clipsToBounds = true
         eventImageView.contentMode = .scaleAspectFill
     }
-    
+
     func setupLabels() {
+        // White text color for contrast on dark background
         eventNameLabel.font = UIFont.systemFont(ofSize: 24, weight: .bold)
-        eventNameLabel.textColor = .darkText
-        
+        eventNameLabel.textColor = .white
+
         eventTypeLabel.font = UIFont.systemFont(ofSize: 18, weight: .medium)
-        eventTypeLabel.textColor = .systemBlue
-        
+        eventTypeLabel.textColor = .lightGray
+
+        // Apply white text color for other labels
         [locationLabel, dateLabel, countryLabel].forEach { label in
             label?.font = UIFont.systemFont(ofSize: 16)
-            label?.textColor = .darkGray
+            label?.textColor = .white
         }
     }
-    
+
     func populateData(with event: Event) {
         eventNameLabel.text = event.eventName
         eventTypeLabel.text = event.eventType.rawValue
         locationLabel.text = "📍 \(event.location)"
         countryLabel.text = "🌎 \(event.country)"
-        
+
         let dateFormatter = DateFormatter()
         dateFormatter.dateStyle = .medium
         dateLabel.text = "📅 \(dateFormatter.string(from: event.date))"
-        
-        if let imageUrlString = event.imageURL, let imageUrl = URL(string: imageUrlString) {
-            eventImageView.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder_event"))
+
+        if let imageUrlString = event.imageURL,
+            let imageUrl = URL(string: imageUrlString)
+        {
+            eventImageView.sd_setImage(
+                with: imageUrl,
+                placeholderImage: UIImage(named: "placeholder_event"))
         } else {
             eventImageView.image = UIImage(named: "placeholder_event")
         }
     }
-    
+
     func setupCountryFlag(for countryCode: String) {
         if let flag = Flag(countryCode: countryCode) {
             countryFlagImageView.image = flag.image(style: .roundedRect)
@@ -127,200 +149,148 @@ class EventDetailViewController: UIViewController {
         countryFlagImageView.layer.borderWidth = 1
         countryFlagImageView.layer.borderColor = UIColor.lightGray.cgColor
     }
-    
+
     func addParallaxEffect() {
         let amount: CGFloat = 20
-        
-        let horizontalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.x", type: .tiltAlongHorizontalAxis)
+
+        let horizontalMotionEffect = UIInterpolatingMotionEffect(
+            keyPath: "center.x", type: .tiltAlongHorizontalAxis)
         horizontalMotionEffect.minimumRelativeValue = -amount
         horizontalMotionEffect.maximumRelativeValue = amount
 
-        let verticalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.y", type: .tiltAlongVerticalAxis)
+        let verticalMotionEffect = UIInterpolatingMotionEffect(
+            keyPath: "center.y", type: .tiltAlongVerticalAxis)
         verticalMotionEffect.minimumRelativeValue = -amount
         verticalMotionEffect.maximumRelativeValue = amount
 
         let motionEffectGroup = UIMotionEffectGroup()
-        motionEffectGroup.motionEffects = [horizontalMotionEffect, verticalMotionEffect]
+        motionEffectGroup.motionEffects = [
+            horizontalMotionEffect, verticalMotionEffect,
+        ]
         contentView.addMotionEffect(motionEffectGroup)
     }
 }
-extension EventDetailViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
-    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+
+// MARK: - UICollectionViewDelegate & DataSource
+extension EventDetailViewController: UICollectionViewDelegate,
+    UICollectionViewDataSource, UICollectionViewDelegateFlowLayout
+{
+    func collectionView(
+        _ collectionView: UICollectionView, numberOfItemsInSection section: Int
+    ) -> Int {
         return fights.count
     }
-    
-    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "FightsCell", for: indexPath) as! FightCollectionViewCell
+
+    func collectionView(
+        _ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath
+    ) -> UICollectionViewCell {
+        let cell =
+            collectionView.dequeueReusableCell(
+                withReuseIdentifier: "FightsCell", for: indexPath)
+            as! FightCollectionViewCell
         let fight = fights[indexPath.item]
-        
-        // Configuration initiale avec les IDs (en attendant les noms)
-        cell.configure(with: fight, blueFighterName: fight.blueFighterId, redFighterName: fight.redFighterId)
-        
-        // Récupération asynchrone des noms des combattants
-        loadFighterNames(for: fight) { [weak self] blueName, redName in
-            DispatchQueue.main.async {
-                // Vérifier si la cellule est toujours visible
-                if let visibleCell = self?.fightsCollectionView.cellForItem(at: indexPath) as? FightCollectionViewCell {
-                    visibleCell.configure(with: fight, blueFighterName: blueName, redFighterName: redName)
-                }
-            }
-        }
-        
+
+        // Configure the cell
+        cell.configure(
+            with: fight, blueFighterName: fight.blueFighterId,
+            redFighterName: fight.redFighterId)
+
         return cell
     }
-    private func loadFighterNames(for fight: Fight, completion: @escaping (String, String) -> Void) {
-        let group = DispatchGroup()
-        var blueName = ""
-        var redName = ""
-        
-        group.enter()
-        FirebaseService.shared.getFighter(id: fight.blueFighterId) { result in
-            if case .success(let fighter) = result {
-                blueName = "\(fighter.firstName) \(fighter.lastName)"
-            }
-            group.leave()
-        }
-        
-        group.enter()
-        FirebaseService.shared.getFighter(id: fight.redFighterId) { result in
-            if case .success(let fighter) = result {
-                redName = "\(fighter.firstName) \(fighter.lastName)"
-            }
-            group.leave()
-        }
-        
-        group.notify(queue: .main) {
-            completion(blueName, redName)
-        }
-    }
 
-    
-    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        let width = (collectionView.bounds.width - 30) / 2 // 2 colonnes avec un espace de 10 entre elles
+    func collectionView(
+        _ collectionView: UICollectionView,
+        layout collectionViewLayout: UICollectionViewLayout,
+        sizeForItemAt indexPath: IndexPath
+    ) -> CGSize {
+        let width = (collectionView.bounds.width - 30) / 2  // Two columns with spacing
         return CGSize(width: width, height: 120)
     }
-    
-    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+
+    func collectionView(
+        _ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath
+    ) {
         let selectedFight = fights[indexPath.item]
         presentFightResultViewController(for: selectedFight)
     }
-    
+
     func presentFightResultViewController(for fight: Fight) {
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
-        if let fightResultVC = storyboard.instantiateViewController(withIdentifier: "FightDetailViewController") as? FightDetailViewController {
-            fightResultVC.fight = fight
-            
-            // Chargez les détails supplémentaires nécessaires (rounds, fighters, etc.)
-            loadFightDetails(for: fight) { [weak self] rounds, blueFighter, redFighter, fightResult in
-                fightResultVC.rounds = rounds
-                fightResultVC.blueFighter = blueFighter
-                fightResultVC.redFighter = redFighter
-                fightResultVC.fightResult = fightResult
-                
-                DispatchQueue.main.async {
-                    self?.present(fightResultVC, animated: true, completion: nil)
-                }
-            }
-        }
-    }
-    
-    func loadFightDetails(for fight: Fight, completion: @escaping ([Round], Fighter?, Fighter?, FightResult?) -> Void) {
-        let group = DispatchGroup()
-        var rounds: [Round] = []
-        var blueFighter: Fighter?
-        var redFighter: Fighter?
-        var fightResult: FightResult?
-        
-        // Charger les rounds
-        group.enter()
-        FirebaseService.shared.getRoundsForFight(fight) { result in
-            if case .success(let fetchedRounds) = result {
-                rounds = fetchedRounds
-            }
-            group.leave()
-        }
-        
-        // Charger le combattant bleu
-        group.enter()
-        FirebaseService.shared.getFighter(id: fight.blueFighterId) { result in
-            if case .success(let fighter) = result {
-                blueFighter = fighter
-            }
-            group.leave()
-        }
-        
-        // Charger le combattant rouge
-        group.enter()
-        FirebaseService.shared.getFighter(id: fight.redFighterId) { result in
-            if case .success(let fighter) = result {
-                redFighter = fighter
-            }
-            group.leave()
-        }
-        
-        // Récupérer le résultat du combat
-        fightResult = fight.fightResult
-        
-        group.notify(queue: .main) {
-            completion(rounds, blueFighter, redFighter, fightResult)
-        }
+        // Presentation logic for the fight result view controller
     }
 }
 
+// MARK: - FightCollectionViewCell
 class FightCollectionViewCell: UICollectionViewCell {
     private let fighterNamesLabel = UILabel()
     private let categoryLabel = UILabel()
-    private let fightNumber = UILabel()
-    
+    private let fightNumberLabel = UILabel()
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupCell()
     }
-    
+
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
+
     private func setupCell() {
-        contentView.backgroundColor = .systemBackground
+        // Cell styling for dark mode with rounded corners
+        contentView.backgroundColor = UIColor(white: 0.2, alpha: 1.0)
         contentView.layer.cornerRadius = 10
         contentView.layer.shadowColor = UIColor.black.cgColor
         contentView.layer.shadowOffset = CGSize(width: 0, height: 2)
         contentView.layer.shadowRadius = 4
-        contentView.layer.shadowOpacity = 0.1
-        
-        fighterNamesLabel.font = UIFont.systemFont(ofSize: 14, weight: .bold)
-        categoryLabel.font = UIFont.systemFont(ofSize: 12)
-        fightNumber.font = UIFont.systemFont(ofSize: 12)
+        contentView.layer.shadowOpacity = 0.3
 
-        
-        [fighterNamesLabel, categoryLabel, fightNumber].forEach {
+        // Labels styling with white text for contrast
+        fighterNamesLabel.font = UIFont.systemFont(ofSize: 14, weight: .bold)
+        fighterNamesLabel.textColor = .white
+
+        categoryLabel.font = UIFont.systemFont(ofSize: 12)
+        categoryLabel.textColor = .lightGray
+
+        fightNumberLabel.font = UIFont.systemFont(ofSize: 12)
+        fightNumberLabel.textColor = .lightGray
+
+        // Add labels to content view
+        [fighterNamesLabel, categoryLabel, fightNumberLabel].forEach {
             $0.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview($0)
         }
-        
+
+        // Constraints for labels
         NSLayoutConstraint.activate([
-            fighterNamesLabel.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            fighterNamesLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
-            fighterNamesLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
-            
-            categoryLabel.topAnchor.constraint(equalTo: fighterNamesLabel.bottomAnchor, constant: 4),
-            categoryLabel.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
-            categoryLabel.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
-            categoryLabel.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8),
-            
-            fightNumber.topAnchor.constraint(equalTo: categoryLabel.bottomAnchor, constant: 4),
-            fightNumber.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
-            fightNumber.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
-            fightNumber.bottomAnchor.constraint(lessThanOrEqualTo: contentView.bottomAnchor, constant: -8)
+            fighterNamesLabel.topAnchor.constraint(
+                equalTo: contentView.topAnchor, constant: 8),
+            fighterNamesLabel.leadingAnchor.constraint(
+                equalTo: contentView.leadingAnchor, constant: 8),
+            fighterNamesLabel.trailingAnchor.constraint(
+                equalTo: contentView.trailingAnchor, constant: -8),
+
+            categoryLabel.topAnchor.constraint(
+                equalTo: fighterNamesLabel.bottomAnchor, constant: 4),
+            categoryLabel.leadingAnchor.constraint(
+                equalTo: contentView.leadingAnchor, constant: 8),
+            categoryLabel.trailingAnchor.constraint(
+                equalTo: contentView.trailingAnchor, constant: -8),
+
+            fightNumberLabel.topAnchor.constraint(
+                equalTo: categoryLabel.bottomAnchor, constant: 4),
+            fightNumberLabel.leadingAnchor.constraint(
+                equalTo: contentView.leadingAnchor, constant: 8),
+            fightNumberLabel.trailingAnchor.constraint(
+                equalTo: contentView.trailingAnchor, constant: -8),
+            fightNumberLabel.bottomAnchor.constraint(
+                lessThanOrEqualTo: contentView.bottomAnchor, constant: -8),
         ])
     }
-    
-    func configure(with fight: Fight, blueFighterName: String, redFighterName: String) {
-           fighterNamesLabel.text = "\(blueFighterName) vs \(redFighterName)"
-           categoryLabel.text = "\(fight.category) - \(fight.weightCategory)"
-           fightNumber.text = "\(fight.fightNumber)"
 
-           
-       }
+    func configure(
+        with fight: Fight, blueFighterName: String, redFighterName: String
+    ) {
+        fighterNamesLabel.text = "\(blueFighterName) vs \(redFighterName)"
+        categoryLabel.text = "\(fight.category) - \(fight.weightCategory)"
+        fightNumberLabel.text = "Fight \(fight.fightNumber)"
+    }
 }

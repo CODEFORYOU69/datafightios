@@ -15,7 +15,9 @@ class LogoutViewController: UIViewController {
     }
 
     func performLogout() {
-        if let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate {
+        if let sceneDelegate = UIApplication.shared.connectedScenes.first?
+            .delegate as? SceneDelegate
+        {
             sceneDelegate.logout()
         }
     }

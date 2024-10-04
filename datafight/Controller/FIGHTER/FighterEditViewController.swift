@@ -1,20 +1,12 @@
-
-
-//
-//  FighterEditViewController.swift
-//  datafight
-//
-//  Created by younes ouasmi on 03/08/2024.
-//
-
-import UIKit
 import CountryPickerView
-import Photos
 import Firebase
+import FirebaseAnalytics
 import FirebaseAuth
+import Photos
+import UIKit
 
 class FighterEditViewController: UIViewController {
-    
+
     // MARK: - Outlets
     @IBOutlet weak var contentView: UIView!
     @IBOutlet weak var profileImageView: UIImageView!
@@ -24,34 +16,33 @@ class FighterEditViewController: UIViewController {
     @IBOutlet weak var birthdatePicker: UIDatePicker!
     @IBOutlet weak var countryButton: UIButton!
     @IBOutlet weak var addPhotoButton: UIButton!
-    
+
     // MARK: - Properties
     var fighter: Fighter?
-    var selectedCountryCode: String?
-    let countryPicker = CountryPickerView()
-    let imagePicker = UIImagePickerController()
-    
+    private var selectedCountryCode: String?
+    private let countryPicker = CountryPickerView()
+    private let imagePicker = UIImagePickerController()
+
     // MARK: - Lifecycle Methods
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        setupCountryPicker()
-        setupImagePicker()
+        setupDelegates()
         setupNavigationBar()
-        addParallaxEffect()
+
+        // Log screen view
+        Analytics.logEvent(
+            AnalyticsEventScreenView,
+            parameters: [
+                AnalyticsParameterScreenName: "Fighter Edit"
+            ])
     }
-    func setupCountryPicker() {
-        countryPicker.delegate = self
-        countryPicker.dataSource = self}
-    
-    func setupImagePicker() {
-        imagePicker.delegate = self
-        imagePicker.allowsEditing = true
-    }
+
     // MARK: - UI Setup
-    func setupUI() {
-        view.backgroundColor = UIColor(red: 0.95, green: 0.95, blue: 0.97, alpha: 1.0)
-        
+    private func setupUI() {
+        view.backgroundColor = UIColor(
+            red: 0.05, green: 0.05, blue: 0.05, alpha: 1.0)  // Dark background
+
         setupContentView()
         setupProfileImageView()
         setupTextFields()
@@ -59,147 +50,169 @@ class FighterEditViewController: UIViewController {
         setupBirthdatePicker()
         setupCountryButton()
         setupAddPhotoButton()
-        
+
         populateFields()
+        addParallaxEffect()
     }
-    
-    func setupContentView() {
-        contentView.backgroundColor = .white
-        contentView.layer.cornerRadius = 15
-        contentView.layer.shadowColor = UIColor.black.cgColor
-        contentView.layer.shadowOffset = CGSize(width: 0, height: 2)
-        contentView.layer.shadowOpacity = 0.1
-        contentView.layer.shadowRadius = 10
+
+    private func setupContentView() {
+        applyNeonEffect(to: contentView)
+        contentView.backgroundColor = UIColor(white: 0.1, alpha: 0.8)  // Slightly transparent dark background
     }
-    
-    func setupProfileImageView() {
+
+    private func setupProfileImageView() {
         profileImageView.layer.cornerRadius = profileImageView.frame.width / 2
         profileImageView.clipsToBounds = true
         profileImageView.layer.borderWidth = 3
-        profileImageView.layer.borderColor = UIColor.systemBlue.cgColor
+        profileImageView.layer.borderColor = UIColor.systemRed.cgColor
     }
-    
-    func setupTextFields() {
+
+    private func setupTextFields() {
         [firstNameTextField, lastNameTextField].forEach { textField in
-            textField?.borderStyle = .none
-            textField?.backgroundColor = .systemGray6
-            textField?.layer.cornerRadius = 8
-            textField?.layer.masksToBounds = true
-            textField?.font = UIFont.systemFont(ofSize: 16)
-            textField?.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 10, height: textField?.frame.height ?? 0))
-            textField?.leftViewMode = .always
+            applyNeonEffect(to: textField!)  // Forcer le déballage ici
+            textField?.attributedPlaceholder = NSAttributedString(
+                string: textField?.placeholder ?? "",
+                attributes: [
+                    NSAttributedString.Key.foregroundColor: UIColor.lightGray
+                ]
+            )
         }
     }
-    
-    func setupGenderSegmentedControl() {
-        genderSegmentedControl.backgroundColor = .systemGray6
-        genderSegmentedControl.selectedSegmentTintColor = .systemBlue
-        genderSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.darkGray], for: .normal)
-        genderSegmentedControl.setTitleTextAttributes([.foregroundColor: UIColor.white], for: .selected)
+
+    private func setupGenderSegmentedControl() {
+        genderSegmentedControl.backgroundColor = .clear
+        genderSegmentedControl.selectedSegmentTintColor = UIColor(
+            red: 0.8, green: 0.1, blue: 0.1, alpha: 0.8)
+        genderSegmentedControl.setTitleTextAttributes(
+            [.foregroundColor: UIColor.white], for: .normal)
+        genderSegmentedControl.setTitleTextAttributes(
+            [.foregroundColor: UIColor.black], for: .selected)
     }
-    
-    func setupBirthdatePicker() {
-        birthdatePicker.backgroundColor = .systemGray6
-        birthdatePicker.layer.cornerRadius = 8
+
+    private func setupBirthdatePicker() {
+        birthdatePicker.backgroundColor = .clear
+        birthdatePicker.tintColor = .white
+        birthdatePicker.setValue(UIColor.white, forKey: "textColor")
     }
-    
-    func setupCountryButton() {
-        countryButton.layer.cornerRadius = 8
-        countryButton.backgroundColor = .systemGray6
-        countryButton.setTitleColor(.darkGray, for: .normal)
+
+    private func setupCountryButton() {
+        applyNeonEffect(to: countryButton)
     }
-    
-    func setupAddPhotoButton() {
-        addPhotoButton.layer.cornerRadius = 8
-        addPhotoButton.backgroundColor = .systemBlue
-        addPhotoButton.setTitleColor(.white, for: .normal)
+
+    private func setupAddPhotoButton() {
+        applyNeonEffect(to: addPhotoButton)
     }
-    
-    func populateFields() {
+
+    private func setupDelegates() {
+        countryPicker.delegate = self
+        countryPicker.dataSource = self
+        imagePicker.delegate = self
+        imagePicker.allowsEditing = true
+    }
+
+    private func setupNavigationBar() {
+        navigationItem.rightBarButtonItem = UIBarButtonItem(
+            title: "Save", style: .done, target: self,
+            action: #selector(saveTapped))
+        navigationController?.navigationBar.tintColor = .white
+    }
+
+    private func populateFields() {
         if let fighter = fighter {
             firstNameTextField.text = fighter.firstName
             lastNameTextField.text = fighter.lastName
-            genderSegmentedControl.selectedSegmentIndex = fighter.gender == "Male" ? 0 : 1
+            genderSegmentedControl.selectedSegmentIndex =
+                fighter.gender == "Male" ? 0 : 1
             countryButton.setTitle(fighter.country, for: .normal)
             selectedCountryCode = fighter.country
-            
+
             if let birthdate = fighter.birthdate {
                 birthdatePicker.date = birthdate
             }
-            
-            if let imageUrlString = fighter.profileImageURL, let imageUrl = URL(string: imageUrlString) {
-                profileImageView.sd_setImage(with: imageUrl, placeholderImage: UIImage(named: "placeholder_profile"))
+
+            if let imageUrlString = fighter.profileImageURL,
+                let imageUrl = URL(string: imageUrlString)
+            {
+                profileImageView.sd_setImage(
+                    with: imageUrl,
+                    placeholderImage: UIImage(named: "placeholder_profile"))
             }
         }
     }
-    
-    func setupNavigationBar() {
-        navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Save", style: .done, target: self, action: #selector(saveTapped))
-    }
-    
-    func addParallaxEffect() {
+
+    private func addParallaxEffect() {
         let amount: CGFloat = 20
-        
-        let horizontalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.x", type: .tiltAlongHorizontalAxis)
-        horizontalMotionEffect.minimumRelativeValue = -amount
-        horizontalMotionEffect.maximumRelativeValue = amount
-        
-        let verticalMotionEffect = UIInterpolatingMotionEffect(keyPath: "center.y", type: .tiltAlongVerticalAxis)
-        verticalMotionEffect.minimumRelativeValue = -amount
-        verticalMotionEffect.maximumRelativeValue = amount
-        
-        let motionEffectGroup = UIMotionEffectGroup()
-        motionEffectGroup.motionEffects = [horizontalMotionEffect, verticalMotionEffect]
-        contentView.addMotionEffect(motionEffectGroup)
+        let group = UIMotionEffectGroup()
+        let horizontalEffect = UIInterpolatingMotionEffect(
+            keyPath: "center.x", type: .tiltAlongHorizontalAxis)
+        horizontalEffect.minimumRelativeValue = -amount
+        horizontalEffect.maximumRelativeValue = amount
+
+        let verticalEffect = UIInterpolatingMotionEffect(
+            keyPath: "center.y", type: .tiltAlongVerticalAxis)
+        verticalEffect.minimumRelativeValue = -amount
+        verticalEffect.maximumRelativeValue = amount
+
+        group.motionEffects = [horizontalEffect, verticalEffect]
+        contentView.addMotionEffect(group)
     }
-    
+
     // MARK: - Actions
     @IBAction func addPhotoTapped(_ sender: Any) {
         presentPhotoPicker()
     }
-    
+
     @IBAction func selectCountryTapped(_ sender: Any) {
         countryPicker.showCountriesList(from: self)
     }
-    
+
     @objc func saveTapped(_ sender: Any) {
         saveOrUpdateFighter()
     }
-    
+
     // MARK: - Helper Methods
-    func presentPhotoPicker() {
-        let alertController = UIAlertController(title: "Choose a photo", message: nil, preferredStyle: .actionSheet)
-        
+    private func presentPhotoPicker() {
+        let alertController = UIAlertController(
+            title: "Choose a photo", message: nil, preferredStyle: .actionSheet)
+
         if UIImagePickerController.isSourceTypeAvailable(.camera) {
-            alertController.addAction(UIAlertAction(title: "Take a photo", style: .default) { [weak self] _ in
-                self?.presentImagePicker(sourceType: .camera)
-            })
+            alertController.addAction(
+                UIAlertAction(title: "Take a photo", style: .default) {
+                    [weak self] _ in
+                    self?.presentImagePicker(sourceType: .camera)
+                })
         }
-        
-        alertController.addAction(UIAlertAction(title: "Choose from gallery", style: .default) { [weak self] _ in
-            self?.presentImagePicker(sourceType: .photoLibrary)
-        })
-        
-        alertController.addAction(UIAlertAction(title: "Cancel", style: .cancel))
-        
-        if let popoverController = alertController.popoverPresentationController {
+
+        alertController.addAction(
+            UIAlertAction(title: "Choose from gallery", style: .default) {
+                [weak self] _ in
+                self?.presentImagePicker(sourceType: .photoLibrary)
+            })
+
+        alertController.addAction(
+            UIAlertAction(title: "Cancel", style: .cancel))
+
+        if let popoverController = alertController.popoverPresentationController
+        {
             popoverController.sourceView = addPhotoButton
             popoverController.sourceRect = addPhotoButton.bounds
         }
-        
+
         present(alertController, animated: true)
     }
-    
-    func saveOrUpdateFighter() {
+
+    private func saveOrUpdateFighter() {
         guard let firstName = firstNameTextField.text, !firstName.isEmpty,
-              let lastName = lastNameTextField.text, !lastName.isEmpty,
-              let country = selectedCountryCode, !country.isEmpty else {
-            showAlert(title: "Error", message: "Please fill in all required fields")
+            let lastName = lastNameTextField.text, !lastName.isEmpty,
+            let country = selectedCountryCode, !country.isEmpty
+        else {
+            showAlert(message: "Please fill in all required fields")
             return
         }
-        
-        let gender = genderSegmentedControl.selectedSegmentIndex == 0 ? "Men" : "Women"
-        
+
+        let gender =
+            genderSegmentedControl.selectedSegmentIndex == 0 ? "Men" : "Women"
+
         let updatedFighter = Fighter(
             id: fighter?.id,
             creatorUserId: Auth.auth().currentUser?.uid ?? "",
@@ -210,15 +223,17 @@ class FighterEditViewController: UIViewController {
             country: country,
             profileImageURL: fighter?.profileImageURL
         )
-        
-        if let image = profileImageView.image, image != UIImage(named: "placeholder_profile") {
+
+        if let image = profileImageView.image,
+            image != UIImage(named: "placeholder_profile")
+        {
             uploadFighterImage(image, fighter: updatedFighter)
         } else {
             saveFighterToFirestore(updatedFighter)
         }
     }
-    
-    func uploadFighterImage(_ image: UIImage, fighter: Fighter) {
+
+    private func uploadFighterImage(_ image: UIImage, fighter: Fighter) {
         FirebaseService.shared.uploadFighterImage(image) { [weak self] result in
             switch result {
             case .success(let url):
@@ -226,49 +241,103 @@ class FighterEditViewController: UIViewController {
                 updatedFighter.profileImageURL = url.absoluteString
                 self?.saveFighterToFirestore(updatedFighter)
             case .failure(let error):
-                self?.showAlert(title: "Error", message: "Unable to upload image: \(error.localizedDescription)")
+                self?.showAlert(
+                    message:
+                        "Unable to upload image: \(error.localizedDescription)")
             }
         }
     }
-    
-    func saveFighterToFirestore(_ fighter: Fighter) {
+
+    private func saveFighterToFirestore(_ fighter: Fighter) {
         FirebaseService.shared.saveFighter(fighter) { [weak self] result in
             switch result {
             case .success:
-                self?.showAlert(title: "Success", message: "Fighter saved successfully") {
-                    self?.navigationController?.popViewController(animated: true)
+                // Log successful fighter save
+                Analytics.logEvent(
+                    "fighter_saved",
+                    parameters: [
+                        "fighter_id": fighter.id ?? "new" as NSObject
+                    ])
+                self?.showAlert(message: "Fighter saved successfully") {
+                    self?.navigationController?.popViewController(
+                        animated: true)
                 }
             case .failure(let error):
-                self?.showAlert(title: "Error", message: "Unable to save fighter: \(error.localizedDescription)")
+                // Log fighter save failure
+                Analytics.logEvent(
+                    "fighter_save_failed",
+                    parameters: [
+                        "error": error.localizedDescription as NSObject
+                    ])
+                self?.showAlert(
+                    message:
+                        "Unable to save fighter: \(error.localizedDescription)")
             }
         }
     }
-    
-    func showAlert(title: String, message: String, completion: (() -> Void)? = nil) {
-        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "OK", style: .default) { _ in
-            completion?()
-        })
+
+    private func showAlert(message: String, completion: (() -> Void)? = nil) {
+        let alert = UIAlertController(
+            title: nil, message: message, preferredStyle: .alert)
+        alert.addAction(
+            UIAlertAction(title: "OK", style: .default) { _ in
+                completion?()
+            })
         present(alert, animated: true)
+    }
+
+    // Function to apply subtle neon effect to the UI elements
+    private func applyNeonEffect(to view: UIView) {
+        view.layer.borderWidth = 1.0
+        view.layer.borderColor =
+            UIColor(red: 1.0, green: 0.1, blue: 0.1, alpha: 0.5).cgColor
+        view.layer.shadowColor =
+            UIColor(red: 1.0, green: 0.1, blue: 0.1, alpha: 0.5).cgColor
+        view.layer.shadowRadius = 5.0
+        view.layer.shadowOpacity = 0.5
+        view.layer.shadowOffset = CGSize(width: 0, height: 0)
+        view.layer.cornerRadius = 10.0
+
+        if let button = view as? UIButton {
+            button.setTitleColor(.white, for: .normal)
+            button.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
+            button.backgroundColor = UIColor(
+                red: 0.8, green: 0.1, blue: 0.1, alpha: 0.8)
+        } else if let textField = view as? UITextField {
+            textField.textColor = .white
+            textField.font = UIFont.systemFont(ofSize: 16)
+            textField.backgroundColor = UIColor(white: 0.1, alpha: 0.8)
+        }
     }
 }
 
 // MARK: - Extensions
-extension FighterEditViewController: CountryPickerViewDelegate, CountryPickerViewDataSource {
-    func countryPickerView(_ countryPickerView: CountryPickerView, didSelectCountry country: Country) {
+extension FighterEditViewController: CountryPickerViewDelegate,
+    CountryPickerViewDataSource
+{
+    func countryPickerView(
+        _ countryPickerView: CountryPickerView,
+        didSelectCountry country: Country
+    ) {
         countryButton.setTitle(country.name, for: .normal)
         selectedCountryCode = country.code
     }
 }
 
-extension FighterEditViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+extension FighterEditViewController: UIImagePickerControllerDelegate,
+    UINavigationControllerDelegate
+{
+    func imagePickerController(
+        _ picker: UIImagePickerController,
+        didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey:
+            Any]
+    ) {
         if let editedImage = info[.editedImage] as? UIImage {
             profileImageView.image = editedImage
         }
         picker.dismiss(animated: true)
     }
-    
+
     func presentImagePicker(sourceType: UIImagePickerController.SourceType) {
         if sourceType == .photoLibrary {
             checkPhotoLibraryPermission { [weak self] granted in
@@ -278,7 +347,10 @@ extension FighterEditViewController: UIImagePickerControllerDelegate, UINavigati
                         self?.present(self!.imagePicker, animated: true)
                     }
                 } else {
-                    self?.showAlert(title: "Access Denied", message: "Please allow access to your photo library in the app settings to select a profile picture.")
+                    self?.showAlert(
+                        message:
+                            "Please allow access to your photo library in the app settings to select a profile picture."
+                    )
                 }
             }
         } else {
@@ -286,7 +358,7 @@ extension FighterEditViewController: UIImagePickerControllerDelegate, UINavigati
             present(imagePicker, animated: true)
         }
     }
-    
+
     func checkPhotoLibraryPermission(completion: @escaping (Bool) -> Void) {
         let status = PHPhotoLibrary.authorizationStatus()
         switch status {

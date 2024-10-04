@@ -23,6 +23,7 @@
 		3E0F20D32C72AE7D002FA01B /* FightTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E0F20D02C72AE7D002FA01B /* FightTableViewCell.swift */; };
 		3E4D14FE2C5D91CC00A3835A /* FighterEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4D14FD2C5D91CC00A3835A /* FighterEditViewController.swift */; };
 		3E4D15062C5E523A00A3835A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3E4D15052C5E523A00A3835A /* GoogleService-Info.plist */; };
+		3E50979B2CAF383D00AF5BC4 /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E50979A2CAF383D00AF5BC4 /* AdSupport.framework */; };
 		3E5E43FC2C9F457200145377 /* GraphCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E43FB2C9F457200145377 /* GraphCollectionViewCell.swift */; };
 		3E5E43FE2C9F45B000145377 /* AnalysisDashboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E43FD2C9F45B000145377 /* AnalysisDashboardViewController.swift */; };
 		3E5E44002C9F45E100145377 /* GraphConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E43FF2C9F45E100145377 /* GraphConfiguration.swift */; };
@@ -50,7 +51,6 @@
 		3E79A2532C7164BF00A64EE3 /* EventListViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E79A2522C7164BF00A64EE3 /* EventListViewController.swift */; };
 		3E7E9AD22C780F470067586F /* AddRoundViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9AD12C780F470067586F /* AddRoundViewController.swift */; };
 		3E7E9AD42C7836C70067586F /* RoundModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9AD32C7836C70067586F /* RoundModel.swift */; };
-		3E7E9B0D2C7949250067586F /* ActionWheelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9B0C2C7949250067586F /* ActionWheelView.swift */; };
 		3E7E9B0F2C7BFA4E0067586F /* ActionPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9B0E2C7BFA4D0067586F /* ActionPickerView.swift */; };
 		3E7E9B112C7CFB710067586F /* VideoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9B102C7CFB710067586F /* VideoModel.swift */; };
 		3E7E9B132C7CFBDC0067586F /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9B122C7CFBDC0067586F /* VideoPlayerView.swift */; };
@@ -61,7 +61,7 @@
 		3E7E9B202C7E08ED0067586F /* AddRoundViewController+Gestures.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9B1F2C7E08ED0067586F /* AddRoundViewController+Gestures.swift */; };
 		3E7E9B222C7FAB930067586F /* AddRoundViewController+finalizeRound.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9B212C7FAB930067586F /* AddRoundViewController+finalizeRound.swift */; };
 		3E7E9B372C86B8E20067586F /* AddRoundViewController+fcalculate+round+fight.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9B362C86B8E20067586F /* AddRoundViewController+fcalculate+round+fight.swift */; };
-		3E7E9B392C86BA1E0067586F /* actionwheelForIvr.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9B382C86BA1E0067586F /* actionwheelForIvr.swift */; };
+		3E7E9B392C86BA1E0067586F /* AddroundViewController+IvrAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E7E9B382C86BA1E0067586F /* AddroundViewController+IvrAction.swift */; };
 		3E84D9172C91191200C0BB2E /* FightResultViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E84D9162C91191200C0BB2E /* FightResultViewController.swift */; };
 		3E87E3292C56B94700D843E2 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E87E3282C56B94700D843E2 /* AppDelegate.swift */; };
 		3E87E32B2C56B94700D843E2 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E87E32A2C56B94700D843E2 /* SceneDelegate.swift */; };
@@ -82,7 +82,6 @@
 		3EABF4632CA2082300F09559 /* FightDetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF4622CA2082300F09559 /* FightDetailViewController.swift */; };
 		3EABF4762CA417EE00F09559 /* FirebaseGeneralTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EABF4752CA417EE00F09559 /* FirebaseGeneralTests.swift */; };
 		3EC508FE2CAAFAB00044FDCD /* SDWebImage in Frameworks */ = {isa = PBXBuildFile; productRef = 3EE5E4BB2CA9E28F00BAB683 /* SDWebImage */; };
-		3EE3E2132CACB888001D684D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3E4D15052C5E523A00A3835A /* GoogleService-Info.plist */; };
 		3EE3E2152CAD6CE5001D684D /* FightTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE3E2142CAD6CE5001D684D /* FightTests.swift */; };
 		3EE3E2172CAD6DC6001D684D /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE3E2162CAD6DC6001D684D /* EventTests.swift */; };
 		3EE3E2192CAD6FF4001D684D /* FighterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3EE3E2182CAD6FF4001D684D /* FighterTests.swift */; };
@@ -123,6 +122,7 @@
 		3E21A5E72C8E279200ACDCA4 /* datafight.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = datafight.entitlements; sourceTree = "<group>"; };
 		3E4D14FD2C5D91CC00A3835A /* FighterEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterEditViewController.swift; sourceTree = "<group>"; };
 		3E4D15052C5E523A00A3835A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		3E50979A2CAF383D00AF5BC4 /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/AdSupport.framework; sourceTree = DEVELOPER_DIR; };
 		3E5E43FB2C9F457200145377 /* GraphCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphCollectionViewCell.swift; sourceTree = "<group>"; };
 		3E5E43FD2C9F45B000145377 /* AnalysisDashboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisDashboardViewController.swift; sourceTree = "<group>"; };
 		3E5E43FF2C9F45E100145377 /* GraphConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphConfiguration.swift; sourceTree = "<group>"; };
@@ -149,7 +149,6 @@
 		3E79A2522C7164BF00A64EE3 /* EventListViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventListViewController.swift; sourceTree = "<group>"; };
 		3E7E9AD12C780F470067586F /* AddRoundViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddRoundViewController.swift; sourceTree = "<group>"; };
 		3E7E9AD32C7836C70067586F /* RoundModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoundModel.swift; sourceTree = "<group>"; };
-		3E7E9B0C2C7949250067586F /* ActionWheelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionWheelView.swift; sourceTree = "<group>"; };
 		3E7E9B0E2C7BFA4D0067586F /* ActionPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActionPickerView.swift; sourceTree = "<group>"; };
 		3E7E9B102C7CFB710067586F /* VideoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoModel.swift; sourceTree = "<group>"; };
 		3E7E9B122C7CFBDC0067586F /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
@@ -160,7 +159,7 @@
 		3E7E9B1F2C7E08ED0067586F /* AddRoundViewController+Gestures.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddRoundViewController+Gestures.swift"; sourceTree = "<group>"; };
 		3E7E9B212C7FAB930067586F /* AddRoundViewController+finalizeRound.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddRoundViewController+finalizeRound.swift"; sourceTree = "<group>"; };
 		3E7E9B362C86B8E20067586F /* AddRoundViewController+fcalculate+round+fight.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddRoundViewController+fcalculate+round+fight.swift"; sourceTree = "<group>"; };
-		3E7E9B382C86BA1E0067586F /* actionwheelForIvr.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = actionwheelForIvr.swift; sourceTree = "<group>"; };
+		3E7E9B382C86BA1E0067586F /* AddroundViewController+IvrAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AddroundViewController+IvrAction.swift"; sourceTree = "<group>"; };
 		3E84D9162C91191200C0BB2E /* FightResultViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FightResultViewController.swift; sourceTree = "<group>"; };
 		3E87E3252C56B94700D843E2 /* datafight.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = datafight.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		3E87E3282C56B94700D843E2 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -192,6 +191,7 @@
 				3EE5E4BA2CA9E25200BAB683 /* SDWebImage in Frameworks */,
 				3E98A8732CAB0C8F00123F78 /* FirebaseAnalytics in Frameworks */,
 				3E98A8812CAB0C8F00123F78 /* FirebaseStorage in Frameworks */,
+				3E50979B2CAF383D00AF5BC4 /* AdSupport.framework in Frameworks */,
 				3E98A8752CAB0C8F00123F78 /* FirebaseAppCheck in Frameworks */,
 				3E98A87B2CAB0C8F00123F78 /* FirebaseFirestore in Frameworks */,
 				3E98A8792CAB0C8F00123F78 /* FirebaseCrashlytics in Frameworks */,
@@ -215,6 +215,7 @@
 		3E044D592CA4AFE500DA5EFA /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				3E50979A2CAF383D00AF5BC4 /* AdSupport.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -290,7 +291,7 @@
 				3E7E9B1F2C7E08ED0067586F /* AddRoundViewController+Gestures.swift */,
 				3E7E9B212C7FAB930067586F /* AddRoundViewController+finalizeRound.swift */,
 				3E7E9B362C86B8E20067586F /* AddRoundViewController+fcalculate+round+fight.swift */,
-				3E7E9B382C86BA1E0067586F /* actionwheelForIvr.swift */,
+				3E7E9B382C86BA1E0067586F /* AddroundViewController+IvrAction.swift */,
 				3E98BF8D2C8A579C00B8C859 /* AddRoundViewController+determineWinner.swift */,
 			);
 			path = AddRound;
@@ -327,7 +328,6 @@
 				3E5F6ED62C5F785000BC4746 /* utils */,
 				3E98A8832CAB227900123F78 /* Main.storyboard */,
 				3E87E3362C56B94900D843E2 /* Info.plist */,
-				3E7E9B0C2C7949250067586F /* ActionWheelView.swift */,
 			);
 			path = datafight;
 			sourceTree = "<group>";
@@ -422,6 +422,7 @@
 				3E87E3212C56B94700D843E2 /* Sources */,
 				3E87E3222C56B94700D843E2 /* Frameworks */,
 				3E87E3232C56B94700D843E2 /* Resources */,
+				3E5097992CAEEBAF00AF5BC4 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -532,13 +533,37 @@
 			buildActionMask = 2147483647;
 			files = (
 				3E6848D12CA788F500EF01A6 /* Assets.xcassets in Resources */,
-				3EE3E2132CACB888001D684D /* GoogleService-Info.plist in Resources */,
 				3E6848D32CA9695C00EF01A6 /* testVideo.mp4 in Resources */,
 				3E98A8842CAB227900123F78 /* Main.storyboard in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		3E5097992CAEEBAF00AF5BC4 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Resources/DWARF/${PRODUCT_NAME}",
+				"${DWARF_DSYM_FOLDER_PATH}/${DWARF_DSYM_FILE_NAME}/Contents/Info.plist",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/GoogleService-Info.plist",
+				"$(TARGET_BUILD_DIR)/$(EXECUTABLE_PATH)",
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Type a script or drag a script file from your workspace to insert its path.\n\"${BUILD_DIR%/Build/*}/SourcePackages/checkouts/firebase-ios-sdk/Crashlytics/run\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		3E87E3212C56B94700D843E2 /* Sources */ = {
@@ -568,7 +593,7 @@
 				3E87E32B2C56B94700D843E2 /* SceneDelegate.swift in Sources */,
 				3EABF4632CA2082300F09559 /* FightDetailViewController.swift in Sources */,
 				3E7E9B372C86B8E20067586F /* AddRoundViewController+fcalculate+round+fight.swift in Sources */,
-				3E7E9B392C86BA1E0067586F /* actionwheelForIvr.swift in Sources */,
+				3E7E9B392C86BA1E0067586F /* AddroundViewController+IvrAction.swift in Sources */,
 				3E7E9B222C7FAB930067586F /* AddRoundViewController+finalizeRound.swift in Sources */,
 				3E0F20C92C72735C002FA01B /* FightCategories.swift in Sources */,
 				3E5F6EDA2C5F788400BC4746 /* UIKit+Extensions.swift in Sources */,
@@ -596,7 +621,6 @@
 				3E6133332C6E4EF70060D6E6 /* LogoutViewController.swift in Sources */,
 				3E7E9B1B2C7DF6480067586F /* AddRoundViewController+Actions.swift in Sources */,
 				3E6133382C6EC5290060D6E6 /* UserModel.swift in Sources */,
-				3E7E9B0D2C7949250067586F /* ActionWheelView.swift in Sources */,
 				3E5F6E9D2C5EFB5800BC4746 /* SignUpViewController.swift in Sources */,
 				3E7E9B132C7CFBDC0067586F /* VideoPlayerView.swift in Sources */,
 				3E5E44002C9F45E100145377 /* GraphConfiguration.swift in Sources */,
@@ -771,6 +795,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_ASSET_PATHS = datafight/utils/Assets.xcassets;
 				DEVELOPMENT_TEAM = VRA2ZFJM88;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -783,8 +808,8 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.8;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -825,8 +850,9 @@
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
-				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = UIInterfaceOrientationPortrait;
-				IPHONEOS_DEPLOYMENT_TARGET = 17.5;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = "";
+				"IPHONEOS_DEPLOYMENT_TARGET[sdk=iphoneos*]" = 15.8;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

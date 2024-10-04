@@ -19,7 +19,6 @@ struct Fighter: Codable, Identifiable {
     var profileImageURL: String?
     var fightIds: [String]?
 
-
     enum CodingKeys: String, CodingKey {
         case id
         case creatorUserId
@@ -33,7 +32,11 @@ struct Fighter: Codable, Identifiable {
 
     }
 
-    init(id: String? = nil, creatorUserId: String, firstName: String, lastName: String, gender: String, birthdate: Date?, country: String, profileImageURL: String? = nil, fightIds: [String]? = nil) {
+    init(
+        id: String? = nil, creatorUserId: String, firstName: String,
+        lastName: String, gender: String, birthdate: Date?, country: String,
+        profileImageURL: String? = nil, fightIds: [String]? = nil
+    ) {
         self.id = id
         self.creatorUserId = creatorUserId
         self.firstName = firstName
@@ -49,14 +52,17 @@ struct Fighter: Codable, Identifiable {
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decodeIfPresent(String.self, forKey: .id)
-        creatorUserId = try container.decode(String.self, forKey: .creatorUserId)
+        creatorUserId = try container.decode(
+            String.self, forKey: .creatorUserId)
         firstName = try container.decode(String.self, forKey: .firstName)
         lastName = try container.decode(String.self, forKey: .lastName)
         gender = try container.decode(String.self, forKey: .gender)
         birthdate = try container.decodeIfPresent(Date.self, forKey: .birthdate)
         country = try container.decode(String.self, forKey: .country)
-        profileImageURL = try container.decodeIfPresent(String.self, forKey: .profileImageURL)
-        fightIds = try container.decodeIfPresent([String].self, forKey: .fightIds)
+        profileImageURL = try container.decodeIfPresent(
+            String.self, forKey: .profileImageURL)
+        fightIds = try container.decodeIfPresent(
+            [String].self, forKey: .fightIds)
     }
 
     func encode(to encoder: Encoder) throws {
@@ -73,4 +79,3 @@ struct Fighter: Codable, Identifiable {
 
     }
 }
-    
