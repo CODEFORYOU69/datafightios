@@ -24,6 +24,7 @@
 		3E4D14FE2C5D91CC00A3835A /* FighterEditViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E4D14FD2C5D91CC00A3835A /* FighterEditViewController.swift */; };
 		3E4D15062C5E523A00A3835A /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3E4D15052C5E523A00A3835A /* GoogleService-Info.plist */; };
 		3E50979B2CAF383D00AF5BC4 /* AdSupport.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 3E50979A2CAF383D00AF5BC4 /* AdSupport.framework */; };
+		3E5781602CB0CA3300210C38 /* MedalCompetitionCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E57815F2CB0CA3300210C38 /* MedalCompetitionCell.swift */; };
 		3E5E43FC2C9F457200145377 /* GraphCollectionViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E43FB2C9F457200145377 /* GraphCollectionViewCell.swift */; };
 		3E5E43FE2C9F45B000145377 /* AnalysisDashboardViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E43FD2C9F45B000145377 /* AnalysisDashboardViewController.swift */; };
 		3E5E44002C9F45E100145377 /* GraphConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E43FF2C9F45E100145377 /* GraphConfiguration.swift */; };
@@ -125,6 +126,7 @@
 		3E4D14FD2C5D91CC00A3835A /* FighterEditViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FighterEditViewController.swift; sourceTree = "<group>"; };
 		3E4D15052C5E523A00A3835A /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		3E50979A2CAF383D00AF5BC4 /* AdSupport.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AdSupport.framework; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX15.0.sdk/System/Library/Frameworks/AdSupport.framework; sourceTree = DEVELOPER_DIR; };
+		3E57815F2CB0CA3300210C38 /* MedalCompetitionCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MedalCompetitionCell.swift; sourceTree = "<group>"; };
 		3E5E43FB2C9F457200145377 /* GraphCollectionViewCell.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphCollectionViewCell.swift; sourceTree = "<group>"; };
 		3E5E43FD2C9F45B000145377 /* AnalysisDashboardViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnalysisDashboardViewController.swift; sourceTree = "<group>"; };
 		3E5E43FF2C9F45E100145377 /* GraphConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GraphConfiguration.swift; sourceTree = "<group>"; };
@@ -365,6 +367,7 @@
 		3E98BF822C89D86300B8C859 /* FIGHTER */ = {
 			isa = PBXGroup;
 			children = (
+				3E57815F2CB0CA3300210C38 /* MedalCompetitionCell.swift */,
 				3E4D14FD2C5D91CC00A3835A /* FighterEditViewController.swift */,
 				3E5F6EC42C5F04A200BC4746 /* FighterListViewController.swift */,
 				3E5F6ECE2C5F064500BC4746 /* FighterDetailViewController.swift */,
@@ -595,6 +598,7 @@
 				3E7E9AD22C780F470067586F /* AddRoundViewController.swift in Sources */,
 				3E5F6ED12C5F069600BC4746 /* EventDetailViewController.swift in Sources */,
 				3E5F6EC92C5F04D200BC4746 /* LoginViewController.swift in Sources */,
+				3E5781602CB0CA3300210C38 /* MedalCompetitionCell.swift in Sources */,
 				3E7E9B0F2C7BFA4E0067586F /* ActionPickerView.swift in Sources */,
 				3E87E32B2C56B94700D843E2 /* SceneDelegate.swift in Sources */,
 				3EABF4632CA2082300F09559 /* FightDetailViewController.swift in Sources */,

@@ -2201,7 +2201,124 @@ class FirebaseGeneralTests: XCTestCase {
         // Wait for expectations
         await fulfillment(of: [expectation], timeout: 60)
     }
+    func testGetFighterCompleteStats() async throws {
+        // Ensure a user is logged in
+        guard let currentUserID = Auth.auth().currentUser?.uid else {
+            XCTFail("No authenticated user")
+            return
+        }
 
+        // Step 1: Create and save a Fighter
+        var fighter = Fighter(
+            id: nil,
+            creatorUserId: currentUserID,
+            firstName: "Test",
+            lastName: "Fighter",
+            gender: "Male",
+            birthdate: Date(),
+            country: "TestCountry",
+            profileImageURL: nil,
+            fightIds: []
+        )
+
+        do {
+            // Save Fighter
+            let fighterId = try await firebaseService.saveFighterAsync(fighter)
+            fighter.id = fighterId
+
+            // Step 2: Create and save Events
+            var event1 = Event(
+                id: nil,
+                creatorUserId: currentUserID,
+                eventName: "Test Event 1",
+                eventType: .open,
+                location: "Test Location 1",
+                date: Date(),
+                imageURL: nil,
+                fightIds: [],
+                country: "Test Country"
+            )
+
+            var event2 = Event(
+                id: nil,
+                creatorUserId: currentUserID,
+                eventName: "Test Event 2",
+                eventType: .nationalChampionship,
+                location: "Test Location 2",
+                date: Date(),
+                imageURL: nil,
+                fightIds: [],
+                country: "Test Country"
+            )
+
+            let eventId1 = try await firebaseService.saveEventAsync(event1)
+            event1.id = eventId1
+            let eventId2 = try await firebaseService.saveEventAsync(event2)
+            event2.id = eventId2
+
+            // Step 3: Create and save Fights
+            var fight1 = Fight(
+                id: nil,
+                creatorUserId: currentUserID,
+                eventId: eventId1,
+                fightNumber: 1,
+                blueFighterId: fighterId,
+                redFighterId: "opponentId1",
+                category: "Adult",
+                weightCategory: "Lightweight",
+                round: "Final",
+                isOlympic: false,
+                roundIds: [],
+                fightResult: FightResult(winner: fighterId, method: "Points", totalScore: (blue: 10, red: 5)),
+                blueVideoReplayUsed: false,
+                redVideoReplayUsed: false,
+                videoId: nil,
+                videoURL: nil
+            )
+
+            var fight2 = Fight(
+                id: nil,
+                creatorUserId: currentUserID,
+                eventId: eventId2,
+                fightNumber: 1,
+                blueFighterId: fighterId,
+                redFighterId: "opponentId2",
+                category: "Adult",
+                weightCategory: "Lightweight",
+                round: "Semi Final",
+                isOlympic: false,
+                roundIds: [],
+                fightResult: FightResult(winner: "opponentId2", method: "Points", totalScore: (blue: 7, red: 8)),
+                blueVideoReplayUsed: false,
+                redVideoReplayUsed: false,
+                videoId: nil,
+                videoURL: nil
+            )
+
+            let fightId1 = try await firebaseService.saveFightAsync(fight1)
+            fight1.id = fightId1
+            let fightId2 = try await firebaseService.saveFightAsync(fight2)
+            fight2.id = fightId2
+
+            // Now call getFighterCompleteStats
+            let stats = try await firebaseService.getFighterCompleteStatsAsync(fighterId: fighterId)
+
+            // Validate the results
+            XCTAssertNotNil(stats, "Stats should not be nil")
+            XCTAssertEqual(stats.totalCompetitions, 2, "There should be exactly 2 competitions")
+            XCTAssertEqual(stats.totalFights, 2, "There should be exactly 2 fights")
+            XCTAssertEqual(stats.totalWins, 1, "There should be exactly 1 win")
+            XCTAssertEqual(stats.winPercentage, 50.0, accuracy: 0.01, "Win percentage should be 50%")
+            XCTAssertEqual(stats.goldMedals, 1, "There should be 1 gold medal")
+            XCTAssertEqual(stats.silverMedals, 0, "There should be 0 silver medals")
+            XCTAssertEqual(stats.bronzeMedals, 1, "There should be 1 bronze medal")
+            XCTAssertEqual(stats.medalCompetitions.count, 2, "There should be 2 medal competitions")
+
+        } catch {
+            XCTFail("Test failed with error: \(error.localizedDescription)")
+        }
+    }
+    
 
 
 }

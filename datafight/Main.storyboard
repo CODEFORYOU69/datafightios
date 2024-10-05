@@ -2369,13 +2369,13 @@
                                                 <rect key="frame" x="472.5" y="10" width="120.5" height="184.5"/>
                                                 <subviews>
                                                     <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Country" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="0" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aV6-hc-eea">
-                                                        <rect key="frame" x="0.0" y="0.0" width="120.5" height="114"/>
+                                                        <rect key="frame" x="0.0" y="0.0" width="120.5" height="20.5"/>
                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                         <nil key="textColor"/>
                                                         <nil key="highlightedColor"/>
                                                     </label>
                                                     <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="ZKC-ZZ-HPf">
-                                                        <rect key="frame" x="0.0" y="122" width="120.5" height="62.5"/>
+                                                        <rect key="frame" x="0.0" y="28.5" width="120.5" height="156"/>
                                                     </imageView>
                                                 </subviews>
                                                 <constraints>
@@ -2407,30 +2407,160 @@
                                     <constraint firstItem="a5j-cA-x10" firstAttribute="width" secondItem="NAb-GR-6yP" secondAttribute="width" multiplier="0.9" id="zKN-jS-n0v"/>
                                 </constraints>
                             </view>
+                            <view alpha="0.69999999999999996" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="C9l-Jy-sIt" userLabel="statsView">
+                                <rect key="frame" x="37" y="548" width="670" height="410"/>
+                                <subviews>
+                                    <stackView opaque="NO" contentMode="scaleToFill" axis="vertical" distribution="fillEqually" spacing="8" translatesAutoresizingMaskIntoConstraints="NO" id="y9s-jc-NVu">
+                                        <rect key="frame" x="16" y="10" width="638" height="184.5"/>
+                                        <subviews>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="totalCompetitionsLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ece-IY-ttL" userLabel="totalCompetitionsLabel">
+                                                <rect key="frame" x="0.0" y="0.0" width="638" height="19.5"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="totalFightsLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="aoZ-wM-oH0" userLabel="totalFightsLabel">
+                                                <rect key="frame" x="0.0" y="27.5" width="638" height="19.5"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="totalWinsLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="g51-tf-gJd" userLabel="totalWinsLabel">
+                                                <rect key="frame" x="0.0" y="55" width="638" height="19.5"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="winPercentageLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LD5-JV-fzo" userLabel="winPercentageLabel">
+                                                <rect key="frame" x="0.0" y="82.5" width="638" height="19.5"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="goldMedalsLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="EZE-2X-f8w" userLabel="goldMedalsLabel">
+                                                <rect key="frame" x="0.0" y="110" width="638" height="19.5"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="silverMedalsLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="UdR-Hz-Qbe" userLabel="silverMedalsLabel">
+                                                <rect key="frame" x="0.0" y="137.5" width="638" height="19.5"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="bronzeMedalsLabel" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zUF-sh-nqz" userLabel="bronzeMedalsLabel">
+                                                <rect key="frame" x="0.0" y="165" width="638" height="19.5"/>
+                                                <fontDescription key="fontDescription" type="system" weight="medium" pointSize="14"/>
+                                                <color key="textColor" white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                                <nil key="highlightedColor"/>
+                                            </label>
+                                        </subviews>
+                                    </stackView>
+                                    <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="plain" separatorStyle="default" rowHeight="-1" estimatedRowHeight="-1" sectionHeaderHeight="-1" estimatedSectionHeaderHeight="-1" sectionFooterHeight="-1" estimatedSectionFooterHeight="-1" translatesAutoresizingMaskIntoConstraints="NO" id="WGG-gR-c6W">
+                                        <rect key="frame" x="16" y="194.5" width="638" height="205"/>
+                                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
+                                        <color key="separatorColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <color key="sectionIndexBackgroundColor" white="0.66666666669999997" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                        <prototypes>
+                                            <tableViewCell opaque="NO" clipsSubviews="YES" contentMode="scaleToFill" restorationIdentifier="MedalCompetitionCell" preservesSuperviewLayoutMargins="YES" selectionStyle="default" indentationWidth="10" reuseIdentifier="MedalCompetitionCell" rowHeight="80" id="Tb6-3q-Fdq" customClass="MedalCompetitionCell" customModule="datafight" customModuleProvider="target">
+                                                <rect key="frame" x="0.0" y="50" width="638" height="80"/>
+                                                <autoresizingMask key="autoresizingMask"/>
+                                                <tableViewCellContentView key="contentView" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" preservesSuperviewLayoutMargins="YES" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="Tb6-3q-Fdq" id="9EG-8w-97n">
+                                                    <rect key="frame" x="0.0" y="0.0" width="638" height="80"/>
+                                                    <autoresizingMask key="autoresizingMask"/>
+                                                    <subviews>
+                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="NqH-ln-tIA" userLabel="eventLabel">
+                                                            <rect key="frame" x="10" y="4" width="255" height="72"/>
+                                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                            <nil key="textColor"/>
+                                                            <nil key="highlightedColor"/>
+                                                        </label>
+                                                        <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wLS-bA-h3F" userLabel="numberOfFight">
+                                                            <rect key="frame" x="363" y="4" width="255" height="72"/>
+                                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                            <nil key="textColor"/>
+                                                            <nil key="highlightedColor"/>
+                                                        </label>
+                                                        <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="rXq-dU-tSF" userLabel="medalImage">
+                                                            <rect key="frame" x="275" y="4" width="64" height="72"/>
+                                                        </imageView>
+                                                    </subviews>
+                                                    <constraints>
+                                                        <constraint firstItem="wLS-bA-h3F" firstAttribute="centerY" secondItem="9EG-8w-97n" secondAttribute="centerY" id="GhM-bn-PTP"/>
+                                                        <constraint firstItem="rXq-dU-tSF" firstAttribute="centerY" secondItem="9EG-8w-97n" secondAttribute="centerY" id="LlL-xT-b5r"/>
+                                                        <constraint firstItem="wLS-bA-h3F" firstAttribute="width" secondItem="9EG-8w-97n" secondAttribute="width" multiplier="0.4" id="Lzy-qe-hIP"/>
+                                                        <constraint firstItem="NqH-ln-tIA" firstAttribute="width" secondItem="9EG-8w-97n" secondAttribute="width" multiplier="0.4" id="Pz6-7v-vh3"/>
+                                                        <constraint firstItem="rXq-dU-tSF" firstAttribute="width" secondItem="9EG-8w-97n" secondAttribute="width" multiplier="0.1" id="QBN-Ff-HSe"/>
+                                                        <constraint firstItem="NqH-ln-tIA" firstAttribute="leading" secondItem="9EG-8w-97n" secondAttribute="leading" constant="10" id="QuT-an-Ph5"/>
+                                                        <constraint firstItem="rXq-dU-tSF" firstAttribute="height" secondItem="9EG-8w-97n" secondAttribute="height" multiplier="0.9" id="YgN-vG-4dk"/>
+                                                        <constraint firstItem="wLS-bA-h3F" firstAttribute="height" secondItem="9EG-8w-97n" secondAttribute="height" multiplier="0.9" id="jbN-uC-GEi"/>
+                                                        <constraint firstItem="NqH-ln-tIA" firstAttribute="height" secondItem="9EG-8w-97n" secondAttribute="height" multiplier="0.9" id="jge-Q1-7il"/>
+                                                        <constraint firstItem="rXq-dU-tSF" firstAttribute="leading" secondItem="NqH-ln-tIA" secondAttribute="trailing" constant="10" id="uMO-tB-Z5j"/>
+                                                        <constraint firstItem="NqH-ln-tIA" firstAttribute="centerY" secondItem="9EG-8w-97n" secondAttribute="centerY" id="yNV-RP-vU3"/>
+                                                        <constraint firstAttribute="trailing" secondItem="wLS-bA-h3F" secondAttribute="trailing" constant="20" id="zVy-e2-KEK"/>
+                                                    </constraints>
+                                                </tableViewCellContentView>
+                                                <connections>
+                                                    <outlet property="competitionNameLabel" destination="NqH-ln-tIA" id="etb-0U-rxU"/>
+                                                    <outlet property="fightCountLabel" destination="wLS-bA-h3F" id="nap-vI-ZAj"/>
+                                                    <outlet property="medalImageView" destination="rXq-dU-tSF" id="Vl7-5a-ACE"/>
+                                                </connections>
+                                            </tableViewCell>
+                                        </prototypes>
+                                    </tableView>
+                                </subviews>
+                                <color key="backgroundColor" white="0.0" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
+                                <constraints>
+                                    <constraint firstItem="y9s-jc-NVu" firstAttribute="height" secondItem="C9l-Jy-sIt" secondAttribute="height" multiplier="0.45" id="c01-iP-DGV"/>
+                                    <constraint firstItem="WGG-gR-c6W" firstAttribute="height" secondItem="C9l-Jy-sIt" secondAttribute="height" multiplier="0.5" id="ebZ-Cu-Jlc"/>
+                                    <constraint firstItem="WGG-gR-c6W" firstAttribute="leading" secondItem="C9l-Jy-sIt" secondAttribute="leading" constant="16" id="jLj-Py-QvE"/>
+                                    <constraint firstAttribute="trailing" secondItem="y9s-jc-NVu" secondAttribute="trailing" constant="16" id="jkh-wb-yGc"/>
+                                    <constraint firstItem="y9s-jc-NVu" firstAttribute="leading" secondItem="C9l-Jy-sIt" secondAttribute="leading" constant="16" id="lPG-Wj-hND"/>
+                                    <constraint firstItem="WGG-gR-c6W" firstAttribute="top" secondItem="y9s-jc-NVu" secondAttribute="bottom" id="ndj-mr-aPB"/>
+                                    <constraint firstItem="y9s-jc-NVu" firstAttribute="top" secondItem="C9l-Jy-sIt" secondAttribute="top" constant="10" id="qnY-Yx-3ta"/>
+                                    <constraint firstAttribute="trailing" secondItem="WGG-gR-c6W" secondAttribute="trailing" constant="16" id="yPe-gq-Zbj"/>
+                                </constraints>
+                            </view>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="BoL-3t-sbd"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
+                            <constraint firstItem="C9l-Jy-sIt" firstAttribute="width" secondItem="BoL-3t-sbd" secondAttribute="width" multiplier="0.9" id="20F-hb-jWb"/>
+                            <constraint firstItem="C9l-Jy-sIt" firstAttribute="top" secondItem="NAb-GR-6yP" secondAttribute="bottom" constant="20" id="2bd-2a-Y5g"/>
                             <constraint firstItem="NAb-GR-6yP" firstAttribute="height" secondItem="BoL-3t-sbd" secondAttribute="height" multiplier="0.4" id="DHa-gg-9Jd"/>
                             <constraint firstItem="NAb-GR-6yP" firstAttribute="top" secondItem="BoL-3t-sbd" secondAttribute="top" constant="30" id="KJG-Jb-XR4"/>
                             <constraint firstItem="NAb-GR-6yP" firstAttribute="centerX" secondItem="8vK-in-I6R" secondAttribute="centerX" id="VzZ-tk-KD9"/>
                             <constraint firstItem="NAb-GR-6yP" firstAttribute="width" secondItem="BoL-3t-sbd" secondAttribute="width" multiplier="0.9" id="aAi-Gd-Coe"/>
+                            <constraint firstItem="C9l-Jy-sIt" firstAttribute="centerX" secondItem="8vK-in-I6R" secondAttribute="centerX" id="kZa-vn-0pg"/>
+                            <constraint firstItem="C9l-Jy-sIt" firstAttribute="height" secondItem="BoL-3t-sbd" secondAttribute="height" multiplier="0.4" id="mtt-5V-RvA"/>
                             <constraint firstItem="a5j-cA-x10" firstAttribute="height" secondItem="BoL-3t-sbd" secondAttribute="height" multiplier="0.3" id="yrd-0E-NFF"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="mm1-63-nD2"/>
                     <connections>
                         <outlet property="birthdateLabel" destination="Wig-E4-yF6" id="os8-gw-XoT"/>
+                        <outlet property="bronzeMedalsLabel" destination="zUF-sh-nqz" id="QYN-td-6J9"/>
                         <outlet property="countryLabel" destination="aV6-hc-eea" id="PKD-Z5-6N6"/>
+                        <outlet property="detailsView" destination="NAb-GR-6yP" id="hhh-0t-DvD"/>
                         <outlet property="flagImageView" destination="ZKC-ZZ-HPf" id="VRc-WP-Uaw"/>
                         <outlet property="genderLabel" destination="nl2-FD-xwT" id="bTj-R4-Tdb"/>
+                        <outlet property="goldMedalsLabel" destination="EZE-2X-f8w" id="qUa-0c-4w1"/>
+                        <outlet property="medalCompetitionsTableView" destination="WGG-gR-c6W" id="fcH-5A-kOu"/>
                         <outlet property="nameLabel" destination="scf-aP-Rob" id="PBU-5F-Kj4"/>
                         <outlet property="profileImageView" destination="mop-x3-XT3" id="2Vo-Mf-emv"/>
+                        <outlet property="silverMedalsLabel" destination="UdR-Hz-Qbe" id="8bT-AY-Dfh"/>
+                        <outlet property="statsView" destination="C9l-Jy-sIt" id="bqN-qq-IlP"/>
+                        <outlet property="totalCompetitionsLabel" destination="Ece-IY-ttL" id="h8J-lP-SLi"/>
+                        <outlet property="totalFightsLabel" destination="aoZ-wM-oH0" id="LUF-9h-zno"/>
+                        <outlet property="totalWinsLabel" destination="g51-tf-gJd" id="muI-yP-C3r"/>
+                        <outlet property="viewIn" destination="a5j-cA-x10" id="xkU-hN-YBi"/>
+                        <outlet property="winPercentageLabel" destination="LD5-JV-fzo" id="bQ0-7n-SAd"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="DiZ-mf-c2k" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2959" y="-867"/>
+            <point key="canvasLocation" x="2958.8709677419356" y="-867.16681376875545"/>
         </scene>
     </scenes>
     <resources>

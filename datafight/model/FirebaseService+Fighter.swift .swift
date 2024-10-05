@@ -161,6 +161,90 @@ extension FirebaseService {
             }
         }
     }
+    func getFighterCompleteStats(fighterId: String, completion: @escaping (Result<FighterCompleteStats, Error>) -> Void) {
+           getFights { result in
+               switch result {
+               case .success(let allFights):
+                   let fighterFights = allFights.filter { $0.blueFighterId == fighterId || $0.redFighterId == fighterId }
+                   
+                   let totalFights = fighterFights.count
+                   let totalWins = fighterFights.filter { $0.fightResult?.winner == fighterId }.count
+                   let winPercentage = totalFights > 0 ? Double(totalWins) / Double(totalFights) * 100 : 0
+                   
+                   let fightsByEvent = Dictionary(grouping: fighterFights, by: { $0.eventId })
+                   let totalCompetitions = fightsByEvent.keys.count
+                   
+                   var goldMedals = 0
+                   var silverMedals = 0
+                   var bronzeMedals = 0
+                   var medalCompetitions: [MedalCompetition] = []
+                   
+                   let group = DispatchGroup()
+                   
+                   for (eventId, fights) in fightsByEvent {
+                       group.enter()
+                       self.processMedalForEvent(eventId: eventId, fights: fights, fighterId: fighterId) { medalResult in
+                           switch medalResult {
+                           case .success(let medalInfo):
+                               if let medal = medalInfo.medal {
+                                   switch medal {
+                                   case .gold: goldMedals += 1
+                                   case .silver: silverMedals += 1
+                                   case .bronze: bronzeMedals += 1
+                                   }
+                                   medalCompetitions.append(MedalCompetition(competitionName: medalInfo.eventName, medalColor: medal, fightCount: fights.count))
+                               }
+                           case .failure(let error):
+                               print("Error processing medal for event: \(error.localizedDescription)")
+                           }
+                           group.leave()
+                       }
+                   }
+                   
+                   group.notify(queue: .main) {
+                       let stats = FighterCompleteStats(
+                           totalCompetitions: totalCompetitions,
+                           totalFights: totalFights,
+                           totalWins: totalWins,
+                           winPercentage: winPercentage,
+                           goldMedals: goldMedals,
+                           silverMedals: silverMedals,
+                           bronzeMedals: bronzeMedals,
+                           medalCompetitions: medalCompetitions
+                       )
+                       completion(.success(stats))
+                   }
+                   
+               case .failure(let error):
+                   completion(.failure(error))
+               }
+           }
+       }
+       
+       private func processMedalForEvent(eventId: String, fights: [Fight], fighterId: String, completion: @escaping (Result<(medal: MedalColor?, eventName: String), Error>) -> Void) {
+           let finalFight = fights.first { $0.round?.lowercased() == "final" }
+           let semiFinalFight = fights.first { $0.round?.lowercased() == "semi final" }
+           let thirdPlaceFight = fights.first { $0.round?.lowercased() == "third place" }
+           
+           var medal: MedalColor?
+           
+           if let final = finalFight {
+               medal = final.fightResult?.winner == fighterId ? .gold : .silver
+           } else if semiFinalFight != nil {
+               medal = .bronze
+           } else if let thirdPlace = thirdPlaceFight, thirdPlace.fightResult?.winner == fighterId {
+               medal = .bronze
+           }
+           
+           getEvent(id: eventId) { eventResult in
+               switch eventResult {
+               case .success(let event):
+                   completion(.success((medal: medal, eventName: event.eventName)))
+               case .failure(let error):
+                   completion(.failure(error))
+               }
+           }
+       }
 
 }
 extension FirebaseService {
@@ -177,5 +261,35 @@ extension FirebaseService {
             }
         }
     }
+    func getFighterCompleteStatsAsync(fighterId: String) async throws -> FighterCompleteStats {
+           return try await withCheckedThrowingContinuation { continuation in
+               getFighterCompleteStats(fighterId: fighterId) { result in
+                   switch result {
+                   case .success(let stats):
+                       continuation.resume(returning: stats)
+                   case .failure(let error):
+                       continuation.resume(throwing: error)
+                   }
+               }
+           }
+       }
+}
+struct FighterCompleteStats {
+    let totalCompetitions: Int
+    let totalFights: Int
+    let totalWins: Int
+    let winPercentage: Double
+    let goldMedals: Int
+    let silverMedals: Int
+    let bronzeMedals: Int
+    let medalCompetitions: [MedalCompetition]
+}
+enum MedalColor {
+    case gold, silver, bronze
+}
 
+struct MedalCompetition {
+    let competitionName: String
+    let medalColor: MedalColor
+    let fightCount: Int
 }

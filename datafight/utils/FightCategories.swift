@@ -77,9 +77,9 @@ struct FightCategories {
     ]
 
     static let rounds = [
-        "128ème", "64ème", "32ème", "16ème", "Quarts de finale", "Demi-finale",
-        "Finale", "1er tour de repêchage", "2ème tour de repêchage",
-        "Match pour la 3ème place",
+        "128ème", "64ème", "32ème", "16ème", "1/8", "quarter final", "semi final",
+        "Finale", "1st tour repêchage", "2nd tour  repêchage",
+        "third place",
     ]
 
     static func getWeightCategories(
