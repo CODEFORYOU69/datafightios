@@ -79,24 +79,10 @@ class FighterListViewController: UIViewController {
     }
 
     private func setupActivityIndicator() {
-        view.addSubview(loadingView)
-        loadingView.addSubview(activityIndicator)
-
-        NSLayoutConstraint.activate([
-            loadingView.topAnchor.constraint(equalTo: view.topAnchor),
-            loadingView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            loadingView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
-            loadingView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-
-            activityIndicator.centerXAnchor.constraint(
-                equalTo: loadingView.centerXAnchor),
-            activityIndicator.centerYAnchor.constraint(
-                equalTo: loadingView.centerYAnchor),
-        ])
-
+        view.addSubview(activityIndicator)
+        activityIndicator.center = view.center
         activityIndicator.hidesWhenStopped = true
         activityIndicator.color = .white
-        loadingView.isHidden = true
     }
 
     // MARK: - Data Loading
