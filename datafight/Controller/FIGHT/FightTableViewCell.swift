@@ -87,6 +87,7 @@ class FightTableViewCell: UITableViewCell {
     }
 
     private func styleLabelsAndButtons() {
+        // test workflows
         let labels = [
             blueFighterNameLabel, redFighterNameLabel, fightInfoLabel,
             round1Label, round2Label, round3Label,
