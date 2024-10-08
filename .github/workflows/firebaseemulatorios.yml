@@ -71,7 +71,7 @@ jobs:
           xcodebuild build-for-testing \
             -project datafight.xcodeproj \
             -scheme "$scheme" \
-            -destination 'platform=iOS Simulator,OS=18.0,id=C34E5E41-DE63-498D-9D85-2CB4650348F9'
+            -destination 'platform=iOS Simulator,OS=18.0,id=6212A518-5134-4A87-B1EC-58D546FCB306'
             -derivedDataPath ${{ github.workspace }}/build \
             CODE_SIGNING_ALLOWED=NO \
             -skipPackagePluginValidation | xcpretty
@@ -89,7 +89,7 @@ jobs:
             "xcodebuild test-without-building \
               -project datafight.xcodeproj \
               -scheme \"$scheme\" \
-              -destination 'platform=iOS Simulator,OS=18.0,id=C34E5E41-DE63-498D-9D85-2CB4650348F9' \
+              -destination 'platform=iOS Simulator,OS=18.0,id=6212A518-5134-4A87-B1EC-58D546FCB306' \
               CODE_SIGNING_ALLOWED=NO \
               -parallel-testing-enabled NO \
               -retry-tests-on-failure \

@@ -93,7 +93,7 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
         manageScores()
         styleButtons()
 
-        addRoundNavigationBar.title = "Analyse your Fight"
+        addRoundNavigationBar.title = "Analyze your Fight"
 
         // Configuration des attributs de titre
         let textAttributes = [
