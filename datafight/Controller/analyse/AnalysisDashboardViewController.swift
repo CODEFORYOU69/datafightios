@@ -41,7 +41,7 @@ class AnalysisDashboardViewController: UIViewController {
             ])
     }
     func setupNavigationBar() {
-        navigationItem.title = "Analyse"
+        navigationItem.title = "Analyze"
 
         // Configuration des attributs de la barre de navigation pour le titre en blanc
         navigationController?.navigationBar.titleTextAttributes = [
