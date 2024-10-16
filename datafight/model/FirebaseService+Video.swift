@@ -25,105 +25,78 @@ extension FirebaseService {
         let videoId = UUID().uuidString
         let storageRef = storage.child("videos/\(videoId).mp4")
 
-        let fileManager = FileManager.default
-        let tempDirectoryURL = fileManager.temporaryDirectory
-        let tempFileURL = tempDirectoryURL.appendingPathComponent(videoId)
-            .appendingPathExtension("mp4")
+        // Début de l'upload
+        let uploadTask = storageRef.putFile(from: videoURL, metadata: nil)
 
-        do {
-            try fileManager.copyItem(at: videoURL, to: tempFileURL)
-
-            guard fileManager.fileExists(atPath: tempFileURL.path) else {
-                completion(
-                    .failure(
-                        NSError(
-                            domain: "FirebaseService", code: 0,
-                            userInfo: [
-                                NSLocalizedDescriptionKey:
-                                    "Temp video file does not exist"
-                            ])))
-                return
+        // Suivi de la progression
+        uploadTask.observe(.progress) { snapshot in
+            if let progress = snapshot.progress {
+                let percentage = Double(progress.completedUnitCount) / Double(progress.totalUnitCount)
+                progressHandler(percentage)
             }
+        }
 
-            let videoData = try Data(contentsOf: tempFileURL)
-
-            // Début de l'upload
-            let uploadTask = storageRef.putData(videoData, metadata: nil)
-
-            // Suivi de la progression
-            uploadTask.observe(.progress) { snapshot in
-                if let progress = snapshot.progress {
-                    let percentage =
-                        Double(progress.completedUnitCount)
-                        / Double(progress.totalUnitCount)
-                    progressHandler(percentage)
-                }
-            }
-
-            // Gestion de l'achèvement de l'upload
-            uploadTask.observe(.success) { snapshot in
-                storageRef.downloadURL { url, error in
-                    if let error = error {
-                        completion(.failure(error))
-                        return
-                    }
-                    guard let downloadURL = url else {
-                        completion(
-                            .failure(
-                                NSError(
-                                    domain: "FirebaseService", code: 0,
-                                    userInfo: [
-                                        NSLocalizedDescriptionKey:
-                                            "Failed to get download URL"
-                                    ])))
-                        return
-                    }
-
-                    // Récupérer la durée de la vidéo
-                    let asset = AVAsset(url: videoURL)
-                    Task {
-                        do {
-                            let duration = try await asset.load(.duration)
-                            let durationInSeconds = CMTimeGetSeconds(duration)
-
-                            let video = Video(
-                                id: videoId,
-                                fightId: fight.id ?? "",
-                                url: downloadURL.absoluteString,
-                                duration: durationInSeconds,
-                                roundTimestamps: []
-                            )
-
-                            try await self.db.collection("videos").document(
-                                videoId
-                            ).setData(video.dictionary)
-                            try await self.db.collection("fights").document(
-                                fight.id ?? ""
-                            ).updateData([
-                                "videoId": videoId,
-                                "videoURL": downloadURL.absoluteString,
-                            ])
-                            completion(.success(video))
-
-                        } catch {
-                            completion(.failure(error))
-                        }
-                    }
-                }
-            }
-
-            // Gestion de l'échec de l'upload
-            uploadTask.observe(.failure) { snapshot in
-                if let error = snapshot.error as NSError? {
-                    print(
-                        "Upload failed with error: \(error.localizedDescription)"
-                    )
-                    print("Error code: \(error.code)")
+        // Gestion de l'achèvement de l'upload
+        uploadTask.observe(.success) { snapshot in
+            storageRef.downloadURL { url, error in
+                if let error = error {
                     completion(.failure(error))
+                    return
+                }
+                guard let downloadURL = url else {
+                    completion(
+                        .failure(
+                            NSError(
+                                domain: "FirebaseService", code: 0,
+                                userInfo: [
+                                    NSLocalizedDescriptionKey:
+                                        "Failed to get download URL"
+                                ])))
+                    return
+                }
+
+                // Récupérer la durée de la vidéo
+                let asset = AVAsset(url: videoURL)
+                Task {
+                    do {
+                        let duration = try await asset.load(.duration)
+                        let durationInSeconds = CMTimeGetSeconds(duration)
+
+                        let video = Video(
+                            id: videoId,
+                            fightId: fight.id ?? "",
+                            url: downloadURL.absoluteString,
+                            duration: durationInSeconds,
+                            roundTimestamps: []
+                        )
+
+                        try await self.db.collection("videos").document(
+                            videoId
+                        ).setData(video.dictionary)
+                        try await self.db.collection("fights").document(
+                            fight.id ?? ""
+                        ).updateData([
+                            "videoId": videoId,
+                            "videoURL": downloadURL.absoluteString,
+                        ])
+                        completion(.success(video))
+
+                    } catch {
+                        completion(.failure(error))
+                    }
                 }
             }
-        } catch {
-            completion(.failure(error))
+        }
+
+        // Gestion de l'échec de l'upload
+        uploadTask.observe(.failure) { snapshot in
+            if let error = snapshot.error as NSError? {
+                print(
+                    "Upload failed with error: \(error.localizedDescription)"
+                )
+                print("Error code: \(error.code)")
+                completion(.failure(error))
+            }
         }
     }
 

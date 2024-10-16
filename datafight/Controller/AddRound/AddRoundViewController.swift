@@ -13,6 +13,7 @@ import FirebaseStorage
 import FlagKit
 import MobileCoreServices
 import UIKit
+
 import UniformTypeIdentifiers
 
 class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
@@ -131,7 +132,6 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
             backwardButton,
             endRoundButton,
 
-            // Ajoutez ici tous les autres boutons que vous voulez styliser
         ]
 
         for button in buttons {
@@ -141,7 +141,7 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
 
     func styleButton(_ button: UIButton) {
         // Bords arrondis
-        button.layer.cornerRadius = 10  // Ajustez cette valeur pour plus ou moins d'arrondi
+        button.layer.cornerRadius = 10
         button.clipsToBounds = true
 
         // Ombrage
@@ -151,18 +151,15 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
         button.layer.shadowOpacity = 0.3
         button.layer.masksToBounds = true
 
-        // Optionnel : Ajout d'une bordure
         button.layer.borderWidth = 1
         button.layer.borderColor = button.titleColor(for: .normal)?.cgColor
 
-        // Optionnel : Ajout d'un dégradé de couleur
         let gradientLayer = CAGradientLayer()
 
-        gradientLayer.cornerRadius = 10  // Même valeur que le cornerRadius du bouton
+        gradientLayer.cornerRadius = 10
 
         button.layer.insertSublayer(gradientLayer, at: 0)
 
-        // Ajuster la couleur du texte pour un meilleur contraste
         button.setTitleColor(.white, for: .normal)
     }
 
@@ -186,7 +183,6 @@ class AddRoundViewController: UIViewController, RoundWinnerDeterminer {
                     guard let self = self else { return }
                     self.setChronoDuration(durationInSeconds)
 
-                    // Positionner la vidéo au début du round actuel
                     if let startTime = self.currentRound?.startTime {
                         self.seekVideo(
                             to: CMTime(

@@ -7,6 +7,8 @@
 
 import AVFoundation
 import AVKit
+import Photos
+
 
 extension AddRoundViewController {
 
@@ -19,13 +21,49 @@ extension AddRoundViewController {
             return
         }
 
-        print("Starting video upload process")
+        // Commencer à accéder à la ressource à périmètre de sécurité
+        guard videoURL.startAccessingSecurityScopedResource() else {
+            DispatchQueue.main.async {
+                self.showAlert(title: "File Access Error", message: "Unable to access the selected video file. Please try again.")
+            }
+            return
+        }
+        defer {
+            // S'assurer de stopper l'accès à la ressource une fois terminé
+            videoURL.stopAccessingSecurityScopedResource()
+        }
+
+        do {
+            // Vérifier si le fichier est accessible
+            let fileManager = FileManager.default
+            guard fileManager.isReadableFile(atPath: videoURL.path) else {
+                DispatchQueue.main.async {
+                    self.showAlert(title: "File Access Error", message: "Unable to access the selected video file. Please try again.")
+                }
+                return
+            }
+
+            // Copier le fichier dans un emplacement temporaire
+            let tempFileURL = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString).appendingPathExtension("mp4")
+            try fileManager.copyItem(at: videoURL, to: tempFileURL)
+
+            print("Starting video upload process")
+            startVideoUpload(videoURL: tempFileURL, for: fight)
+        } catch {
+            print("Error accessing or copying file: \(error.localizedDescription)")
+            DispatchQueue.main.async {
+                self.showAlert(title: "File Error", message: "Unable to process the selected video file.")
+            }
+        }
+    }
+
+
+    private func startVideoUpload(videoURL: URL, for fight: Fight) {
         FirebaseService.shared.uploadVideo(
             for: fight, videoURL: videoURL,
             progressHandler: { [weak self] progress in
                 DispatchQueue.main.async {
-                    self?.progressView.setProgress(
-                        Float(progress), animated: true)
+                    self?.progressView.setProgress(Float(progress), animated: true)
                 }
             }
         ) { [weak self] result in
@@ -40,17 +78,19 @@ extension AddRoundViewController {
                         self?.setChronoDuration(video.duration)
                     }
                 case .failure(let error):
-                    print(
-                        "Failed to upload video: \(error.localizedDescription)")
+                    print("Failed to upload video: \(error.localizedDescription)")
                     self?.showAlert(
                         title: "Upload Error",
-                        message:
-                            "Failed to upload video: \(error.localizedDescription)"
+                        message: "Failed to upload video: \(error.localizedDescription)"
                     )
                 }
             }
+            
+            // Nettoyer le fichier temporaire
+            try? FileManager.default.removeItem(at: videoURL)
         }
     }
+
 
     // MARK: - Timer and Score Management
 
@@ -172,43 +212,84 @@ extension AddRoundViewController: UIDocumentPickerDelegate {
 
     /// Prompts the user to choose a source for video upload
     func promptForVideoUpload() {
-        print("Prompting for video upload.")
+         print("Prompting for video upload.")
 
-        let alertController = UIAlertController(
-            title: "Upload Video",
-            message: "Please select the source to upload the video.",
-            preferredStyle: .alert)
+         let alertController = UIAlertController(
+             title: "Upload Video",
+             message: "Please select the source to upload the video.",
+             preferredStyle: .alert)
 
-        let photoLibraryAction = UIAlertAction(
-            title: "Photo Library", style: .default
-        ) { [weak self] _ in
-            print("Photo Library selected.")
-            self?.presentVideoPicker()
+         let photoLibraryAction = UIAlertAction(
+             title: "Photo Library", style: .default
+         ) { [weak self] _ in
+             print("Photo Library selected.")
+             self?.checkPhotoLibraryPermission()
+         }
+
+         let filePickerAction = UIAlertAction(title: "Files", style: .default) {
+             [weak self] _ in
+             print("Files selected.")
+             self?.presentDocumentPicker()
+         }
+
+         let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
+             print("Video upload canceled.")
+         }
+
+         alertController.addAction(photoLibraryAction)
+         alertController.addAction(filePickerAction)
+         alertController.addAction(cancelAction)
+
+         if let popoverController = alertController.popoverPresentationController {
+             popoverController.sourceView = self.view
+             popoverController.sourceRect = CGRect(x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0, height: 0)
+             popoverController.permittedArrowDirections = []
+         }
+
+         presentAlert(alertController)
+     }
+
+    func checkPhotoLibraryPermission() {
+        let status = PHPhotoLibrary.authorizationStatus(for: .readWrite)
+        switch status {
+        case .authorized, .limited:
+            self.presentVideoPicker()
+        case .notDetermined:
+            PHPhotoLibrary.requestAuthorization(for: .readWrite) { [weak self] status in
+                DispatchQueue.main.async {
+                    switch status {
+                    case .authorized, .limited:
+                        self?.presentVideoPicker()
+                    case .denied, .restricted:
+                        self?.showPhotoLibraryDeniedAlert()
+                    case .notDetermined:
+                        // This case should not occur after requesting authorization, but we'll handle it just in case
+                        print("Photo library access is still not determined after request")
+                    @unknown default:
+                        print("Unknown photo library authorization status")
+                    }
+                }
+            }
+        case .denied, .restricted:
+            self.showPhotoLibraryDeniedAlert()
+        @unknown default:
+            print("Unknown photo library authorization status")
+            self.showPhotoLibraryDeniedAlert()
         }
-
-        let filePickerAction = UIAlertAction(title: "Files", style: .default) {
-            [weak self] _ in
-            print("Files selected.")
-            self?.presentDocumentPicker()
-        }
-
-        let cancelAction = UIAlertAction(title: "Cancel", style: .cancel) { _ in
-            print("Video upload canceled.")
-        }
-
-        alertController.addAction(photoLibraryAction)
-        alertController.addAction(filePickerAction)
-        alertController.addAction(cancelAction)
-
-        if let popoverController = alertController.popoverPresentationController
-        {
-            popoverController.sourceView = self.view  // Ensure the source is set
-            popoverController.sourceRect = CGRect(
-                x: self.view.bounds.midX, y: self.view.bounds.midY, width: 0,
-                height: 0)
-            popoverController.permittedArrowDirections = []
-        }
-
-        presentAlert(alertController)
     }
+
+     func showPhotoLibraryDeniedAlert() {
+         let alert = UIAlertController(
+             title: "Photo Library Access Denied",
+             message: "Please allow access to your photo library in Settings to upload videos.",
+             preferredStyle: .alert
+         )
+         alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+         alert.addAction(UIAlertAction(title: "Open Settings", style: .default) { _ in
+             if let settingsURL = URL(string: UIApplication.openSettingsURLString) {
+                 UIApplication.shared.open(settingsURL, options: [:], completionHandler: nil)
+             }
+         })
+         presentAlert(alert)
+     }
 }
